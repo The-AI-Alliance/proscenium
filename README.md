@@ -3,10 +3,13 @@
 Proscenium establishes a modular analysis of AI "Agents".
 It is composed of several well-defined subsystems.
 
+A few of the initial goals of this project include:
+
 - Clarify how the components interact
 - Identify areas where innovation is still redefining interfaces
 - Highlight designs that can limit the "blast radius" of changes
 - For users of frameworks, identify risk of lock-in
+- Enumerate "glue code", libraries, or protocols that are missing from the ecosystem
 
 ## Subsystems
 
@@ -24,21 +27,7 @@ It is composed of several well-defined subsystems.
 +--------------+   +----------------------+
 ```
 
-## Implementation
-
-Examples and bindings for several real implementations of these
-subsystem are provided in this repository.
-
-- Actors
-  - [Thespian](https://thespianpy.com/)
-- Inference
-  - [AI Suite](https://github.com/andrewyng/aisuite)
-- Functions
-  - [Gofannon](https://github.com/The-AI-Alliance/gofannon)
-- Memory
-  - RAM: local module [`proscenium.memory`](proscenium/memory.py)
-
-## Examples
+## Methodology
 
 The purpose of this repository is to show several examples of these sub-systems
 working together in a way that mimics patterns highlighted in modern agentic frameworks.
@@ -49,6 +38,18 @@ The will include
 - Reflection
 - RAG
 - GraphRAG
+- ...
+
+Subsystem implementations used in these demos:
+
+- Actors
+  - [Thespian](https://thespianpy.com/)
+- Inference
+  - [AI Suite](https://github.com/andrewyng/aisuite)
+- Functions
+  - [Gofannon](https://github.com/The-AI-Alliance/gofannon)
+- Memory
+  - RAM: local module [`proscenium.memory`](proscenium/memory.py)
 
 ## Talk
 
@@ -58,10 +59,5 @@ the role that each plays by building a running example one layer at a time.
 ## Setup
 
 ```bash
-python3.11 -m venv venv
-
-. venv/bin/activate
-
-pip install -r requirements.txt
-pip install git+https://github.com/The-AI-Alliance/gofannon.git
+poetry install
 ```
