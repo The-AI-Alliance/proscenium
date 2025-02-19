@@ -3,6 +3,11 @@
 Proscenium establishes a modular analysis of AI "Agents".
 It is composed of several well-defined subsystems.
 
+- Clarify how the components interact
+- Identify areas where innovation is still redefining interfaces
+- Highlight designs that can limit the "blast radius" of changes
+- For users of frameworks, identify risk of lock-in
+
 ## Subsystems
 
 ```text
@@ -11,7 +16,7 @@ It is composed of several well-defined subsystems.
 +------------------------------------------------------------+
 |                          Actors                            |
 +--------------+---+----------------------+---+--------------+
-|   Functions  |   |      Inference       |   | Memory       |
+|   Functions  |   |      Inference       |   |   Memory     |
 +--------------+   +----------------------+   +--------------+
 | APIs,        |   |  Inference Providers |   | DB, RAM, ... |
 | Libraries,   |   +----------------------+   +--------------+
@@ -37,6 +42,13 @@ subsystem are provided in this repository.
 
 The purpose of this repository is to show several examples of these sub-systems
 working together in a way that mimics patterns highlighted in modern agentic frameworks.
+
+The will include
+
+- Tool use
+- Reflection
+- RAG
+- GraphRAG
 
 ## Talk
 
