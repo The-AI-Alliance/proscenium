@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "proscenium"
+version = "0.0.1-dev"
+description = "Framing Agents as Actors"
+authors = ["Adam Pingel <oss@pingel.org>"]
+license = "ASFv2"
+readme = "README.md"
+packages = [{include = "proscenium"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.10.6"
+thespian = "^4.0.0"
+aisuite = "^0.1.10"
+python-dotenv = "^1.0.1"
+docstring_parser = "^0.16"
+
+[tool.poetry.extras]
+testing = ["pytest"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
