@@ -34,3 +34,15 @@ class Abacus(Actor):
         )
 
         self.send(sender, response)
+
+if __name__ == '__main__':
+    from thespian.actors import ActorSystem
+    from example.arithmetic import Abacus
+
+    abacus = ActorSystem().createActor(Abacus)
+
+    message = "What is 33312-457? And what is 3+3?"
+    # message = "What is your favorite color?"
+
+    answer = ActorSystem().ask(abacus, message, 1)
+    print(answer)
