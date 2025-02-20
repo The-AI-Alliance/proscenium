@@ -4,7 +4,6 @@ import wget
 from proscenium.vector_database import create_vector_db
 from proscenium.vector_database import add_chunked_file_to_vector_db
 from proscenium.vector_database import rag_prompt
-from proscenium.web import url_to_file
 from proscenium.prompts import rag_system_prompt
 from proscenium.inference import complete_simple
 
