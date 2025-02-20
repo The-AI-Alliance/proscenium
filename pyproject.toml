@@ -11,7 +11,7 @@ packages = [{include = "proscenium"}]
 python = "^3.11"
 pydantic = "^2.10.6"
 thespian = "^4.0.0"
-aisuite = "^0.1.10"
+aisuite = {extras = ["openai,anthropic"], version = "^0.1.10"}
 python-dotenv = "^1.0.1"
 docstring_parser = "^0.16"
 wget = "^3.2"
