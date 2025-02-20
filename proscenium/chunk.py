@@ -1,6 +1,10 @@
 
+import logging
+
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
+
+logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 
 def documents_to_chunks(
     filename: str,
