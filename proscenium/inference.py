@@ -4,6 +4,19 @@ import json
 from aisuite import Client
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
+client = Client()
+
+def complete_simple(model_id: str, system_prompt: str, user_prompt: str) -> str:
+    response = client.chat.completions.create(
+        model=model_id,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0.75,
+    )
+    return response.choices[0].message.content
+
 def evaluate_tool_call(tool_map: dict, tool_call: ChatCompletionMessageToolCall) -> Any:
     function_name = tool_call.function.name
     # TODO validate the arguments?
