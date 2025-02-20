@@ -1,9 +1,11 @@
 
 import logging
+import os
 
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 
 def documents_to_chunks(
