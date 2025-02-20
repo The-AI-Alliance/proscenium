@@ -51,13 +51,12 @@ Subsystem implementations used in these demos:
 - Memory
   - RAM: local module [`proscenium.memory`](proscenium/memory.py)
 
-## Talk
-
-The [`walkthrough`](walkthrough/) directory contains scripts that demonstrate
-the role that each plays by building a running example one layer at a time.
-
 ## Setup
 
 ```bash
-poetry install
+python3.11 -m venv venv
+
+. venv/bin/activate
+
+pip install git+https://github.com/The-AI-Alliance/proscenium.git
 ```
