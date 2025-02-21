@@ -6,7 +6,6 @@ import tempfile
 from .chunk import documents_to_chunks
 from .prompts import rag_prompt_template
 
-from langchain_core.documents.base import Document
 from pymilvus import MilvusClient
 from pymilvus import DataType, FieldSchema, CollectionSchema, Collection
 # from milvus_model.base import BaseEmbeddingFunction
@@ -62,11 +61,11 @@ def create_vector_db(
 def add_chunks_to_vector_db(
         client: MilvusClient,
         embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-        chunks: List[Document]) -> Dict:
+        chunks: List[str]) -> Dict:
 
-    vectors = embedding_fn.encode_documents([chunk.page_content for chunk in chunks])
+    vectors = embedding_fn.encode_documents([chunk for chunk in chunks])
 
-    data = [{"text": chunk.page_content, "vector": vector} for chunk, vector in zip(chunks, vectors)]
+    data = [{"text": chunk, "vector": vector} for chunk, vector in zip(chunks, vectors)]
 
     insert_result = client.insert(collection_name, data) 
 

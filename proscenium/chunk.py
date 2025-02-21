@@ -1,23 +1,31 @@
 
 from typing import List
-import logging
-import os
 
-from langchain_core.documents.base import Document
-from langchain_community.document_loaders import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
+import nltk
+nltk.download('punkt')
+nltk.download('punkt_tab')
 
 def documents_to_chunks(
     filename: str,
-    chunk_size: int = 1000,
-    chunk_overlap: int = 0) -> List[Document]:
+    min_chunk_size: int = 1000,
+    # TODO chunk_overlap
+    ) -> List[str]:
 
-    loader = TextLoader(filename)
-    documents = loader.load()
+    chunks = []
+    with open(filename, 'r') as f:
+        text = f.read()
+        sentences = nltk.sent_tokenize(text)
+        chunk = ""
+        for sentence in sentences:
+            if len(chunk) < min_chunk_size:
+                if len(chunk) > 0:
+                    chunk += " "
+                chunk += sentence
+            else:
+                chunks.append(chunk)
+                chunk = sentence
 
-    text_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        chunks.append(chunk)
 
-    return text_splitter.split_documents(documents)
+
+    return chunks

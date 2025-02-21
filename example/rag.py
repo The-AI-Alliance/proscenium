@@ -9,6 +9,8 @@ from proscenium.vector_database import rag_prompt
 from proscenium.prompts import rag_system_prompt
 from proscenium.inference import complete_simple
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 query = "What did Hermes say to Prometheus about giving fire to humans?"
 
 data_file = "four_plays_of_aeschylus.txt"
@@ -24,7 +26,9 @@ embedding_fn = model.dense.SentenceTransformerEmbeddingFunction(
 vector_db_client, db_file_name = create_vector_db(embedding_fn) 
 print("DB file:", db_file_name)
 
-chunks = documents_to_chunks(data_file)
+chunks = documents_to_chunks(data_file, min_chunk_size=800)
+for i, chunk in enumerate(chunks):
+  print(f"Chunk {i}:", chunk)
 print(f"Data file {data_file} has {len(chunks)} chunks")
 
 info = add_chunks_to_vector_db(vector_db_client, embedding_fn, chunks)

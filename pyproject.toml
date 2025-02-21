@@ -16,8 +16,7 @@ thespian = "^4.0.0"
 aisuite = {extras = ["openai,anthropic"], version = "^0.1.10"}
 docstring_parser = "^0.16"
 pymilvus = {extras = ["model"], version = "^2.5.4"}
-langchain-community = "^0.3.18"
-langchain-huggingface = "^0.1.2"
+nltk = "^3.9.1"
 
 [tool.poetry.extras]
 testing = ["pytest"]
