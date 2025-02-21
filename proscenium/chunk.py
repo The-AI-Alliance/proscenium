@@ -1,7 +1,9 @@
 
+from typing import List
 import logging
 import os
 
+from langchain_core.documents.base import Document
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 
@@ -11,7 +13,7 @@ logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 def documents_to_chunks(
     filename: str,
     chunk_size: int = 1000,
-    chunk_overlap: int = 0):
+    chunk_overlap: int = 0) -> List[Document]:
 
     loader = TextLoader(filename)
     documents = loader.load()

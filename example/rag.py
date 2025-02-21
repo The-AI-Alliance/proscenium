@@ -3,7 +3,8 @@ import os
 import wget
 from pymilvus import model
 from proscenium.vector_database import create_vector_db
-from proscenium.vector_database import add_chunked_file_to_vector_db
+from proscenium.chunk import documents_to_chunks
+from proscenium.vector_database import add_chunks_to_vector_db
 from proscenium.vector_database import rag_prompt
 from proscenium.prompts import rag_system_prompt
 from proscenium.inference import complete_simple
@@ -23,7 +24,10 @@ embedding_fn = model.dense.SentenceTransformerEmbeddingFunction(
 vector_db_client, db_file_name = create_vector_db(embedding_fn) 
 print("DB file:", db_file_name)
 
-info = add_chunked_file_to_vector_db(vector_db_client, embedding_fn, data_file)
+chunks = documents_to_chunks(data_file)
+print(f"Data file {data_file} has {len(chunks)} chunks")
+
+info = add_chunks_to_vector_db(vector_db_client, embedding_fn, chunks)
 print("Chunks inserted", info['insert_count'])
 
 print("Query:", query)
