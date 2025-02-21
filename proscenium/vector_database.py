@@ -1,42 +1,96 @@
 
+from typing import Dict
+
 import tempfile
 
 from .chunk import documents_to_chunks
 from .prompts import rag_prompt_template
 
-from langchain_core.vectorstores.base import VectorStore
-from langchain_milvus import Milvus
-from langchain_huggingface import HuggingFaceEmbeddings
+from pymilvus import MilvusClient
+from pymilvus import DataType, FieldSchema, CollectionSchema, Collection
+# from milvus_model.base import BaseEmbeddingFunction
+from pymilvus import model
 
-def create_vector_db(embedding_model_id: str) -> tuple[Milvus, str]:
+#from sentence_transformers import SentenceTransformer
 
-    embedding_model = HuggingFaceEmbeddings(model_name=embedding_model_id)
+# See https://milvus.io/docs/quickstart.md
 
-    db_file = tempfile.NamedTemporaryFile(prefix="milvus_", suffix=".db", delete=False).name
+collection_name = "chunks"
 
-    vector_db = Milvus(
-        embedding_function=embedding_model,
-        connection_args={"uri": db_file},
-        auto_id=True,
-        index_params={"index_type": "AUTOINDEX"},
+def create_vector_db(
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
+    ) -> tuple[MilvusClient, str]:
+
+    db_file_name = tempfile.NamedTemporaryFile(prefix="milvus_", suffix=".db", delete=False).name
+
+    client = MilvusClient(db_file_name)
+
+    field_id = FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True)
+    field_text = FieldSchema(name="text", dtype=DataType.VARCHAR, max_length= 50000)
+    field_vector = FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim = embedding_fn.dim)
+
+    schema_chunks = CollectionSchema(
+        fields=[field_id, field_text, field_vector],
+        description="Chunks Schema",
+        enable_dynamic_field=True
     )
 
-    return vector_db, db_file
+    client.create_collection(
+        collection_name = collection_name,
+        schema = schema_chunks,
+    )
+
+    index_params = client.prepare_index_params()
+
+    index_params.add_index(
+        field_name="vector", 
+        index_type="IVF_FLAT",
+        metric_type="IP",
+        params={"nlist": 1024}
+    )
+
+    client.create_index(
+        collection_name = collection_name,
+        index_params = index_params,
+        sync = False
+    )
+
+    return client, db_file_name
 
 
-def add_chunked_file_to_vector_db(vector_db: VectorStore, filename: str) -> str:
+def add_chunked_file_to_vector_db(
+        client: MilvusClient,
+        embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+        filename: str,
+        first_id: int = 0) -> Dict:
 
     chunks = documents_to_chunks(filename)
 
-    vector_db.add_documents(chunks)
+    vectors = embedding_fn.encode_documents([chunk.page_content for chunk in chunks])
+    # print("Dim:", embedding_fn.dim, vectors[0].shape)
 
-    return filename, len(chunks)
+    data = [{"text": chunks[i].page_content, "vector": vectors[i]} for i in range(len(vectors))]
+    #print("Data has", len(data), "entities, each with fields: ", data[0].keys())
+    #print("Vector dim:", len(data[0]["vector"]))
 
+    insert_result = client.insert(collection_name, data) 
 
-def rag_prompt(vector_db: VectorStore, query: str) -> str:
+    return insert_result
 
-    docs = vector_db.similarity_search(query)
+def rag_prompt(
+    client: MilvusClient,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    query: str,
+    k: int = 4) -> str:
 
-    context = "\n\n".join([f"{i}. {doc.page_content}" for i, doc in enumerate(docs[:4])])
+    chunks = client.search(
+        collection_name = collection_name,
+        data = embedding_fn.encode_queries([query]),
+        anns_field = "vector",
+        search_params = {"metric":"IP", "offset":0},
+        output_fields = ["text"],
+        limit = k)
+
+    context = "\n\n".join([f"{i}. {chunk}" for i, chunk in enumerate(chunks)])
 
     return rag_prompt_template.format(context=context, query=query)

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "proscenium"
 version = "0.0.1-dev"
-description = "Framing Agents as Actors"
+description = "Frame AI Agents"
 authors = ["Adam Pingel <oss@pingel.org>"]
 license = "ASFv2"
 readme = "README.md"
@@ -9,16 +9,15 @@ packages = [{include = "proscenium"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+wget = "^3.2"
+python-dotenv = "^1.0.1"
 pydantic = "^2.10.6"
 thespian = "^4.0.0"
 aisuite = {extras = ["openai,anthropic"], version = "^0.1.10"}
-python-dotenv = "^1.0.1"
 docstring_parser = "^0.16"
-wget = "^3.2"
+pymilvus = {extras = ["model"], version = "^2.5.4"}
 langchain-community = "^0.3.18"
-langchain-milvus = "^0.1.8"
 langchain-huggingface = "^0.1.2"
-
 
 [tool.poetry.extras]
 testing = ["pytest"]
