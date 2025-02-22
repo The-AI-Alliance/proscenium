@@ -13,11 +13,12 @@ wget = "^3.2"
 python-dotenv = "^1.0.1"
 pydantic = "^2.10.6"
 thespian = "^4.0.0"
-aisuite = {extras = ["openai,anthropic"], version = "^0.1.10"}
 docstring_parser = "^0.16"
 pymilvus = {extras = ["model"], version = "^2.5.4"}
+datasets = "^3.3.2"
 langchain-community = "^0.3.18"
 langchain-huggingface = "^0.1.2"
+aisuite = {extras = ["openai,anthropic"], version = "^0.1.10"}
 
 [tool.poetry.extras]
 testing = ["pytest"]

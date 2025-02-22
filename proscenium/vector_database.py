@@ -3,12 +3,11 @@ from typing import Dict, List
 
 import tempfile
 
-from .chunk import documents_to_chunks
 from .prompts import rag_prompt_template
 
 from langchain_core.documents.base import Document
 from pymilvus import MilvusClient
-from pymilvus import DataType, FieldSchema, CollectionSchema, Collection
+from pymilvus import DataType, FieldSchema, CollectionSchema
 # from milvus_model.base import BaseEmbeddingFunction
 from pymilvus import model
 
