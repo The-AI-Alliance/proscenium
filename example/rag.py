@@ -35,6 +35,7 @@ print("Chunks inserted", info['insert_count'])
 print("Query:", query)
 prompt = rag_prompt(vector_db_client, embedding_fn, query)
 
-model_id = "ollama:llama3.2"
+#model_id = "ollama:llama3.2"
+model_id = "ollama:granite3.1-dense:2b"
 answer = complete_simple(model_id, rag_system_prompt, prompt)
 print("Answer:", answer)

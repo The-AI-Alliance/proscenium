@@ -22,6 +22,7 @@ client = Client()
 # - command line, eg: ollama run llama3.2 --keepalive 2h
 # - models
 #   - ollama:llama3.2
+#   - ollama:granite3.1-dense:2b
 #
 # AWS
 #
