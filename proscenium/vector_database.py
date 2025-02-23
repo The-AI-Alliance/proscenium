@@ -67,11 +67,11 @@ def add_chunks_to_vector_db(
 
     return insert_result
 
-def rag_prompt(
+def closest_chunks(
     client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     query: str,
-    k: int = 4) -> str:
+    k: int = 4) -> List[str]:
 
     chunks = client.search(
         collection_name = collection_name,
@@ -80,6 +80,13 @@ def rag_prompt(
         search_params = {"metric":"IP", "offset":0},
         output_fields = ["text"],
         limit = k)
+
+    return chunks
+
+
+def rag_prompt(
+    chunks: List[str],
+    query: str) -> str:
 
     context = "\n\n".join([f"{i}. {chunk}" for i, chunk in enumerate(chunks)])
 

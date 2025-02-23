@@ -42,10 +42,12 @@ print(info['insert_count'], "chunks inserted")
 
 query = "What did Hermes say to Prometheus about giving fire to humans?"
 
+from proscenium.vector_database import closest_chunks
 from proscenium.vector_database import rag_prompt
 print("USER")
 print(query)
-prompt = rag_prompt(vector_db_client, embedding_fn, query)
+chunks = closest_chunks(vector_db_client, embedding_fn, query)
+prompt = rag_prompt(chunks, query)
 
 from proscenium.prompts import rag_system_prompt
 from proscenium.inference import complete_simple
