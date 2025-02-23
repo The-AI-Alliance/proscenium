@@ -19,8 +19,7 @@ class Abacus(Actor):
 
     system_message = "Perform any referenced arithmetic."
 
-    model = "openai:gpt-4o" # os.environ["OPENAI_API_KEY"]
-    # model = "anthropic:claude-3-5-sonnet-20240620" # os.environ["ANTHROPIC_API_KEY"]
+    model = "ollama:llama3.2"
 
     def receiveMessage(self, message, sender):
 
