@@ -1,27 +1,23 @@
 
 from typing import Dict, List
 
-import tempfile
-
 from .prompts import rag_prompt_template
 
+from pathlib import Path
 from langchain_core.documents.base import Document
 from pymilvus import MilvusClient
 from pymilvus import DataType, FieldSchema, CollectionSchema
 # from milvus_model.base import BaseEmbeddingFunction
 from pymilvus import model
 
-#from sentence_transformers import SentenceTransformer
-
 # See https://milvus.io/docs/quickstart.md
 
 collection_name = "chunks"
 
 def create_vector_db(
+    db_file_name: Path,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
     ) -> tuple[MilvusClient, str]:
-
-    db_file_name = tempfile.NamedTemporaryFile(prefix="milvus_", suffix=".db", delete=False).name
 
     client = MilvusClient(db_file_name)
 
