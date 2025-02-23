@@ -1,31 +1,49 @@
 
+"""
+This module uses the [`aisuite`](https://github.com/andrewyng/aisuite) library
+to interact with various LLM inference providers.
+
+It provides functions to complete a simple chat prompt, evaluate a tool call,
+and apply a list of tool calls to a chat prompt.
+
+Providers tested with Proscenium include:
+
+# AWS
+
+Environment: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+
+Valid model ids:
+- `aws:meta.llama3-1-8b-instruct-v1:0`
+
+# Anthropic
+
+Environment: `ANTHROPIC_API_KEY`
+
+Valid model ids:
+- `anthropic:claude-3-5-sonnet-20240620`
+
+# OpenAI
+
+Environment: `OPENAI_API_KEY`
+
+Valid model ids:
+- `openai:gpt-4o`
+
+# Ollama
+
+Command line, eg `ollama run llama3.2 --keepalive 2h`
+
+Valid model ids:
+- `ollama:llama3.2`
+- `ollama:granite3.1-dense:2b`
+"""
+
 from typing import Any
 import json
 from aisuite import Client
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
 client = Client()
-
-# Valid values for model_id:
-#
-# OpenAI
-# - api key OPENAI_API_KEY
-# - models
-#   - openai:gpt-4o
-#
-# Anthropic
-# - api key ANTHROPIC_API_KEY
-# - models
-#   - anthropic:claude-3-5-sonnet-20240620 
-#
-# Ollama
-# - command line, eg: ollama run llama3.2 --keepalive 2h
-# - models
-#   - ollama:llama3.2
-#   - ollama:granite3.1-dense:2b
-#
-# AWS
-#
 
 def complete_simple(model_id: str, system_prompt: str, user_prompt: str) -> str:
     response = client.chat.completions.create(
