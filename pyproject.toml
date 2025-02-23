@@ -9,9 +9,9 @@ packages = [{include = "proscenium"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-wget = "^3.2"
 python-dotenv = "^1.0.1"
 pydantic = "^2.10.6"
+rich = "^13.9.4"
 thespian = "^4.0.0"
 docstring_parser = "^0.16"
 pymilvus = {extras = ["model"], version = "^2.5.4"}
