@@ -6,6 +6,26 @@ from aisuite.framework.message import ChatCompletionMessageToolCall
 
 client = Client()
 
+# Valid values for model_id:
+#
+# OpenAI
+# - api key OPENAI_API_KEY
+# - models
+#   - openai:gpt-4o
+#
+# Anthropic
+# - api key ANTHROPIC_API_KEY
+# - models
+#   - anthropic:claude-3-5-sonnet-20240620 
+#
+# Ollama
+# - command line, eg: ollama run llama3.2 --keepalive 2h
+# - models
+#   - ollama:llama3.2
+#
+# AWS
+#
+
 def complete_simple(model_id: str, system_prompt: str, user_prompt: str) -> str:
     response = client.chat.completions.create(
         model=model_id,
