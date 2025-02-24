@@ -95,9 +95,9 @@ def closest_chunks(
     client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     query: str,
-    k: int = 4) -> List[str]:
+    k: int = 4) -> List[Dict]:
 
-    chunks = client.search(
+    result = client.search(
         collection_name = collection_name,
         data = embedding_fn.encode_queries([query]),
         anns_field = "vector",
@@ -105,13 +105,15 @@ def closest_chunks(
         output_fields = ["text"],
         limit = k)
 
-    return chunks
+    hits = result[0]
+
+    return hits
 
 
 def rag_prompt(
-    chunks: List[str],
+    chunks: List[Dict],
     query: str) -> str:
 
-    context = "\n\n".join([f"{i}. {chunk}" for i, chunk in enumerate(chunks)])
+    context = "\n\n".join([f"CHUNK {i}. {chunk['entity']['text']}" for i, chunk in enumerate(chunks)])
 
     return rag_prompt_template.format(context=context, query=query)
