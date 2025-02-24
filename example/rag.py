@@ -33,11 +33,26 @@ from proscenium.prompts import rag_system_prompt
 from proscenium.inference import complete_simple
 
 ##################
-# Implementation
+# Utilities
+##################
+
+from rich.table import Table
+def display_closest_chunks(
+    chunks: list[dict]
+):
+    table = Table(title="Closest Chunks", show_lines=True)
+    table.add_column("id", justify="right", style="cyan")
+    table.add_column("distance", style="magenta")
+    table.add_column("entity.text", justify="right", style="green")
+    for chunk in chunks:
+        table.add_row(str(chunk['id']), str(chunk['distance']), chunk['entity']['text'])
+    print(table)
+
+##################
+# Main
 ##################
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 
 print_header()
 
@@ -51,8 +66,7 @@ print("Connected to vector db stored in", db_file_name)
 
 chunks = closest_chunks(vector_db_client, embedding_fn, query)
 print("Found", len(chunks), "closest chunks")
-for i, chunk in enumerate(chunks):
-    print("  ", i, "id", chunk['id'], "at", chunk['distance'])
+display_closest_chunks(chunks)
 
 prompt = rag_prompt(chunks, query)
 print("RAG prompt created. Calling inference at", model_id,"\n\n")
