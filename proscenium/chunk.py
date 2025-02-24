@@ -1,4 +1,6 @@
 
+import logging
+import os
 from typing import List
 from typing import Iterable
 
@@ -6,6 +8,9 @@ from langchain_core.documents.base import Document
 
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.text_splitter import TokenTextSplitter
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 
 def documents_to_chunks_by_characters(
     documents: Iterable[Document],

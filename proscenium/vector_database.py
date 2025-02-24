@@ -12,28 +12,40 @@ from pymilvus import model
 
 # See https://milvus.io/docs/quickstart.md
 
+def embedding_function(
+    embedding_model_id: str) -> model.dense.SentenceTransformerEmbeddingFunction:
+    embedding_fn = model.dense.SentenceTransformerEmbeddingFunction(
+        model_name = embedding_model_id,
+        device = 'cpu' # or 'cuda:0'
+    )
+    return embedding_fn
+
 collection_name = "chunks"
 
-def create_vector_db(
-    db_file_name: Path,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
-    ) -> tuple[MilvusClient, str]:
-
-    client = MilvusClient(db_file_name)
+def schema_chunks(embedding_fn: model.dense.SentenceTransformerEmbeddingFunction) -> CollectionSchema:
 
     field_id = FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True)
     field_text = FieldSchema(name="text", dtype=DataType.VARCHAR, max_length= 50000)
     field_vector = FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim = embedding_fn.dim)
 
-    schema_chunks = CollectionSchema(
+    schema = CollectionSchema(
         fields=[field_id, field_text, field_vector],
         description="Chunks Schema",
         enable_dynamic_field=True
     )
 
+    return schema
+
+def create_vector_db(
+    db_file_name: Path,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
+    ) -> MilvusClient:
+
+    client = MilvusClient(str(db_file_name))
+
     client.create_collection(
         collection_name = collection_name,
-        schema = schema_chunks,
+        schema = schema_chunks(embedding_fn),
     )
 
     index_params = client.prepare_index_params()
@@ -51,7 +63,19 @@ def create_vector_db(
         sync = False
     )
 
-    return client, db_file_name
+    return client
+
+
+def vector_db(
+    db_file_name: Path,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
+    ) -> MilvusClient:
+
+    client = MilvusClient(str(db_file_name))
+
+    client.load_collection(collection_name)
+
+    return client
 
 
 def add_chunks_to_vector_db(
