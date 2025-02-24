@@ -22,8 +22,9 @@ query = "What did Hermes say to Prometheus about giving fire to humans?"
 ##################
 
 import os
-import logging
 from rich import print
+from rich.table import Table
+from rich.panel import Panel
 from proscenium.console import print_header
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
@@ -36,7 +37,6 @@ from proscenium.inference import complete_simple
 # Utilities
 ##################
 
-from rich.table import Table
 def display_closest_chunks(
     chunks: list[dict]
 ):
@@ -56,7 +56,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 print_header()
 
-print("USER\n", query, "\n")
+print(Panel(query, title="User"))
 
 embedding_fn = embedding_function(embedding_model_id)
 print("Embedding model:", embedding_model_id)
@@ -72,4 +72,4 @@ prompt = rag_prompt(chunks, query)
 print("RAG prompt created. Calling inference at", model_id,"\n\n")
 
 answer = complete_simple(model_id, rag_system_prompt, prompt)
-print("ASSISTANT\n", answer, "\n")
+print(Panel(answer, title="Assistant"))
