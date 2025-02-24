@@ -39,6 +39,9 @@ print("Data files to chunk:", data_file)
 embedding_fn = embedding_function(embedding_model_id)
 print("Embedding model", embedding_model_id)
 
+if db_file_name.exists():
+    db_file_name.unlink()
+    print("Deleted existing vector db file", db_file_name)
 vector_db_client = create_vector_db(db_file_name, embedding_fn) 
 print("Vector db stored in file", db_file_name)
 
