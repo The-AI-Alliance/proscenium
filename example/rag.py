@@ -51,6 +51,8 @@ print("Connected to vector db stored in", db_file_name)
 
 chunks = closest_chunks(vector_db_client, embedding_fn, query)
 print("Found", len(chunks), "closest chunks")
+for i, chunk in enumerate(chunks):
+    print("  ", i, "id", chunk['id'], "at", chunk['distance'])
 
 prompt = rag_prompt(chunks, query)
 print("RAG prompt created. Calling inference at", model_id,"\n\n")
