@@ -1,4 +1,6 @@
 
+from rich import print
+
 # Taken from python notebook on a branch:
 # https://github.com/ibm-granite-community/granite-legal-cookbook/blob/158-legal-graph-rag/recipes/Graph/Entity_Extraction_from_NH_Caselaw.ipynb
 
@@ -14,9 +16,19 @@ model_id = "openai:gpt-4o"
 
 from proscenium.load import load_hugging_face_dataset
 
-loader = load_hugging_face_dataset("free-law/nh", page_content_column="text")
-documents = loader.load()
+documents = load_hugging_face_dataset("free-law/nh", page_content_column="text")
 print("Document Count: " + str(len(documents)))
+
+num_docs = 10
+
+print("Truncating to ", num_docs)
+documents = documents[:num_docs]
+
+##################################
+# Filter documents
+##################################
+
+# if doc.metadata["id"] in ['4440632', '4441078']]
 
 ##################################
 # Inspect documents
@@ -24,7 +36,7 @@ print("Document Count: " + str(len(documents)))
 
 import json
 
-for doc in documents[:10]:
+for doc in documents:
     print(json.dumps(doc.metadata, indent=4), "\n")
     print(doc.page_content[:100], "\n")
 
@@ -36,9 +48,8 @@ from proscenium.chunk import documents_to_chunks_by_tokens
 
 doc_chunks = {}
 
-for doc in documents[:100]:
+for doc in documents:
     id = doc.metadata["id"]
-    # if doc.metadata["id"] in ['4440632', '4441078']]
     chunks = documents_to_chunks_by_tokens([doc], chunk_size=1000, chunk_overlap=0)
     doc_chunks[id] = chunks
     print(f"Case {id} has {len(chunks)} chunks")
@@ -53,7 +64,7 @@ for doc in documents[:100]:
 # we will be extracting it from the case law text.
 
 import json
-for doc in documents[1:2]:
+for doc in documents:
     id = doc.metadata["id"]
     print(json.dumps(doc.metadata, indent=4))
     for chunk in doc_chunks[id]:
@@ -70,7 +81,7 @@ categories = {
     "Precedent Cited": "Previous case law referred to in the case.",
 }
 
-query_template = """\
+extraction_template = """\
 Below is a list of entity categories:
 
 {categories}
@@ -93,7 +104,7 @@ for doc in documents:
     extracts = []
     for i, chunk in enumerate(doc_chunks[id]):
         print(f"\nChunk {i} of {id}")
-        query = query_template.format(
+        query = extraction_template.format(
             categories = categories_str,
             text = chunk.page_content)
         print(str(len(query)) + " characters in query")
@@ -102,7 +113,6 @@ for doc in documents:
         extracts.append(response)
 
     doc_extracts[id] = extracts
-
 
 ##################################
 # Construct graph triples
@@ -151,6 +161,8 @@ for id, triples in doc_triples.items():
             all_triples.append(triple)
             print(triple)
 
+import sys
+sys.exit(0)
 
 ##################################
 # Populate the graph
@@ -161,6 +173,8 @@ from stringcase import snakecase, lowercase
 
 # Define the list of (entity, relationship, entity) triples
 triples = all_triples
+
+# TODO neo4j setup instructions
 
 # Connect to the Neo4j database
 uri = get_env_var("NEO4J_URI")
@@ -223,18 +237,19 @@ with driver.session() as session:
     for record in result:
         print(record["name"])
 
-
 ##################################
-# Populate vector db with entities
+# Create Vector DB
 ##################################
 
-from langchain_huggingface import HuggingFaceEmbeddings
+embedding_model_id = "all-MiniLM-L6-v2"
 
-embeddings_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+embedding_fn = embedding_function(embedding_model_id)
+print("Embedding model", embedding_model_id)
 
-from langchain_chroma import Chroma
+db_file_name = Path("milvus.db")
 
-vector_db = Chroma(embedding_function=embeddings_model)
+vector_db_client = create_vector_db(db_file_name, embedding_fn) 
+print("Vector db stored in file", db_file_name)
 
 ##################################
 # Add graph nodes to vector db
@@ -250,9 +265,10 @@ with driver.session() as session:
         doc = Document(record["name"])
         names.append(doc)
 
-ids = vector_db.add_documents(names)
-print("Documents added: ", len(ids))
-
+info = add_chunks_to_vector_db(vector_db_client, embedding_fn, chunks)
+print(info['insert_count'], "chunks inserted")
+print(vector_db_client.get_collection_stats(collection_name))
+print(vector_db_client.describe_collection(collection_name))
 
 ##################################
 # Extract entities from question
@@ -260,29 +276,32 @@ print("Documents added: ", len(ids))
 
 question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
 
-response = model.invoke(query.format(question))
+response = complete_simple(model_id, "You are an entity extractor", extraction_template.format(
+    categories = categories_str,
+    text = question))
 print(response)
-question_entity_triples = get_triples_from_extract(response, "")
-print(question_entity_triples)
 
+extraction_entity_triples = get_triples_from_extract(response, "")
+print(question_entity_triples)
 
 ##################################
 # Match entities to graph
 ##################################
 
+from proscenium.vector_database import closest_chunks
+
 def match_entity(name, threshold=1.0):
-    """Match entities by embedding vector distance given a similarity threshold. With Chroma, l2 (Euclidean) distance is used."""
-    docs_with_score = vector_db.similarity_search_with_score(name, k=5)
-    for doc, score in docs_with_score:
-        # print(f"{doc.page_content} has a similarity score of {score}")
-        next
-    if len(docs_with_score):
-        doc, score = docs_with_score[0]
-        if score <= threshold:
-            # Return first close match.
-            return doc.page_content
+
+    """Match entities by embedding vector distance given a similarity threshold."""
+
+    hits = closest_chunks(vector_db_client, embedding_fn, name, k=5)
+    # TODO print the hits
+    if len(hits) > 0:
+        # TODO confirm that 0th element is the closest match
+        hit = hits[0]
+        if hit['distance'] <= threshold:
+            return hit['entity']['text']
     else:
-        # No match.
         return None
 
 for triple in question_entity_triples:
@@ -291,7 +310,6 @@ for triple in question_entity_triples:
     match = match_entity(name)
     if match is not None:
         print(f"Match: {match}")
-
 
 ##################################
 # Query graph for cases
@@ -311,7 +329,6 @@ for triple in question_entity_triples:
     entity, role, case = triple
     entity_match = match_entity(entity)
     query_for_cases(entity_match, role)
-
 
 ##################################
 # Query for cases given multiple entities and their relationships to the case.
@@ -352,12 +369,16 @@ print(case_text)
 # Answer question
 ##################################
 
-q = f"""
+query_template = """
 Answer the question using the following text from one case: \n\n{case_text}
 
 Question: {question}
 """
 
-print(question)
-response = model.invoke(q)
+query = query_template.format(
+    case_text = case_text,
+    question = question)
+print(query)
+
+response = complete_simple(model_id, "You are a helpful law librarian", query)
 print(response)
