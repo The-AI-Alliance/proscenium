@@ -22,10 +22,7 @@ print("Data files to chunk:", data_file)
 embedding_fn = embedding_function(embedding_model_id)
 print("Embedding model", embedding_model_id)
 
-if db_file_name.exists():
-    db_file_name.unlink()
-    print("Deleted existing vector db file", db_file_name)
-vector_db_client = create_vector_db(db_file_name, embedding_fn) 
+vector_db_client = create_vector_db(db_file_name, embedding_fn, overwrite=True)
 print("Vector db stored in file", db_file_name)
 
 documents = load_file(data_file)
@@ -35,5 +32,4 @@ print("Data file", data_file, "has", len(chunks), "chunks")
 info = add_chunks_to_vector_db(vector_db_client, embedding_fn, chunks)
 print(info['insert_count'], "chunks inserted")
 print(vector_db_client.get_collection_stats(collection_name))
-
 print(vector_db_client.describe_collection(collection_name))
