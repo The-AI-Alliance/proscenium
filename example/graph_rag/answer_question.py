@@ -1,9 +1,16 @@
 
+from rich import print
+
+question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+
 ##################################
 # Extract entities from question
 ##################################
 
-question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+from proscenium.inference import complete_simple
+from .config import model_id, categories
+
+categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
 
 response = complete_simple(model_id, "You are an entity extractor", extraction_template.format(
     categories = categories_str,
@@ -43,8 +50,23 @@ for triple in question_entity_triples:
         print(f"Match: {match}")
 
 ##################################
+# Connect to Neo4j
+##################################
+
+import os
+uri = os.environ["NEO4J_URI"] = "bolt://localhost:7687"
+username = os.environ["NEO4J_USERNAME"] = "neo4j"
+password = os.environ["NEO4J_PASSWORD"] = "password"
+
+from neo4j import GraphDatabase
+driver = GraphDatabase.driver(uri, auth=(username, password))
+
+
+##################################
 # Query graph for cases
 ##################################
+
+from stringcase import snakecase, lowercase
 
 def query_for_cases(entity_name, role):
     with driver.session() as session:

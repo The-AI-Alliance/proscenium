@@ -1,21 +1,26 @@
+
+from rich import print
+
 ##################################
-# Populate the graph
+# Connect to Neo4j
 ##################################
 
-from neo4j import GraphDatabase
-from stringcase import snakecase, lowercase
-
-# Define the list of (entity, relationship, entity) triples
-triples = all_triples
-
-# TODO neo4j setup instructions
-
-# Connect to the Neo4j database
 import os
 uri = os.environ["NEO4J_URI"] = "bolt://localhost:7687"
 username = os.environ["NEO4J_USERNAME"] = "neo4j"
 password = os.environ["NEO4J_PASSWORD"] = "password"
+
+from neo4j import GraphDatabase
 driver = GraphDatabase.driver(uri, auth=(username, password))
+
+##################################
+# Populate the graph
+##################################
+
+from stringcase import snakecase, lowercase
+
+# Define the list of (entity, relationship, entity) triples
+triples = all_triples
 
 def add_triple(tx, entity, role, case):
     query = (

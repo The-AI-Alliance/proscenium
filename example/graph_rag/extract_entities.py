@@ -1,11 +1,7 @@
 
 from rich import print
 
-##################################
-# Model
-##################################
-
-model_id = "openai:gpt-4o"
+from .config import num_docs, model_id, hf_dataset_id, hf_dataset_column
 
 ##################################
 # Load documents from HF dataset
@@ -13,10 +9,8 @@ model_id = "openai:gpt-4o"
 
 from proscenium.load import load_hugging_face_dataset
 
-documents = load_hugging_face_dataset("free-law/nh", page_content_column="text")
+documents = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
 print("Document Count: " + str(len(documents)))
-
-num_docs = 10
 
 print("Truncating to ", num_docs)
 documents = documents[:num_docs]
@@ -72,11 +66,7 @@ for doc in documents:
 ##################################
 
 from proscenium.inference import complete_simple
-
-categories = {
-    "Judge/Justice": "The name of the judge or justice involved in the case, including their role (e.g., trial judge, appellate judge, presiding justice).",
-    "Precedent Cited": "Previous case law referred to in the case.",
-}
+from .config import categories
 
 extraction_template = """\
 Below is a list of entity categories:
@@ -150,8 +140,8 @@ for doc in documents:
 
 # Get all of the triples, filtering those that have no entity.
 all_triples = []
-for id, triples in doc_triples.items():
-    print(f"Case {id}")
+for case_id, triples in doc_triples.items():
+    print(f"Case {case_id}")
     for triple in triples:
         r = triple[1].lower()
         if "not explicitly mentioned" not in r and "not applicable" not in r and "not specified" not in r:
