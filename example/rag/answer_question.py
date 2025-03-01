@@ -6,7 +6,7 @@ from rich import print
 from rich.panel import Panel
 
 from proscenium.display import print_header
-from proscenium.vector_database import display_closest_chunks
+from proscenium.display import display_chunk_hits
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
@@ -30,7 +30,7 @@ print("Connected to vector db stored in", db_file_name)
 
 chunks = closest_chunks(vector_db_client, embedding_fn, query)
 print("Found", len(chunks), "closest chunks")
-display_closest_chunks(chunks)
+display_chunk_hits(chunks)
 
 from .prompts import rag_prompt_template
 
