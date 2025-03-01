@@ -1,4 +1,4 @@
-
+from pathlib import Path
 
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"
@@ -11,7 +11,7 @@ neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
 
 embedding_model_id = "all-MiniLM-L6-v2"
-milvus_db_file = "milvus.db"
+milvus_db_file = Path("milvus.db")
 
 categories = {
     "Judge/Justice": "The name of the judge or justice involved in the case, including their role (e.g., trial judge, appellate judge, presiding justice).",

@@ -5,7 +5,6 @@ from rich import print
 # Create Vector DB
 ##################################
 
-from pathlib import Path
 from .config import embedding_model_id, milvus_db_file
 from proscenium.vector_database import create_vector_db
 from proscenium.vector_database import add_chunks_to_vector_db
@@ -14,10 +13,8 @@ from proscenium.vector_database import embedding_function
 embedding_fn = embedding_function(embedding_model_id)
 print("Embedding model", embedding_model_id)
 
-db_file_name = Path(milvus_db_file)
-
-vector_db_client = create_vector_db(db_file_name, embedding_fn) 
-print("Vector db stored in file", db_file_name)
+vector_db_client = create_vector_db(milvus_db_file, embedding_fn) 
+print("Vector db stored in file", milvus_db_file)
 
 ##################################
 # Connect to Neo4j
