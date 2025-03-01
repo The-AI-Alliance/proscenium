@@ -60,3 +60,7 @@ python3.11 -m venv venv
 
 pip install git+https://github.com/The-AI-Alliance/proscenium.git
 ```
+
+or
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
