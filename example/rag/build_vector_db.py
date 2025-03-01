@@ -16,9 +16,7 @@ from .config import db_file_name, embedding_model_id, url, data_file
 
 print_header()
 
-if not data_file.exists():
-    print("downloading", url)
-    asyncio.run(url_to_file(url, data_file))
+asyncio.run(url_to_file(url, data_file))
 print("Data files to chunk:", data_file)
 
 embedding_fn = embedding_function(embedding_model_id)
