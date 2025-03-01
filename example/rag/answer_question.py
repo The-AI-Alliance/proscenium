@@ -1,41 +1,20 @@
 
-##################
-# Configuration
-##################
-
-from pathlib import Path
-
-db_file_name = Path("milvus.db")
-embedding_model_id = "all-MiniLM-L6-v2"
-#model_id = "ollama:llama3.2"
-#model_id = "ollama:granite3.1-dense:2b"
-model_id = "openai:gpt-4o"
-
-##################
-# User Query
-##################
-
 query = "What did Hermes say to Prometheus about giving fire to humans?"
-
-##################
-# Imports
-##################
 
 import os
 from rich import print
 from rich.panel import Panel
+
 from proscenium.display import print_header
 from proscenium.vector_database import display_closest_chunks
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
 from proscenium.vector_database import rag_prompt
-from proscenium.prompts import rag_system_prompt
 from proscenium.complete import complete_simple
 
-##################
-# Main
-##################
+from .prompts import rag_system_prompt
+from .config import db_file_name, model_id, embedding_model_id
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 

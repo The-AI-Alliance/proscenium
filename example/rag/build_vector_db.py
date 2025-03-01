@@ -1,22 +1,8 @@
 
-##################
-# Configuration
-##################
-
-from pathlib import Path
-from pydantic.networks import HttpUrl
-
-url = HttpUrl('https://www.gutenberg.org/cache/epub/8714/pg8714.txt')
-data_file = Path("four_plays_of_aeschylus.txt")
-embedding_model_id = "all-MiniLM-L6-v2"
-db_file_name = Path("milvus.db")
-
-##################
-# Imports
-##################
 
 import asyncio
 from rich import print
+
 from proscenium.display import print_header
 from proscenium.surf import url_to_file
 from proscenium.vector_database import embedding_function
@@ -26,9 +12,7 @@ from proscenium.chunk import documents_to_chunks_by_characters
 from proscenium.vector_database import add_chunks_to_vector_db
 from proscenium.vector_database import collection_name
 
-##################
-# Implementation
-##################
+from .config import db_file_name, embedding_model_id, url, data_file
 
 print_header()
 
