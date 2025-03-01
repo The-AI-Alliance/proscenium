@@ -23,30 +23,15 @@ query = "What did Hermes say to Prometheus about giving fire to humans?"
 
 import os
 from rich import print
-from rich.table import Table
 from rich.panel import Panel
 from proscenium.console import print_header
+from proscenium.vector_database import display_closest_chunks
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
 from proscenium.vector_database import rag_prompt
 from proscenium.prompts import rag_system_prompt
 from proscenium.inference import complete_simple
-
-##################
-# Utilities
-##################
-
-def display_closest_chunks(
-    chunks: list[dict]
-):
-    table = Table(title="Closest Chunks", show_lines=True)
-    table.add_column("id", justify="right", style="cyan")
-    table.add_column("distance", style="magenta")
-    table.add_column("entity.text", justify="right", style="green")
-    for chunk in chunks:
-        table.add_row(str(chunk['id']), str(chunk['distance']), chunk['entity']['text'])
-    print(table)
 
 ##################
 # Main
