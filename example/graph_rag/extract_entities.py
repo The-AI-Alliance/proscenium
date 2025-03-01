@@ -65,23 +65,9 @@ for doc in documents:
 # Extracting entities
 ##################################
 
-from proscenium.inference import complete_simple
 from .config import categories
-
-extraction_template = """\
-Below is a list of entity categories:
-
-{categories}
-
-Given this list of entity categories, you will be asked to extract entities belonging to these categories from a text passage.
-Consider only the list of entity categories above; do not extract any additional entities.
-For each entity found, list the category and the entity, separated by a semicolon.
-Do not use the words "Entity" or "Category".
-
-Find the entities in the following text, and list them in the format specified above:
-
-{text}
-"""
+from proscenium.inference import complete_simple
+from proscenium.extract import extraction_template
 
 categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
 
@@ -105,20 +91,7 @@ for doc in documents:
 # Construct graph triples
 ##################################
 
-def get_triples_from_extract(extract, case_name):
-    triples = []
-    lines = extract.splitlines()
-    for line in lines:
-        try:
-            # Take the number off of the front.
-            line = line.split(". ", 1)[1]
-            role, entity = line.split(": ", 2)
-            if role in categories:
-                triple = (entity, role, case_name)
-                triples.append(triple)
-        except (ValueError, IndexError):
-            print(f"Error parsing case {id} line: {line}")
-    return triples
+from proscenium.extract import get_triples_from_extract
 
 doc_triples = {}
 for doc in documents:
@@ -127,7 +100,7 @@ for doc in documents:
     triples = []
     for i, extract in enumerate(doc_extracts[id]):
         # Break response up into entity triples.
-        new_triples = get_triples_from_extract(extract, name);
+        new_triples = get_triples_from_extract(extract, name, categories)
         triples.extend(new_triples)
     # Add triples from metadata.
     triples.append((doc.metadata["court"], 'Court', name))

@@ -7,7 +7,9 @@ from rich import print
 
 from pathlib import Path
 from .config import embedding_model_id, milvus_db_file
-from proscenium.vector_database import create_vector_db, add_chunks_to_vector_db
+from proscenium.vector_database import create_vector_db
+from proscenium.vector_database import add_chunks_to_vector_db
+from proscenium.vector_database import embedding_function
 
 embedding_fn = embedding_function(embedding_model_id)
 print("Embedding model", embedding_model_id)
@@ -43,7 +45,7 @@ with driver.session() as session:
         doc = Document(record["name"])
         names.append(doc)
 
-info = add_chunks_to_vector_db(vector_db_client, embedding_fn, chunks)
+info = add_chunks_to_vector_db(vector_db_client, embedding_fn, names)
 print(info['insert_count'], "chunks inserted")
 print(vector_db_client.get_collection_stats(collection_name))
 print(vector_db_client.describe_collection(collection_name))

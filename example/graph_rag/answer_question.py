@@ -4,11 +4,26 @@ from rich import print
 question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
 
 ##################################
+# Connect to vector db
+##################################
+
+from .config import embedding_model_id, milvus_db_file
+from proscenium.vector_database import vector_db
+
+embedding_fn = embedding_function(embedding_model_id)
+print("Embedding model", embedding_model_id)
+
+vector_db_client = vector_db(milvus_db_file, embedding_fn)
+print("Connected to vector db stored in", milvus_db_file)
+
+##################################
 # Extract entities from question
 ##################################
 
-from proscenium.inference import complete_simple
 from .config import model_id, categories
+from proscenium.inference import complete_simple
+from proscenium.extract import extraction_template
+from proscenium.extract import get_triples_from_extract
 
 categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
 
@@ -17,7 +32,7 @@ response = complete_simple(model_id, "You are an entity extractor", extraction_t
     text = question))
 print(response)
 
-extraction_entity_triples = get_triples_from_extract(response, "")
+question_entity_triples = get_triples_from_extract(response, "", categories)
 print(question_entity_triples)
 
 ##################################
@@ -25,6 +40,7 @@ print(question_entity_triples)
 ##################################
 
 from proscenium.vector_database import closest_chunks
+from proscenium.vector_database import embedding_function
 from proscenium.console import display_chunk_hits
 
 def match_entity(name, threshold=1.0):
@@ -60,7 +76,6 @@ password = os.environ["NEO4J_PASSWORD"] = "password"
 
 from neo4j import GraphDatabase
 driver = GraphDatabase.driver(uri, auth=(username, password))
-
 
 ##################################
 # Query graph for cases
