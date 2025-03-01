@@ -3,7 +3,7 @@
 from thespian.actors import Actor
 from aisuite import Client
 
-from proscenium.invoke import apply_tools
+from proscenium.complete import apply_tools
 from proscenium.invoke import process_tools
 
 from gofannon.basic_math.addition import Addition
