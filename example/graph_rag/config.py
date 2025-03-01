@@ -6,6 +6,8 @@ num_docs = 10
 
 model_id = "openai:gpt-4o"
 
+entity_json_file = Path("entities.json")
+
 neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
 neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]

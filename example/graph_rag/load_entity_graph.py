@@ -2,6 +2,16 @@
 from rich import print
 
 ##################################
+# Load triples
+##################################
+
+import json
+from .config import entity_json_file
+
+with open(entity_json_file) as infile:
+    triples = json.load(infile)
+
+##################################
 # Connect to Neo4j
 ##################################
 
@@ -15,9 +25,6 @@ driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 ##################################
 
 from stringcase import snakecase, lowercase
-
-# Define the list of (entity, relationship, entity) triples
-triples = all_triples
 
 def add_triple(tx, entity, role, case):
     query = (

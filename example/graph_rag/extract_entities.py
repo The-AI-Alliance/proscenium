@@ -88,7 +88,7 @@ for doc in documents:
     doc_extracts[id] = extracts
 
 ##################################
-# Construct graph triples
+# Construct triples
 ##################################
 
 from proscenium.extract import get_triples_from_extract
@@ -120,3 +120,15 @@ for case_id, triples in doc_triples.items():
         if "not explicitly mentioned" not in r and "not applicable" not in r and "not specified" not in r:
             all_triples.append(triple)
             print(triple)
+
+
+##################################
+# Write all_tripes to json file
+##################################
+
+import json
+from .config import entity_json_file
+
+with open(entity_json_file, 'wb') as outfile:
+    json.dump(all_triples, outfile)
+print("Wrote triples to", entity_json_file)
