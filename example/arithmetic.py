@@ -1,15 +1,15 @@
 
 
 from thespian.actors import Actor
-
 from aisuite import Client
-from proscenium.inference import apply_tools
+
+from proscenium.invoke import apply_tools
+from proscenium.invoke import process_tools
 
 from gofannon.basic_math.addition import Addition
 from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
-from proscenium.functions import process_tools
 
 class Abacus(Actor):
 

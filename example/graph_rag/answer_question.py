@@ -21,9 +21,9 @@ print("Connected to vector db stored in", milvus_db_file)
 ##################################
 
 from .config import model_id, categories
-from proscenium.inference import complete_simple
-from proscenium.extract import extraction_template
-from proscenium.extract import get_triples_from_extract
+from proscenium.complete import complete_simple
+from proscenium.parse import extraction_template
+from proscenium.parse import get_triples_from_extract
 
 categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
 
@@ -41,7 +41,7 @@ print(question_entity_triples)
 
 from proscenium.vector_database import closest_chunks
 from proscenium.vector_database import embedding_function
-from proscenium.console import display_chunk_hits
+from proscenium.display import display_chunk_hits
 
 def match_entity(name, threshold=1.0):
 

@@ -17,8 +17,8 @@ db_file_name = Path("milvus.db")
 
 import asyncio
 from rich import print
-from proscenium.console import print_header
-from proscenium.web import url_to_file
+from proscenium.display import print_header
+from proscenium.surf import url_to_file
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import create_vector_db
 from proscenium.load import load_file

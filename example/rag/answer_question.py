@@ -24,14 +24,14 @@ query = "What did Hermes say to Prometheus about giving fire to humans?"
 import os
 from rich import print
 from rich.panel import Panel
-from proscenium.console import print_header
+from proscenium.display import print_header
 from proscenium.vector_database import display_closest_chunks
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
 from proscenium.vector_database import rag_prompt
 from proscenium.prompts import rag_system_prompt
-from proscenium.inference import complete_simple
+from proscenium.complete import complete_simple
 
 ##################
 # Main

@@ -66,8 +66,8 @@ for doc in documents:
 ##################################
 
 from .config import categories
-from proscenium.inference import complete_simple
-from proscenium.extract import extraction_template
+from proscenium.complete import complete_simple
+from proscenium.parse import extraction_template
 
 categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
 
@@ -91,7 +91,7 @@ for doc in documents:
 # Construct triples
 ##################################
 
-from proscenium.extract import get_triples_from_extract
+from proscenium.parse import get_triples_from_extract
 
 doc_triples = {}
 for doc in documents:
