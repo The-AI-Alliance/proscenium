@@ -5,11 +5,15 @@ from rich import print
 # Load triples
 ##################################
 
-import json
-from .config import entity_json_file
+import csv
+from .config import entity_csv_file
 
-with open(entity_json_file) as infile:
-    triples = json.load(infile)
+print("Loading triples from", entity_csv_file)
+
+with open(entity_csv_file) as f:
+    reader = csv.reader(f, delimiter=",", quotechar='"')
+    next(reader, None)  # skip header row
+    triples = [row for row in reader]
 
 ##################################
 # Connect to Neo4j

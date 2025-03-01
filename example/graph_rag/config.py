@@ -2,11 +2,11 @@ from pathlib import Path
 
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"
-num_docs = 10
+num_docs = 4
 
 model_id = "openai:gpt-4o"
 
-entity_json_file = Path("entities.json")
+entity_csv_file = Path("entities.csv")
 
 neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
 neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
