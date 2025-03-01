@@ -22,31 +22,16 @@ query = "What did Hermes say to Prometheus about giving fire to humans?"
 ##################
 
 import os
-import logging
 from rich import print
+from rich.panel import Panel
 from proscenium.console import print_header
+from proscenium.vector_database import display_closest_chunks
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
 from proscenium.vector_database import rag_prompt
 from proscenium.prompts import rag_system_prompt
 from proscenium.inference import complete_simple
-
-##################
-# Utilities
-##################
-
-from rich.table import Table
-def display_closest_chunks(
-    chunks: list[dict]
-):
-    table = Table(title="Closest Chunks", show_lines=True)
-    table.add_column("id", justify="right", style="cyan")
-    table.add_column("distance", style="magenta")
-    table.add_column("entity.text", justify="right", style="green")
-    for chunk in chunks:
-        table.add_row(str(chunk['id']), str(chunk['distance']), chunk['entity']['text'])
-    print(table)
 
 ##################
 # Main
@@ -56,7 +41,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 print_header()
 
-print("USER\n", query, "\n")
+print(Panel(query, title="User"))
 
 embedding_fn = embedding_function(embedding_model_id)
 print("Embedding model:", embedding_model_id)
@@ -72,4 +57,4 @@ prompt = rag_prompt(chunks, query)
 print("RAG prompt created. Calling inference at", model_id,"\n\n")
 
 answer = complete_simple(model_id, rag_system_prompt, prompt)
-print("ASSISTANT\n", answer, "\n")
+print(Panel(answer, title="Assistant"))

@@ -109,7 +109,6 @@ def closest_chunks(
 
     return hits
 
-
 def rag_prompt(
     chunks: List[Dict],
     query: str) -> str:
