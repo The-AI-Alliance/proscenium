@@ -69,13 +69,10 @@ for triple in question_entity_triples:
 # Connect to Neo4j
 ##################################
 
-import os
-uri = os.environ["NEO4J_URI"] = "bolt://localhost:7687"
-username = os.environ["NEO4J_USERNAME"] = "neo4j"
-password = os.environ["NEO4J_PASSWORD"] = "password"
+from .config import neo4j_uri, neo4j_username, neo4j_password
+from proscenium.know import knowledge_graph_client
 
-from neo4j import GraphDatabase
-driver = GraphDatabase.driver(uri, auth=(username, password))
+driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
 ##################################
 # Query graph for cases
@@ -129,6 +126,17 @@ cases = query_for_cases(entity_role_pairs)
 ##################################
 # Retrieve case text
 ##################################
+
+# TODO avoid this by indexing the case text elsewhere (eg the graph)
+
+from .config import hf_dataset_id, hf_dataset_column, num_docs
+from proscenium.load import load_hugging_face_dataset
+
+documents = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
+print("Document Count: " + str(len(documents)))
+
+print("Truncating to ", num_docs)
+documents = documents[:num_docs]
 
 case_text = [doc.page_content for doc in documents if doc.metadata["name_abbreviation"] == cases[0]][0]
 print(case_text)

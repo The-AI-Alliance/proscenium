@@ -5,13 +5,10 @@ from rich import print
 # Connect to Neo4j
 ##################################
 
-import os
-uri = os.environ["NEO4J_URI"] = "bolt://localhost:7687"
-username = os.environ["NEO4J_USERNAME"] = "neo4j"
-password = os.environ["NEO4J_PASSWORD"] = "password"
+from .config import neo4j_uri, neo4j_username, neo4j_password
+from proscenium.know import knowledge_graph_client
 
-from neo4j import GraphDatabase
-driver = GraphDatabase.driver(uri, auth=(username, password))
+driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
 ##################################
 # Populate the graph
@@ -69,7 +66,6 @@ with driver.session() as session:
 # Find cited precedents
 ##################################
 
-driver = GraphDatabase.driver(uri, auth=(username, password))
 with driver.session() as session:
     # Query to find all nodes
     result = session.run("MATCH (a)-[:precedent_cited]->() RETURN a.name AS name")

@@ -6,6 +6,10 @@ num_docs = 10
 
 model_id = "openai:gpt-4o"
 
+neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
+neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
+neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
+
 embedding_model_id = "all-MiniLM-L6-v2"
 milvus_db_file = "milvus.db"
 
