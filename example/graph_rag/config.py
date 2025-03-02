@@ -3,6 +3,7 @@ from pathlib import Path
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"
 num_docs = 4
+# initial version looked at only: doc.metadata["id"] in ['4440632', '4441078']
 
 model_id = "openai:gpt-4o"
 

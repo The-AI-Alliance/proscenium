@@ -3,6 +3,10 @@ from rich import print
 
 from .config import num_docs, model_id, hf_dataset_id, hf_dataset_column
 
+import logging
+logging.basicConfig()
+logging.getLogger().setLevel(logging.WARNING)
+
 ##################################
 # Load documents from HF dataset
 ##################################
@@ -14,16 +18,6 @@ print("Document Count: " + str(len(documents)))
 
 print("Truncating to ", num_docs)
 documents = documents[:num_docs]
-
-##################################
-# Filter documents
-##################################
-
-# if doc.metadata["id"] in ['4440632', '4441078']]
-
-##################################
-# Inspect documents
-##################################
 
 import json
 
@@ -45,10 +39,6 @@ for doc in documents:
     doc_chunks[id] = chunks
     print(f"Case {id} has {len(chunks)} chunks")
 
-##################################
-# Inspect chunks
-##################################
-
 # Each text chunk inherits the metadata from the document.
 # For the purpose of this recipe, note that the `judge`
 # is not well captured in many of these documents;
@@ -62,7 +52,7 @@ for doc in documents:
 #        print(chunk.page_content[:100])
 
 ##################################
-# Extracting entities
+# Extract entities
 ##################################
 
 from .config import categories
@@ -73,19 +63,19 @@ categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
 
 doc_extracts = {}
 for doc in documents:
-    id = doc.metadata['id']
+    case_id = doc.metadata['id']
+    print(f"\nExtracting entities case id {case_id}")
     extracts = []
     for i, chunk in enumerate(doc_chunks[id]):
-        print(f"\nChunk {i} of {id}")
+        print(f"\nExtracting entities for chunk {i} of case id {case_id}")
         query = extraction_template.format(
             categories = categories_str,
             text = chunk.page_content)
-        # print(str(len(query)) + " characters in query")
         response = complete_simple(model_id, "You are an entity extractor", query)
-        # print(response)
+        logging.debug(response)
         extracts.append(response)
 
-    doc_extracts[id] = extracts
+    doc_extracts[case_id] = extracts
 
 ##################################
 # Construct triples
@@ -97,6 +87,7 @@ doc_triples = {}
 for doc in documents:
     id = doc.metadata['id']
     name = doc.metadata['name_abbreviation']
+    print("TRIPLES FOR id", id, ", name", name)
     triples = []
     for i, extract in enumerate(doc_extracts[id]):
         # Break response up into entity triples.
@@ -119,7 +110,7 @@ for case_id, triples in doc_triples.items():
         r = triple[1].lower()
         if "not explicitly mentioned" not in r and "not applicable" not in r and "not specified" not in r:
             all_triples.append(triple)
-            # print(triple)
+            logging.debug(triple)
 
 
 ##################################
