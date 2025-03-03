@@ -2,15 +2,15 @@
 from typing import List
 from rich import print
 import logging
-import csv
 from rich.progress import Progress
 from langchain_core.documents.base import Document
 
-from proscenium.load import load_hugging_face_dataset
+from proscenium.read import load_hugging_face_dataset
 from proscenium.chunk import documents_to_chunks_by_tokens
 from proscenium.parse import extraction_template
 from proscenium.complete import complete_simple
 from proscenium.parse import get_triples_from_extract
+from proscenium.write import triples_to_csv
 
 from .display import display_case
 from .config import entity_csv_file
@@ -43,13 +43,6 @@ def case_to_triples(case_doc: Document) -> List[tuple[str, str, str]]:
     triples.append((case_doc.metadata["court"], 'Court', case_name))
 
     return triples
-
-def triples_to_csv(triples: List[tuple[str, str, str]], filename: str) -> None:
-
-    with open(filename, "wt") as f:
-        writer = csv.writer(f, delimiter=",", quotechar='"')
-        writer.writerow(["entity", "role", "case name"]) # header
-        writer.writerows(triples)
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)

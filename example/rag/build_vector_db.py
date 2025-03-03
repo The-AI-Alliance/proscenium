@@ -4,10 +4,10 @@ import asyncio
 from rich import print
 
 from proscenium.display import print_header
-from proscenium.surf import url_to_file
+from proscenium.read import url_to_file
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import create_vector_db
-from proscenium.load import load_file
+from proscenium.read import load_file
 from proscenium.chunk import documents_to_chunks_by_characters
 from proscenium.vector_database import add_chunks_to_vector_db
 from proscenium.vector_database import collection_name
