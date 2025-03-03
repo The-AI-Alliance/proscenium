@@ -3,18 +3,17 @@ import logging
 import csv
 from rich import print
 from rich.progress import Progress
-
 from langchain_core.documents.base import Document
+
 from proscenium.read import load_hugging_face_dataset
 from proscenium.chunk import documents_to_chunks_by_tokens
 from proscenium.parse import get_triples_from_extract
-from proscenium.parse import extraction_template_from_categories
+from proscenium.parse import extraction_template_from_predicates
 from proscenium.complete import complete_simple
-from proscenium.write import triples_to_csv
 
-from .config import categories
-from .config import model_id
 from .display import display_case
+from .config import predicates
+from .config import model_id
 from .config import entity_csv_file
 from .config import num_docs, hf_dataset_id, hf_dataset_column
 
@@ -37,17 +36,17 @@ def process_document(extraction_template: str, case_doc: Document, writer: csv.w
             "You are an entity extractor",
             extraction_template.format(text = chunk.page_content))
 
-        new_triples = get_triples_from_extract(extract, case_name, categories)
+        new_triples = get_triples_from_extract(extract, case_name, predicates)
 
         print("   extracted", len(new_triples), "triples")
         writer.writerows(new_triples)
 
-caselaw_extraction_template = extraction_template_from_categories(categories)
+caselaw_extraction_template = extraction_template_from_predicates(predicates)
 
 documents = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
 old_len = len(documents)
 documents = documents[:num_docs]
-print("using", num_docs, "documents of ", len(documents), "from HF dataset", hf_dataset_id)
+print("using the first", num_docs, "documents of", len(documents), "from HF dataset", hf_dataset_id)
 
 with Progress() as progress:
 

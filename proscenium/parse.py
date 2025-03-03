@@ -16,7 +16,7 @@ class PartialFormatter(Formatter):
 raw_extraction_template = """\
 Below is a list of entity categories:
 
-{categories}
+{predicates}
 
 Given this list of entity categories, you will be asked to extract entities belonging to these categories from a text passage.
 Consider only the list of entity categories above; do not extract any additional entities.
@@ -30,13 +30,21 @@ Find the entities in the following text, and list them in the format specified a
 
 partial_formatter = PartialFormatter()
 
-def extraction_template_from_categories(categories: Dict[str, str]) -> str:
-    categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
-    return partial_formatter.format(raw_extraction_template, categories=categories_str)
+def extraction_template_from_predicates(
+    predicates: Dict[str, str]
+    ) -> str:
+    predicates_str = "\n".join([f"{k}: {v}" for k, v in predicates.items()])
+    return partial_formatter.format(raw_extraction_template, predicates=predicates_str)
 
 
-def get_triples_from_extract(extract, object: str, categories) -> List[tuple[str, str, str]]:
+def get_triples_from_extract(
+    extract,
+    object: str,
+    predicates: Dict[str, str]
+    ) -> List[tuple[str, str, str]]:
+
     logging.info("get_triples_from_extract: extract = <<<%s>>>", extract)
+
     triples = []
     lines = extract.splitlines()
     for line in lines:
@@ -45,7 +53,7 @@ def get_triples_from_extract(extract, object: str, categories) -> List[tuple[str
             predicate, subject = line.split("; ", 2)
             #role_lower = role.lower()
             #if "not explicitly mentioned" not in r and "not applicable" not in r and "not specified" not in r:
-            if predicate in categories:
+            if predicate in predicates:
                 triple = (subject.strip(), predicate, object)
                 triples.append(triple)
             else:

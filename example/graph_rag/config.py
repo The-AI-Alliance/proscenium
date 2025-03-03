@@ -20,7 +20,7 @@ milvus_db_file = Path("milvus.db")
 # is not well captured in many of these documents;
 # we will be extracting it from the case law text.
 
-categories = {
+predicates = {
     "Judge/Justice": "The name of the judge or justice involved in the case, including their role (e.g., trial judge, appellate judge, presiding justice).",
     "Precedent Cited": "Previous case law referred to in the case.",
 }
