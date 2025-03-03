@@ -22,10 +22,12 @@ def get_triples_from_extract(extract, case_name, categories):
     lines = extract.splitlines()
     for line in lines:
         try:
-            # line = line.split(". ", 1)[1] # for numbered list
+            #line = line.split(". ", 1)[1] # for numbered list
             role, entity = line.split("; ", 2)
+            #role_lower = role.lower()
+            #if "not explicitly mentioned" not in r and "not applicable" not in r and "not specified" not in r:
             if role in categories:
-                triple = (entity, role, case_name)
+                triple = (entity.strip(), role, case_name)
                 triples.append(triple)
             else:
                 logging.warning("Skipping line <<<%s>>> due to unknown role: %s", line, role)

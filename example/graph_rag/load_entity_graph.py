@@ -38,48 +38,33 @@ def add_triple(tx, entity, role, case):
     ) % snakecase(lowercase(role.replace('/', '_')))
     tx.run(query, entity=entity, case=case)
 
-def build_graph(triples):
-    with driver.session() as session:
-        # Empty the graph first
-        session.run("MATCH (n) DETACH DELETE n")
-        # Fill the graph
-        for entity, role, case in triples:
-            session.write_transaction(add_triple, entity, role, case)
+with driver.session() as session:
+    session.run("MATCH (n) DETACH DELETE n") # empty graph
+    for entity, role, case in triples:
+        session.write_transaction(add_triple, entity, role, case)
 
-# Build the graph from the triples list
-build_graph(triples)
-
-# Close the connection to the database
 driver.close()
-
 
 ##################################
 # Inspect the graph
 ##################################
 
+driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+
 with driver.session() as session:
-    # Query to find all nodes
-    result = session.run("MATCH (n) RETURN n.name AS name")
     print("Nodes in the graph:")
+    result = session.run("MATCH (n) RETURN n.name AS name") # all nodes
     for record in result:
         print(record["name"])
 
-    # Query to find all relationships
-    result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
     print("\nRelationship types in the graph:")
+    result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel") # all relationships
     rels = [record["rel"] for record in result]
-    # unique rels
-    rels = list(set(rels))
+    rels = list(set(rels)) # unique rels
     for rel in rels:
         print(rel)
 
-##################################
-# Find cited precedents
-##################################
-
-with driver.session() as session:
-    # Query to find all nodes
-    result = session.run("MATCH (a)-[:precedent_cited]->() RETURN a.name AS name")
     print("Precedents in the graph:")
+    result = session.run("MATCH (a)-[:precedent_cited]->() RETURN a.name AS name")
     for record in result:
         print(record["name"])
