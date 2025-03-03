@@ -1,9 +1,19 @@
 
 import logging
 
-from typing import List
+from typing import List, Dict
+from string import Formatter
 
-extraction_template = """\
+class PartialFormatter(Formatter):
+    def get_value(self, key, args, kwargs):
+        try:
+            return super().get_value(key, args, kwargs)
+        except KeyError:
+            return "{" + key + "}"
+
+# TODO move to prompt
+
+raw_extraction_template = """\
 Below is a list of entity categories:
 
 {categories}
@@ -18,21 +28,28 @@ Find the entities in the following text, and list them in the format specified a
 {text}
 """
 
-def get_triples_from_extract(extract, case_name, categories) -> List[tuple[str, str, str]]:
+partial_formatter = PartialFormatter()
+
+def extraction_template_from_categories(categories: Dict[str, str]) -> str:
+    categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
+    return partial_formatter.format(raw_extraction_template, categories=categories_str)
+
+
+def get_triples_from_extract(extract, object: str, categories) -> List[tuple[str, str, str]]:
     logging.info("get_triples_from_extract: extract = <<<%s>>>", extract)
     triples = []
     lines = extract.splitlines()
     for line in lines:
         try:
             #line = line.split(". ", 1)[1] # for numbered list
-            role, entity = line.split("; ", 2)
+            predicate, subject = line.split("; ", 2)
             #role_lower = role.lower()
             #if "not explicitly mentioned" not in r and "not applicable" not in r and "not specified" not in r:
-            if role in categories:
-                triple = (entity.strip(), role, case_name)
+            if predicate in categories:
+                triple = (subject.strip(), predicate, object)
                 triples.append(triple)
             else:
-                logging.warning("Skipping line <<<%s>>> due to unknown role: %s", line, role)
+                logging.warning("Skipping line <<<%s>>> due to unknown role: %s", line, predicate)
         except (ValueError, IndexError):
             logging.error("Error parsing line <<<%s>>>", line)
     return triples

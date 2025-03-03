@@ -24,6 +24,3 @@ categories = {
     "Judge/Justice": "The name of the judge or justice involved in the case, including their role (e.g., trial judge, appellate judge, presiding justice).",
     "Precedent Cited": "Previous case law referred to in the case.",
 }
-
-# TODO should call a utility to produce this string
-categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
