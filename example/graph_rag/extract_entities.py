@@ -1,66 +1,50 @@
 
 import logging
-import csv
 from rich import print
 from rich.progress import Progress
-from langchain_core.documents.base import Document
+import csv
 
 from proscenium.read import load_hugging_face_dataset
-from proscenium.chunk import documents_to_chunks_by_tokens
-from proscenium.parse import get_triples_from_extract
-from proscenium.parse import extraction_template_from_predicates
-from proscenium.complete import complete_simple
+from proscenium.parse import raw_extraction_template, PartialFormatter
 
-from .display import display_case
-from .config import predicates
-from .config import model_id
-from .config import entity_csv_file
 from .config import num_docs, hf_dataset_id, hf_dataset_column
+from .config import model_id, predicates, entity_csv_file, doc_display, doc_as_object, doc_direct_triples
+from .extract_utils import process_document_chunks
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
 
-def process_document(extraction_template: str, case_doc: Document, writer: csv.writer):
+docs = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
 
-    case_name = case_doc.metadata['name_abbreviation']
+old_len = len(docs)
+docs = docs[:num_docs]
+print("using the first", num_docs, "documents of", len(docs), "from HF dataset", hf_dataset_id)
 
-    writer.writerow((case_doc.metadata["court"], 'Court', case_name))
+partial_formatter = PartialFormatter()
 
-    chunks = documents_to_chunks_by_tokens([case_doc], chunk_size=1000, chunk_overlap=0)
-    for i, chunk in enumerate(chunks):
-
-        print("chunk", i+1, "of", len(chunks))
-
-        extract = complete_simple(
-            model_id,
-            "You are an entity extractor",
-            extraction_template.format(text = chunk.page_content))
-
-        new_triples = get_triples_from_extract(extract, case_name, predicates)
-
-        print("   extracted", len(new_triples), "triples")
-        writer.writerows(new_triples)
-
-caselaw_extraction_template = extraction_template_from_predicates(predicates)
-
-documents = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
-old_len = len(documents)
-documents = documents[:num_docs]
-print("using the first", num_docs, "documents of", len(documents), "from HF dataset", hf_dataset_id)
+extraction_template = partial_formatter.format(
+    raw_extraction_template,
+    predicates = "\n".join([f"{k}: {v}" for k, v in predicates.items()]))
 
 with Progress() as progress:
 
-    task_extract = progress.add_task("[green]Extracting entities...", total=len(documents))
+    task_extract = progress.add_task("[green]Extracting entities...", total=len(docs))
 
     with open(entity_csv_file, "wt") as f:
 
         writer = csv.writer(f, delimiter=",", quotechar='"')
         writer.writerow(["subject", "predicate", "object"]) # header
 
-        for case_doc in documents:
+        for doc in docs:
 
-            display_case(case_doc)
-            process_document(caselaw_extraction_template, case_doc, writer)
+            doc_display(doc)
+
+            direct_triples = doc_direct_triples(doc)
+            writer.writerows(direct_triples)
+
+            object = doc_as_object(doc)
+            process_document_chunks(model_id, extraction_template, predicates, doc, object, writer)
+
             progress.update(task_extract, advance=1)
 
     print("Wrote entity triples to", entity_csv_file)

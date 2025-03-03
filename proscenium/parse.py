@@ -2,6 +2,7 @@
 import logging
 
 from typing import List, Dict
+
 from string import Formatter
 
 class PartialFormatter(Formatter):
@@ -10,8 +11,6 @@ class PartialFormatter(Formatter):
             return super().get_value(key, args, kwargs)
         except KeyError:
             return "{" + key + "}"
-
-# TODO move to prompt
 
 raw_extraction_template = """\
 Below is a list of entity categories:
@@ -27,15 +26,6 @@ Find the entities in the following text, and list them in the format specified a
 
 {text}
 """
-
-partial_formatter = PartialFormatter()
-
-def extraction_template_from_predicates(
-    predicates: Dict[str, str]
-    ) -> str:
-    predicates_str = "\n".join([f"{k}: {v}" for k, v in predicates.items()])
-    return partial_formatter.format(raw_extraction_template, predicates=predicates_str)
-
 
 def get_triples_from_extract(
     extract,
