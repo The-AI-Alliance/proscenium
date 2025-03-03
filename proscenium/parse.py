@@ -1,6 +1,8 @@
 
 import logging
 
+from typing import List
+
 extraction_template = """\
 Below is a list of entity categories:
 
@@ -16,7 +18,7 @@ Find the entities in the following text, and list them in the format specified a
 {text}
 """
 
-def get_triples_from_extract(extract, case_name, categories):
+def get_triples_from_extract(extract, case_name, categories) -> List[tuple[str, str, str]]:
     logging.info("get_triples_from_extract: extract = <<<%s>>>", extract)
     triples = []
     lines = extract.splitlines()

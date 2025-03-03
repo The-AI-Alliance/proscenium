@@ -1,116 +1,73 @@
-from rich import print
-from rich.panel import Panel
-from .config import num_docs, model_id, hf_dataset_id, hf_dataset_column
 
+from typing import List
+from rich import print
 import logging
+import csv
+from rich.progress import Progress
+from langchain_core.documents.base import Document
+
+from proscenium.load import load_hugging_face_dataset
+from proscenium.chunk import documents_to_chunks_by_tokens
+from proscenium.parse import extraction_template
+from proscenium.complete import complete_simple
+from proscenium.parse import get_triples_from_extract
+
+from .display import display_case
+from .config import entity_csv_file
+from .config import categories, categories_str
+from .config import model_id
+from .config import num_docs, hf_dataset_id, hf_dataset_column
+
+def chunk_to_triples(chunk: Document, case_name: str) -> List[tuple[str, str, str]]:
+
+    query = extraction_template.format(categories = categories_str, text = chunk.page_content)
+    extract = complete_simple(model_id, "You are an entity extractor", query)
+    new_triples = get_triples_from_extract(extract, case_name, categories)
+
+    return new_triples
+
+def case_to_triples(case_doc: Document) -> List[tuple[str, str, str]]:
+
+    triples = []
+
+    case_name = case_doc.metadata['name_abbreviation']
+    display_case(case_doc)
+
+    chunks = documents_to_chunks_by_tokens([case_doc], chunk_size=1000, chunk_overlap=0)
+    for i, chunk in enumerate(chunks):
+        print("chunk", i+1, "of", len(chunks))
+        new_triples = chunk_to_triples(chunk, case_name)
+        print("   extracted", len(new_triples), "triples")
+        triples.extend(new_triples)
+
+    triples.append((case_doc.metadata["court"], 'Court', case_name))
+
+    return triples
+
+def triples_to_csv(triples: List[tuple[str, str, str]], filename: str) -> None:
+
+    with open(filename, "wt") as f:
+        writer = csv.writer(f, delimiter=",", quotechar='"')
+        writer.writerow(["entity", "role", "case name"]) # header
+        writer.writerows(triples)
+
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
 
-##################################
-# Load documents from HF dataset
-##################################
-
-from proscenium.load import load_hugging_face_dataset
-from .display import display_case
-
 documents = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
-print("Document Count: " + str(len(documents)))
-
-print("Truncating to the first", num_docs)
+old_len = len(documents)
 documents = documents[:num_docs]
-
-for doc in documents:
-    display_case(doc)
-
-##################################
-# Chunk
-##################################
-
-# Each text chunk inherits the metadata from the document.
-
-from proscenium.chunk import documents_to_chunks_by_tokens
-
-print(Panel("Chunking"))
-
-doc_chunks = {}
-for doc in documents:
-    case_id = doc.metadata['id']
-    name = doc.metadata['name_abbreviation']
-    print("case", case_id, name)
-    chunks = documents_to_chunks_by_tokens([doc], chunk_size=1000, chunk_overlap=0)
-    print("   ", len(chunks), "chunks")
-    doc_chunks[case_id] = chunks
-
-##################################
-# Extract entities
-##################################
-
-# For the purpose of this recipe, note that the `judge`
-# is not well captured in many of these documents;
-# we will be extracting it from the case law text.
-
-from .config import categories
-from proscenium.complete import complete_simple
-from proscenium.parse import extraction_template
-
-print(Panel("Extracting entities"))
-
-categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
-
-def chunk_to_extract(chunk: str):
-
-    query = extraction_template.format(
-        categories = categories_str,
-        text = chunk.page_content)
-
-    response = complete_simple(model_id, "You are an entity extractor", query)
-    logging.debug(response)
-    return response
-
-doc_extracts = {}
-for doc in documents:
-    case_id = doc.metadata['id']
-    name = doc.metadata['name_abbreviation']
-    print("case", case_id, name)
-    extracts = []
-    for i, chunk in enumerate(doc_chunks[case_id]):
-        print("   chunk", i)
-        extract = chunk_to_extract(chunk)
-        extracts.append(extract)
-
-    doc_extracts[case_id] = extracts
-
-##################################
-# Construct triples
-##################################
-
-from proscenium.parse import get_triples_from_extract
-
-print(Panel("Parsing extracts"))
+print(old_len, "documents truncated to the first", num_docs)
 
 triples = []
-for doc in documents:
-    case_id = doc.metadata['id']
-    name = doc.metadata['name_abbreviation']
-    print("case", case_id, name)
-    extracts = doc_extracts[case_id]
-    for extract in extracts:
-        new_triples = get_triples_from_extract(extract, name, categories)
-        triples.extend(new_triples)
-    triples.append((doc.metadata["court"], 'Court', name))
 
-##################################
-# Write triples to json file
-##################################
+with Progress() as progress:
 
-import csv
-from .config import entity_csv_file
+    task_extract = progress.add_task("[green]Extracting entities...", total=len(documents))
 
-print(Panel("Writing CSV"))
+    for case_doc in documents:
+        triples.extend(case_to_triples(case_doc))
+        progress.update(task_extract, advance=1)
 
-with open(entity_csv_file, "wt") as f:
-    writer = csv.writer(f, delimiter=",", quotechar='"')
-    writer.writerow(["entity", "role", "case name"]) # header
-    writer.writerows(triples)
-
-print(len(triples), "entity triples written to", entity_csv_file)
+triples_to_csv(triples, entity_csv_file)
+print("Wrote", len(triples), "entity triples to", entity_csv_file)

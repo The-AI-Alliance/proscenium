@@ -12,6 +12,8 @@ from langchain.text_splitter import TokenTextSplitter
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 
+# Each text chunk inherits the metadata from the document.
+
 def documents_to_chunks_by_characters(
     documents: Iterable[Document],
     chunk_size: int = 1000,
