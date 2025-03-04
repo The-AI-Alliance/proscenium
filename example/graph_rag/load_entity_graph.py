@@ -1,16 +1,17 @@
 
 from rich import print
 
+import example.graph_rag.config as config
+
 ##################################
 # Load triples
 ##################################
 
 import csv
-from .config import entity_csv_file
 
-print("Loading triples from", entity_csv_file)
+print("Loading triples from", config.entity_csv_file)
 
-with open(entity_csv_file) as f:
+with open(config.entity_csv_file) as f:
     reader = csv.reader(f, delimiter=",", quotechar='"')
     next(reader, None)  # skip header row
     triples = [row for row in reader]
@@ -19,10 +20,12 @@ with open(entity_csv_file) as f:
 # Connect to Neo4j
 ##################################
 
-from .config import neo4j_uri, neo4j_username, neo4j_password
 from proscenium.know import knowledge_graph_client
 
-driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+driver = knowledge_graph_client(
+    config.neo4j_uri,
+    config.neo4j_username,
+    config.neo4j_password)
 
 ##################################
 # Populate the graph
@@ -49,7 +52,10 @@ driver.close()
 # Inspect the graph
 ##################################
 
-driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+driver = knowledge_graph_client(
+    config.neo4j_uri,
+    config.neo4j_username,
+    config.neo4j_password)
 
 with driver.session() as session:
     print("Nodes in the graph:")

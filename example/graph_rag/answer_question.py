@@ -1,38 +1,36 @@
 
 from rich import print
 
-question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+import example.graph_rag.config as config
 
 ##################################
 # Connect to vector db
 ##################################
 
-from .config import embedding_model_id, milvus_db_file
 from proscenium.vector_database import vector_db
 
-embedding_fn = embedding_function(embedding_model_id)
-print("Embedding model", embedding_model_id)
+embedding_fn = embedding_function(config.embedding_model_id)
+print("Embedding model", config.embedding_model_id)
 
-vector_db_client = vector_db(milvus_db_file, embedding_fn)
-print("Connected to vector db stored in", milvus_db_file)
+vector_db_client = vector_db(config.milvus_db_file, embedding_fn)
+print("Connected to vector db stored in", config.milvus_db_file)
 
 ##################################
 # Extract entities from question
 ##################################
 
-from .config import model_id, categories
 from proscenium.complete import complete_simple
 from proscenium.parse import extraction_template
 from proscenium.parse import get_triples_from_extract
 
-categories_str = "\n".join([f"{k}: {v}" for k, v in categories.items()])
+categories_str = "\n".join([f"{k}: {v}" for k, v in config.categories.items()])
 
-response = complete_simple(model_id, "You are an entity extractor", extraction_template.format(
+response = complete_simple(config.model_id, "You are an entity extractor", extraction_template.format(
     categories = categories_str,
-    text = question))
+    text = config.question))
 print(response)
 
-question_entity_triples = get_triples_from_extract(response, "", categories)
+question_entity_triples = get_triples_from_extract(response, "", config.categories)
 print(question_entity_triples)
 
 ##################################
@@ -69,10 +67,12 @@ for triple in question_entity_triples:
 # Connect to Neo4j
 ##################################
 
-from .config import neo4j_uri, neo4j_username, neo4j_password
 from proscenium.know import knowledge_graph_client
 
-driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+driver = knowledge_graph_client(
+    config.neo4j_uri,
+    config.neo4j_username,
+    config.neo4j_password)
 
 ##################################
 # Query graph for cases
@@ -129,14 +129,15 @@ cases = query_for_cases(entity_role_pairs)
 
 # TODO avoid this by indexing the case text elsewhere (eg the graph)
 
-from .config import hf_dataset_id, hf_dataset_column, num_docs
-from proscenium.load import load_hugging_face_dataset
+from proscenium.read import load_hugging_face_dataset
 
-documents = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
+documents = load_hugging_face_dataset(
+    config.hf_dataset_id,
+    page_content_column = config.hf_dataset_column)
 print("Document Count: " + str(len(documents)))
 
-print("Truncating to ", num_docs)
-documents = documents[:num_docs]
+print("Truncating to ", config.num_docs)
+documents = documents[:config.num_docs]
 
 case_text = [doc.page_content for doc in documents if doc.metadata["name_abbreviation"] == cases[0]][0]
 print(case_text)
@@ -153,8 +154,8 @@ Question: {question}
 
 query = query_template.format(
     case_text = case_text,
-    question = question)
+    question = config.question)
 print(query)
 
-response = complete_simple(model_id, "You are a helpful law librarian", query)
+response = complete_simple(config.model_id, "You are a helpful law librarian", query)
 print(response)

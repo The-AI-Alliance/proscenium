@@ -10,15 +10,6 @@ num_docs = 4
 
 model_id = "openai:gpt-4o"
 
-entity_csv_file = Path("entities.csv")
-
-neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
-neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
-neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
-
-embedding_model_id = "all-MiniLM-L6-v2"
-milvus_db_file = Path("milvus.db")
-
 case_template = """
 [u]{name}[/u]
 {reporter}, Volume {volume} pages {first_page}-{last_page}
@@ -41,6 +32,13 @@ def doc_display(doc: Document):
     print(Panel(case_str, title=doc.metadata['name_abbreviation']))
     print()
 
+def doc_as_object(doc: Document) -> str:
+    return doc.metadata['name_abbreviation']
+
+def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
+    object: str = doc_as_object(doc)
+    return [(doc.metadata["court"], 'Court', object)]
+
 # For the purpose of this recipe, note that the `judge`
 # is not well captured in many of these documents;
 # we will be extracting it from the case law text.
@@ -50,9 +48,13 @@ predicates = {
     "Precedent Cited": "Previous case law referred to in the case.",
 }
 
-def doc_as_object(doc: Document) -> str:
-    return doc.metadata['name_abbreviation']
+entity_csv_file = Path("entities.csv")
 
-def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
-    object: str = doc_as_object(doc)
-    return [(doc.metadata["court"], 'Court', object)]
+neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
+neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
+neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
+
+embedding_model_id = "all-MiniLM-L6-v2"
+milvus_db_file = Path("milvus.db")
+
+question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
