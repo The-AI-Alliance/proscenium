@@ -1,37 +1,12 @@
 
 from rich import print
-
-import example.graph_rag.config as config
-
-##################################
-# Load triples
-##################################
-
+from rich.progress import Progress
+from stringcase import snakecase, lowercase
 import csv
-
-print("Loading triples from", config.entity_csv_file)
-
-with open(config.entity_csv_file) as f:
-    reader = csv.reader(f, delimiter=",", quotechar='"')
-    next(reader, None)  # skip header row
-    triples = [row for row in reader]
-
-##################################
-# Connect to Neo4j
-##################################
 
 from proscenium.know import knowledge_graph_client
 
-driver = knowledge_graph_client(
-    config.neo4j_uri,
-    config.neo4j_username,
-    config.neo4j_password)
-
-##################################
-# Populate the graph
-##################################
-
-from stringcase import snakecase, lowercase
+import example.graph_rag.config as config
 
 def add_triple(tx, entity, role, case):
     query = (
@@ -41,36 +16,27 @@ def add_triple(tx, entity, role, case):
     ) % snakecase(lowercase(role.replace('/', '_')))
     tx.run(query, entity=entity, case=case)
 
-with driver.session() as session:
-    session.run("MATCH (n) DETACH DELETE n") # empty graph
-    for entity, role, case in triples:
-        session.write_transaction(add_triple, entity, role, case)
+print("Parsing triples from", config.entity_csv_file)
 
-driver.close()
+with open(config.entity_csv_file) as f:
+    reader = csv.reader(f, delimiter=",", quotechar='"')
+    next(reader, None)  # skip header row
+    triples = [row for row in reader]
 
-##################################
-# Inspect the graph
-##################################
+    with Progress() as progress:
 
-driver = knowledge_graph_client(
-    config.neo4j_uri,
-    config.neo4j_username,
-    config.neo4j_password)
+        task_load = progress.add_task(f"[green]Loading {len(triples)} triples into graph...", total=len(triples))
 
-with driver.session() as session:
-    print("Nodes in the graph:")
-    result = session.run("MATCH (n) RETURN n.name AS name") # all nodes
-    for record in result:
-        print(record["name"])
+        driver = knowledge_graph_client(
+            config.neo4j_uri,
+            config.neo4j_username,
+            config.neo4j_password)
 
-    print("\nRelationship types in the graph:")
-    result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel") # all relationships
-    rels = [record["rel"] for record in result]
-    rels = list(set(rels)) # unique rels
-    for rel in rels:
-        print(rel)
 
-    print("Precedents in the graph:")
-    result = session.run("MATCH (a)-[:precedent_cited]->() RETURN a.name AS name")
-    for record in result:
-        print(record["name"])
+        with driver.session() as session:
+            session.run("MATCH (n) DETACH DELETE n") # empty graph
+            for entity, role, case in triples:
+                session.execute_write(add_triple, entity, role, case)
+                progress.update(task_load, advance=1)
+
+        driver.close()
