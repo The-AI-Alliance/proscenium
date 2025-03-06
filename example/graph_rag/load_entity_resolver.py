@@ -25,9 +25,8 @@ driver = knowledge_graph_client(
 names = []
 with driver.session() as session:
     result = session.run("MATCH (n) RETURN n.name AS name")
-    for record in result:
-        doc = Document(record["name"])
-        names.append(doc)
+    new_names = [Document(record["name"]) for record in result]
+    names.extend(new_names)
 
 info = add_chunks_to_vector_db(vector_db_client, embedding_fn, names)
 print(info['insert_count'], "chunks inserted")
