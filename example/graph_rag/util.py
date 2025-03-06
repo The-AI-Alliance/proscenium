@@ -31,20 +31,6 @@ extraction_template = partial_formatter.format(
 
 extraction_system_prompt = "You are an entity extractor"
 
-#def extract_triples_from_atomic_doc(
-#    chunk: Document,
-#    object: str) -> List[tuple[str, str, str]]:
-#
-#    extract = complete_simple(
-#        config.model_id,
-#        extraction_system_prompt,
-#        extraction_template.format(text = chunk.page_content))
-#
-#    new_triples = get_triples_from_extract(extract, object, config.predicates)
-#
-#    return new_triples
-
-
 def process_document(
     doc: Document
     ) -> List[tuple[str, str, str]]:
