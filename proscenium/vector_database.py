@@ -1,13 +1,10 @@
 
 from typing import Dict, List
 
-from .prompts import rag_prompt_template
-
 from pathlib import Path
 from langchain_core.documents.base import Document
 from pymilvus import MilvusClient
 from pymilvus import DataType, FieldSchema, CollectionSchema
-# from milvus_model.base import BaseEmbeddingFunction
 from pymilvus import model
 
 # See https://milvus.io/docs/quickstart.md
@@ -38,8 +35,17 @@ def schema_chunks(embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
 
 def create_vector_db(
     db_file_name: Path,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    overwrite: bool = False
     ) -> MilvusClient:
+
+    if db_file_name.exists():
+        if overwrite:
+            db_file_name.unlink()
+            print("Deleted existing vector db file", db_file_name)
+        else:
+            print("File", db_file_name, "exists. Use overwrite=True to replace.")
+            return None
 
     client = MilvusClient(str(db_file_name))
 
@@ -108,6 +114,7 @@ def closest_chunks(
     hits = result[0]
 
     return hits
+<<<<<<< HEAD
 
 def rag_prompt(
     chunks: List[Dict],
@@ -116,3 +123,5 @@ def rag_prompt(
     context = "\n\n".join([f"CHUNK {chunk['id']}. {chunk['entity']['text']}" for i, chunk in enumerate(chunks)])
 
     return rag_prompt_template.format(context=context, query=query)
+=======
+>>>>>>> main

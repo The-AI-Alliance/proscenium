@@ -14,17 +14,18 @@ A few of the initial goals of this project include:
 ## Subsystems
 
 ```text
-+------------------------------------------------------------+
-|                   Interaction Patterns                     |
-+------------------------------------------------------------+
-|                          Actors                            |
-+--------------+---+----------------------+---+--------------+
-|   Functions  |   |      Inference       |   |   Memory     |
-+--------------+   +----------------------+   +--------------+
-| APIs,        |   |  Inference Providers |   | DB, RAM, ... |
-| Libraries,   |   +----------------------+   +--------------+
-| ...          |   |         LLMs         |
-+--------------+   +----------------------+
++------------------------------------------------------------------------------+
+|                                     Scripts                                  |
++------------------------------------------------------------------------------+
+|                                     Actors                                   |
++------------+--+------------+--+--------------+--+-------+--+-------+--+------+
+|   Invoke   |  |  Complete  |  |   Remember   |  | Chunk |  | Parse |  | Load |
++------------+  +------------+  +--------------+  +-------+  +-------+  +------+
+| APIs,      |  |  Inference |  | DB, RAM, ... |  | ...   |  | ...   |  | ...  |
+| Libraries, |  |  Providers |  +--------------+  +-------+  +-------+  +------+
+| ...        |  +------------+
++------------+  |    LLMs    |
+                +------------+
 ```
 
 ## Methodology
@@ -60,3 +61,7 @@ python3.11 -m venv venv
 
 pip install git+https://github.com/The-AI-Alliance/proscenium.git
 ```
+
+or
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/The-AI-Alliance/proscenium)

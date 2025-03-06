@@ -1,12 +1,17 @@
 
 from rich import print
 
+<<<<<<< HEAD
 question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+=======
+import example.graph_rag.config as config
+>>>>>>> main
 
 ##################################
 # Connect to vector db
 ##################################
 
+<<<<<<< HEAD
 from .config import embedding_model_id, milvus_db_file
 from proscenium.vector_database import vector_db
 
@@ -15,11 +20,22 @@ print("Embedding model", embedding_model_id)
 
 vector_db_client = vector_db(milvus_db_file, embedding_fn)
 print("Connected to vector db stored in", milvus_db_file)
+=======
+from proscenium.vector_database import vector_db
+from proscenium.vector_database import embedding_function
+
+embedding_fn = embedding_function(config.embedding_model_id)
+print("Embedding model", config.embedding_model_id)
+
+vector_db_client = vector_db(config.milvus_db_file, embedding_fn)
+print("Connected to vector db stored in", config.milvus_db_file)
+>>>>>>> main
 
 ##################################
 # Extract entities from question
 ##################################
 
+<<<<<<< HEAD
 from .config import model_id, categories
 from proscenium.inference import complete_simple
 from proscenium.extract import extraction_template
@@ -33,6 +49,28 @@ response = complete_simple(model_id, "You are an entity extractor", extraction_t
 print(response)
 
 question_entity_triples = get_triples_from_extract(response, "", categories)
+=======
+from proscenium.complete import complete_simple
+from proscenium.parse import raw_extraction_template
+from proscenium.parse import get_triples_from_extract
+from proscenium.parse import PartialFormatter
+from proscenium.complete import complete_simple
+
+partial_formatter = PartialFormatter()
+
+extraction_template = partial_formatter.format(
+    raw_extraction_template,
+    predicates = "\n".join([f"{k}: {v}" for k, v in config.predicates.items()]))
+
+extract = complete_simple(
+    config.model_id,
+    "You are an entity extractor",
+    extraction_template.format(text = config.question))
+
+print(extract)
+
+question_entity_triples = get_triples_from_extract(extract, "", config.predicates)
+>>>>>>> main
 print(question_entity_triples)
 
 ##################################
@@ -41,7 +79,11 @@ print(question_entity_triples)
 
 from proscenium.vector_database import closest_chunks
 from proscenium.vector_database import embedding_function
+<<<<<<< HEAD
 from proscenium.console import display_chunk_hits
+=======
+from proscenium.display import display_chunk_hits
+>>>>>>> main
 
 def match_entity(name, threshold=1.0):
 
@@ -69,10 +111,19 @@ for triple in question_entity_triples:
 # Connect to Neo4j
 ##################################
 
+<<<<<<< HEAD
 from .config import neo4j_uri, neo4j_username, neo4j_password
 from proscenium.know import knowledge_graph_client
 
 driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+=======
+from proscenium.know import knowledge_graph_client
+
+driver = knowledge_graph_client(
+    config.neo4j_uri,
+    config.neo4j_username,
+    config.neo4j_password)
+>>>>>>> main
 
 ##################################
 # Query graph for cases
@@ -129,6 +180,7 @@ cases = query_for_cases(entity_role_pairs)
 
 # TODO avoid this by indexing the case text elsewhere (eg the graph)
 
+<<<<<<< HEAD
 from .config import hf_dataset_id, hf_dataset_column, num_docs
 from proscenium.load import load_hugging_face_dataset
 
@@ -137,6 +189,17 @@ print("Document Count: " + str(len(documents)))
 
 print("Truncating to ", num_docs)
 documents = documents[:num_docs]
+=======
+from proscenium.read import load_hugging_face_dataset
+
+documents = load_hugging_face_dataset(
+    config.hf_dataset_id,
+    page_content_column = config.hf_dataset_column)
+print("Document Count:", len(documents))
+
+print("Truncating to", config.num_docs)
+documents = documents[:config.num_docs]
+>>>>>>> main
 
 case_text = [doc.page_content for doc in documents if doc.metadata["name_abbreviation"] == cases[0]][0]
 print(case_text)
@@ -153,8 +216,15 @@ Question: {question}
 
 query = query_template.format(
     case_text = case_text,
+<<<<<<< HEAD
     question = question)
 print(query)
 
 response = complete_simple(model_id, "You are a helpful law librarian", query)
+=======
+    question = config.question)
+print(query)
+
+response = complete_simple(config.model_id, "You are a helpful law librarian", query)
+>>>>>>> main
 print(response)
