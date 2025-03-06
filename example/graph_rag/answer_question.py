@@ -8,6 +8,7 @@ import example.graph_rag.config as config
 ##################################
 
 from proscenium.vector_database import vector_db
+from proscenium.vector_database import embedding_function
 
 embedding_fn = embedding_function(config.embedding_model_id)
 print("Embedding model", config.embedding_model_id)
@@ -20,17 +21,25 @@ print("Connected to vector db stored in", config.milvus_db_file)
 ##################################
 
 from proscenium.complete import complete_simple
-from proscenium.parse import extraction_template
+from proscenium.parse import raw_extraction_template
 from proscenium.parse import get_triples_from_extract
+from proscenium.parse import PartialFormatter
+from proscenium.complete import complete_simple
 
-categories_str = "\n".join([f"{k}: {v}" for k, v in config.categories.items()])
+partial_formatter = PartialFormatter()
 
-response = complete_simple(config.model_id, "You are an entity extractor", extraction_template.format(
-    categories = categories_str,
-    text = config.question))
-print(response)
+extraction_template = partial_formatter.format(
+    raw_extraction_template,
+    predicates = "\n".join([f"{k}: {v}" for k, v in config.predicates.items()]))
 
-question_entity_triples = get_triples_from_extract(response, "", config.categories)
+extract = complete_simple(
+    config.model_id,
+    "You are an entity extractor",
+    extraction_template.format(text = config.question))
+
+print(extract)
+
+question_entity_triples = get_triples_from_extract(extract, "", config.predicates)
 print(question_entity_triples)
 
 ##################################
@@ -134,9 +143,9 @@ from proscenium.read import load_hugging_face_dataset
 documents = load_hugging_face_dataset(
     config.hf_dataset_id,
     page_content_column = config.hf_dataset_column)
-print("Document Count: " + str(len(documents)))
+print("Document Count:", len(documents))
 
-print("Truncating to ", config.num_docs)
+print("Truncating to", config.num_docs)
 documents = documents[:config.num_docs]
 
 case_text = [doc.page_content for doc in documents if doc.metadata["name_abbreviation"] == cases[0]][0]
