@@ -2,7 +2,6 @@
 import logging
 import sys
 from rich import print
-from rich.table import Table
 from rich.panel import Panel
 
 from proscenium.parse import get_triples_from_extract
@@ -71,7 +70,7 @@ print("Objects with names:", object_names, "are matches for", subject_predicate_
 
 if len(object_names) > 0:
 
-    case_text = util.case_text_for_name(object_names[0])
+    case_text = util.case_text_for_name(object_names[0]).page_content
 
     response = complete_simple(
         config.model_id,

@@ -56,7 +56,7 @@ def process_document(
 
     return doc_triples
 
-def case_text_for_name(name: str) -> str:
+def case_text_for_name(name: str) -> Document:
 
     # TODO avoid this by indexing the case text elsewhere (eg the graph)
 
@@ -69,8 +69,9 @@ def case_text_for_name(name: str) -> str:
     documents = documents[:config.num_docs]
 
     for doc in documents:
+        use.as_object.here
         if doc.metadata["name_abbreviation"] == name:
-            return doc.page_content
+            return doc
 
 def query_for_objects(
     driver: Driver,
