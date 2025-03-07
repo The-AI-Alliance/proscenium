@@ -8,7 +8,6 @@ from proscenium.parse import get_triples_from_extract
 from proscenium.complete import complete_simple
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
-from proscenium.vector_database import closest_chunks
 from proscenium.know import knowledge_graph_client
 from proscenium.display import print_header, display_triples, display_pairs
 
@@ -19,6 +18,16 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
 
 print_header()
+
+embedding_fn = embedding_function(config.embedding_model_id)
+vector_db_client = vector_db(config.milvus_db_file, embedding_fn)
+print("Connected to vector db stored in", config.milvus_db_file, "with embedding model", config.embedding_model_id)
+print("\n")
+
+driver = knowledge_graph_client(
+    config.neo4j_uri,
+    config.neo4j_username,
+    config.neo4j_password)
 
 print(Panel(config.question, title="Question"))
 
@@ -36,31 +45,12 @@ if len(question_entity_triples) == 0:
     sys.exit(1)
 display_triples(question_entity_triples, "Query Triples")
 
-print("\nFinding entity matches for triples")
-embedding_fn = embedding_function(config.embedding_model_id)
-vector_db_client = vector_db(config.milvus_db_file, embedding_fn)
-print("\n")
-print("Connected to vector db stored in", config.milvus_db_file)
-print("Embedding model", config.embedding_model_id)
-print("\n")
-subject_predicate_pairs = []
-for triple in question_entity_triples:
-    print("Finding entity matches for", triple[0], "(", triple[1], ")")
-    subject, predicate, object = triple
-    # TODO apply distance threshold
-    hits = closest_chunks(vector_db_client, embedding_fn, subject, k=5)
-    for match in [head['entity']['text'] for head in hits[:1]]:
-        print("   match:", match)
-        subject_predicate_pairs.append((match, predicate))
-# Note: the above block loses the tie-back link from the match to the original triple
+print("Finding entity matches for triples")
+subject_predicate_pairs = util.find_matching_objects(vector_db_client, embedding_fn, question_entity_triples)
 print("\n")
 display_pairs(subject_predicate_pairs, "Subject Predicate Constraints")
 
-driver = knowledge_graph_client(
-    config.neo4j_uri,
-    config.neo4j_username,
-    config.neo4j_password)
-
+print("Querying for objects that match those constraints")
 object_names = util.query_for_objects(driver, subject_predicate_pairs)
 print("Objects with names:", object_names, "are matches for", subject_predicate_pairs)
 

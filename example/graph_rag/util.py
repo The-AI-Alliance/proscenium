@@ -8,12 +8,16 @@ from neo4j import Driver
 
 from rich import print
 
+from pymilvus import MilvusClient
+from pymilvus import model
+
 from proscenium.parse import PartialFormatter
 from proscenium.parse import raw_extraction_template
 from proscenium.parse import get_triples_from_extract
 from proscenium.chunk import documents_to_chunks_by_tokens
 from proscenium.complete import complete_simple
 from proscenium.read import load_hugging_face_dataset
+from proscenium.vector_database import closest_chunks
 
 # Problem-specific configuration:
 import example.graph_rag.config as config
@@ -92,3 +96,23 @@ def query_for_objects(
             objects.append(record["name"])
             print(record["name"])
         return objects
+
+
+def find_matching_objects(
+    vector_db_client: MilvusClient,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    question_triples: List[tuple[str, str, str]]
+    ) -> List[tuple[str, str]]:
+
+    subject_predicate_pairs = []
+    for triple in question_triples:
+        print("Finding entity matches for", triple[0], "(", triple[1], ")")
+        subject, predicate, object = triple
+        # TODO apply distance threshold
+        hits = closest_chunks(vector_db_client, embedding_fn, subject, k=5)
+        for match in [head['entity']['text'] for head in hits[:1]]:
+            print("   match:", match)
+            subject_predicate_pairs.append((match, predicate))
+    # Note: the above block loses the tie-back link from the match to the original triple
+
+    return subject_predicate_pairs
