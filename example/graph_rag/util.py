@@ -56,21 +56,22 @@ def process_document(
 
     return doc_triples
 
-def case_text_for_name(name: str) -> Document:
+def full_doc_by_id(name: str) -> Document:
 
-    # TODO avoid this by indexing the case text elsewhere (eg the graph)
-
+    # TODO avoid this by storing the case text elsewhere (eg the graph)
     documents = load_hugging_face_dataset(
         config.hf_dataset_id,
         page_content_column = config.hf_dataset_column)
-    print("Document Count:", len(documents))
 
-    print("Truncating to", config.num_docs)
+    print("Searching the first", config.num_docs,
+        " documents of", len(documents),
+        "in", config.hf_dataset_id, "column", config.hf_dataset_column)
+
     documents = documents[:config.num_docs]
 
     for doc in documents:
-        use.as_object.here
-        if doc.metadata["name_abbreviation"] == name:
+        object = config.doc_as_object(doc)
+        if object == name:
             return doc
 
 def query_for_objects(
