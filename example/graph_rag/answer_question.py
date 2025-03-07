@@ -12,6 +12,7 @@ from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
 from proscenium.know import knowledge_graph_client
 from proscenium.display import print_header
+from proscenium.display import display_triples, display_pairs
 
 import example.graph_rag.util as util
 import example.graph_rag.config as config
@@ -37,13 +38,7 @@ if len(question_entity_triples) == 0:
     print("No triples extracted from question")
     sys.exit(1)
 
-table = Table(title="Query Triples", show_lines=False)
-table.add_column("Subject", justify="left", style="blue")
-table.add_column("Predicate", justify="left", style="green")
-table.add_column("Object", justify="left", style="red")
-for triple in question_entity_triples:
-    table.add_row(*triple)
-print(table)
+display_triples(question_entity_triples, "Query Triples")
 
 print("\nFinding entity matches for triples")
 embedding_fn = embedding_function(config.embedding_model_id)
@@ -64,12 +59,7 @@ for triple in question_entity_triples:
         subject_predicate_pairs.append((match, predicate))
 # Note: the above block loses the tie-in from the mat to the original triple
 print("\n")
-table = Table(title="Subject Predicate Pairs", show_lines=False)
-table.add_column("Subject", justify="left", style="blue")
-table.add_column("Predicate", justify="left", style="green")
-for pair in subject_predicate_pairs:
-    table.add_row(*pair)
-print(table)
+display_pairs(subject_predicate_pairs, "Subject Predicate Pairs")
 
 driver = knowledge_graph_client(
     config.neo4j_uri,
