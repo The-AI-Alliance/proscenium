@@ -58,7 +58,7 @@ for triple in question_entity_triples:
         subject_predicate_pairs.append((match, predicate))
 # Note: the above block loses the tie-in from the mat to the original triple
 print("\n")
-display_pairs(subject_predicate_pairs, "Subject Predicate Pairs")
+display_pairs(subject_predicate_pairs, "Subject Predicate Constraints")
 
 driver = knowledge_graph_client(
     config.neo4j_uri,
@@ -70,7 +70,7 @@ print("Objects with names:", object_names, "are matches for", subject_predicate_
 
 if len(object_names) > 0:
 
-    case_text = util.case_text_for_name(object_names[0]).page_content
+    case_text = util.full_doc_by_id(object_names[0]).page_content
 
     response = complete_simple(
         config.model_id,
