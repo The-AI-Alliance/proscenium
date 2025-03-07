@@ -5,8 +5,6 @@ from stringcase import snakecase, lowercase
 
 from langchain_core.documents.base import Document
 from neo4j import Driver
-from pymilvus import MilvusClient
-from pymilvus import model
 
 from rich import print
 
@@ -16,8 +14,6 @@ from proscenium.parse import get_triples_from_extract
 from proscenium.chunk import documents_to_chunks_by_tokens
 from proscenium.complete import complete_simple
 from proscenium.read import load_hugging_face_dataset
-from proscenium.vector_database import closest_chunks
-from proscenium.display import display_chunk_hits
 
 # Problem-specific configuration:
 import example.graph_rag.config as config
@@ -76,40 +72,24 @@ def case_text_for_name(name: str) -> str:
         if doc.metadata["name_abbreviation"] == name:
             return doc.page_content
 
-def match_entity(
-    vector_db_client: MilvusClient,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-    name: str):
-
-    """Match entities by embedding vector distance."""
-
-    # TODO take a distance threshold as an argument
-
-    hits = closest_chunks(vector_db_client, embedding_fn, name, k=5)
-    # display_chunk_hits(hits)
-
-    if len(hits) > 0:
-        # TODO confirm that 0th element is the closest match
-        hit = hits[0]
-        return hit['entity']['text']
-    else:
-        return None
-
-def query_for_cases(driver: Driver, entity_role_pairs):
+def query_for_objects(
+    driver: Driver,
+    subject_predicate_constraints: List[tuple[str, str]]
+    ) -> List[str]:
     with driver.session() as session:
         query = ""
-        for i, (entity, role) in enumerate(entity_role_pairs):
-            relationship = snakecase(lowercase(role.replace('/', '_')))
-            query += f"MATCH (e{str(i)}:Entity {{name: '{entity}'}})-[:{relationship}]->(c)\n"
+        for i, (subject, predicate) in enumerate(subject_predicate_constraints):
+            predicate_lc = snakecase(lowercase(predicate.replace('/', '_')))
+            query += f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
         query += "RETURN c.name AS name"
         print(query)
         result = session.run(query)
-        cases = []
-        print("Cases:")
+        objects = []
+        print("   Result:")
         for record in result:
-            cases.append(record["name"])
+            objects.append(record["name"])
             print(record["name"])
-        return cases
+        return objects
 
 query_template = """
 Answer the question using the following text from one case:
