@@ -50,8 +50,6 @@ from rich.text import Text
 from aisuite import Client
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
-#from proscenium.display import console
-
 client = Client()
 
 def complete_simple(
