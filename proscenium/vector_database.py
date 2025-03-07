@@ -114,3 +114,11 @@ def closest_chunks(
     hits = result[0]
 
     return hits
+
+#def rag_prompt(
+#    chunks: List[Dict],
+#    query: str) -> str:
+#
+#    context = "\n\n".join([f"CHUNK {chunk['id']}. {chunk['entity']['text']}" for i, chunk in enumerate(chunks)])
+#
+#    return rag_prompt_template.format(context=context, query=query)

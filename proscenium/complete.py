@@ -39,22 +39,58 @@ Valid model ids:
 """
 
 from typing import Any
+
 import json
+from rich import print
+from rich.console import Group
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+
 from aisuite import Client
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
 client = Client()
 
-def complete_simple(model_id: str, system_prompt: str, user_prompt: str) -> str:
+def complete_simple(
+    model_id: str,
+    system_prompt: str,
+    user_prompt: str,
+    rich_output: bool = False) -> str:
+
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+
+    temperature = 0.75
+
+    if rich_output:
+        messages_table = Table(title="Messages", show_lines=True)
+        messages_table.add_column("Role", justify="left", style="blue")
+        messages_table.add_column("Content", justify="left", style="green")
+        for message in messages:
+            messages_table.add_row(message["role"], message["content"])
+
+        params_text = Text(f"""
+    model_id: {model_id}
+    temperature: {temperature}
+    """)
+
+        call_panel = Panel(Group(params_text, messages_table), title="complete_simple call")
+        print(call_panel)
+
     response = client.chat.completions.create(
         model=model_id,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=0.75,
+        messages=messages,
+        temperature=temperature,
     )
-    return response.choices[0].message.content
+    response = response.choices[0].message.content
+
+    if rich_output:
+        print(Panel(response, title="Response"))
+
+    return response
 
 def evaluate_tool_call(tool_map: dict, tool_call: ChatCompletionMessageToolCall) -> Any:
     function_name = tool_call.function.name

@@ -55,6 +55,17 @@ neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
 
 embedding_model_id = "all-MiniLM-L6-v2"
+
 milvus_db_file = Path("grag-milvus.db")
+
+system_prompt = "You are a helpful law librarian"
+
+graphrag_prompt_template = """
+Answer the question using the following text from one case:
+
+{document_text}
+
+Question: {question}
+"""
 
 question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"

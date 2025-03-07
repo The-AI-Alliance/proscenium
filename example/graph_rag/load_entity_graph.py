@@ -1,5 +1,6 @@
 
 from rich import print
+
 from rich.progress import Progress
 from stringcase import snakecase, lowercase
 import csv
@@ -35,8 +36,8 @@ with open(config.entity_csv_file) as f:
 
         with driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n") # empty graph
-            for entity, role, case in triples:
-                session.execute_write(add_triple, entity, role, case)
+            for subject, predicate, object in triples:
+                session.execute_write(add_triple, subject, predicate, object)
                 progress.update(task_load, advance=1)
 
         driver.close()
