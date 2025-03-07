@@ -74,7 +74,7 @@ if len(object_names) > 0:
 
     response = complete_simple(
         config.model_id,
-        "You are a helpful law librarian",
+        config.system_prompt,
         util.graphrag_prompt(case_text, config.question),
         rich_output = True)
 

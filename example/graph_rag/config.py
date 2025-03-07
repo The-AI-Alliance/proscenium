@@ -58,4 +58,6 @@ embedding_model_id = "all-MiniLM-L6-v2"
 
 milvus_db_file = Path("grag-milvus.db")
 
+system_prompt = "You are a helpful law librarian"
+
 question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
