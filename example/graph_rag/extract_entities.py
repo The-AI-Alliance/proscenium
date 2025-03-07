@@ -8,7 +8,7 @@ from proscenium.read import load_hugging_face_dataset
 
 # Problem-specific configuration:
 import example.graph_rag.config as config
-from example.graph_rag.util import process_document
+from example.graph_rag.util import extract_triples_from_document
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
@@ -30,7 +30,7 @@ with Progress() as progress:
 
         for doc in docs:
 
-            doc_triples = process_document(doc)
+            doc_triples = extract_triples_from_document(doc)
             writer.writerows(doc_triples)
             progress.update(task_extract, advance=1)
 

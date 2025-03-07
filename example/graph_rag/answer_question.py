@@ -10,8 +10,7 @@ from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
 from proscenium.know import knowledge_graph_client
-from proscenium.display import print_header
-from proscenium.display import display_triples, display_pairs
+from proscenium.display import print_header, display_triples, display_pairs
 
 import example.graph_rag.util as util
 import example.graph_rag.config as config
@@ -32,11 +31,9 @@ extraction_response = complete_simple(
 print("\nExtracting triples from extraction response")
 question_entity_triples = get_triples_from_extract(extraction_response, "", config.predicates)
 print("\n")
-
 if len(question_entity_triples) == 0:
     print("No triples extracted from question")
     sys.exit(1)
-
 display_triples(question_entity_triples, "Query Triples")
 
 print("\nFinding entity matches for triples")
@@ -46,7 +43,6 @@ print("\n")
 print("Connected to vector db stored in", config.milvus_db_file)
 print("Embedding model", config.embedding_model_id)
 print("\n")
-
 subject_predicate_pairs = []
 for triple in question_entity_triples:
     print("Finding entity matches for", triple[0], "(", triple[1], ")")
@@ -56,7 +52,7 @@ for triple in question_entity_triples:
     for match in [head['entity']['text'] for head in hits[:1]]:
         print("   match:", match)
         subject_predicate_pairs.append((match, predicate))
-# Note: the above block loses the tie-in from the mat to the original triple
+# Note: the above block loses the tie-back link from the match to the original triple
 print("\n")
 display_pairs(subject_predicate_pairs, "Subject Predicate Constraints")
 
@@ -70,12 +66,16 @@ print("Objects with names:", object_names, "are matches for", subject_predicate_
 
 if len(object_names) > 0:
 
-    case_text = util.full_doc_by_id(object_names[0]).page_content
+    doc = util.full_doc_by_id(object_names[0])
+
+    user_prompt = config.graphrag_prompt_template.format(
+        case_text = doc.page_content,
+        question = config.question)
 
     response = complete_simple(
         config.model_id,
         config.system_prompt,
-        util.graphrag_prompt(case_text, config.question),
+        user_prompt,
         rich_output = True)
 
     print(Panel(response, title="Answer"))

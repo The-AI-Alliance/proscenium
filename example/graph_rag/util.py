@@ -27,7 +27,7 @@ extraction_template = partial_formatter.format(
 
 extraction_system_prompt = "You are an entity extractor"
 
-def process_document(
+def extract_triples_from_document(
     doc: Document
     ) -> List[tuple[str, str, str]]:
 
@@ -58,7 +58,7 @@ def process_document(
 
 def full_doc_by_id(name: str) -> Document:
 
-    # TODO avoid this by storing the case text elsewhere (eg the graph)
+    # TODO avoid this by storing docs elsewhere (eg the graph)
     documents = load_hugging_face_dataset(
         config.hf_dataset_id,
         page_content_column = config.hf_dataset_column)
@@ -92,19 +92,3 @@ def query_for_objects(
             objects.append(record["name"])
             print(record["name"])
         return objects
-
-query_template = """
-Answer the question using the following text from one case:
-
-{case_text}
-
-Question: {question}
-"""
-
-def graphrag_prompt(case_text: str, question: str) -> str:
-
-    query = query_template.format(
-        case_text = case_text,
-        question = question)
-
-    return query
