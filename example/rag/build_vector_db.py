@@ -12,22 +12,24 @@ from proscenium.chunk import documents_to_chunks_by_characters
 from proscenium.vector_database import add_chunks_to_vector_db
 from proscenium.vector_database import collection_name
 
-from .config import db_file_name, embedding_model_id, url, data_file
+import example.rag.config as config
 
 print_header()
 
-asyncio.run(url_to_file(url, data_file))
-print("Data files to chunk:", data_file)
+asyncio.run(url_to_file(config.url, config.data_file))
+print("Data files to chunk:", config.data_file)
 
-embedding_fn = embedding_function(embedding_model_id)
-print("Embedding model", embedding_model_id)
+embedding_fn = embedding_function(config.embedding_model_id)
+print("Embedding model", config.embedding_model_id)
 
-vector_db_client = create_vector_db(db_file_name, embedding_fn, overwrite=True)
-print("Vector db stored in file", db_file_name)
+#vector_db_client = create_vector_db(db_file_name, embedding_fn, overwrite=True)
+#print("Vector db stored in file", db_file_name)
+vector_db_client = create_vector_db(config.milvus_uri, embedding_fn)
+print("Vector db at uri", config.milvus_uri)
 
-documents = load_file(data_file)
+documents = load_file(config.data_file)
 chunks = documents_to_chunks_by_characters(documents)
-print("Data file", data_file, "has", len(chunks), "chunks")
+print("Data file", config.data_file, "has", len(chunks), "chunks")
 
 info = add_chunks_to_vector_db(vector_db_client, embedding_fn, chunks)
 print(info['insert_count'], "chunks inserted")

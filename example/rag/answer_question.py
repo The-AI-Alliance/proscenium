@@ -13,7 +13,7 @@ from proscenium.vector_database import closest_chunks
 from proscenium.complete import complete_simple
 
 from .prompts import rag_system_prompt, rag_prompt
-from .config import db_file_name, model_id, embedding_model_id
+import example.rag.config as config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -21,18 +21,20 @@ print_header()
 
 print(Panel(query, title="User"))
 
-embedding_fn = embedding_function(embedding_model_id)
-print("Embedding model:", embedding_model_id)
+embedding_fn = embedding_function(config.embedding_model_id)
+print("Embedding model:", config.embedding_model_id)
 
-vector_db_client = vector_db(db_file_name, embedding_fn)
-print("Connected to vector db stored in", db_file_name)
+#vector_db_client = vector_db(db_file_name, embedding_fn)
+#print("Connected to vector db stored in", db_file_name)
+vector_db_client = vector_db(config.milvus_uri)
+print("Vector db at uri", config.milvus_uri)
 
 chunks = closest_chunks(vector_db_client, embedding_fn, query)
 print("Found", len(chunks), "closest chunks")
 display_chunk_hits(chunks)
 
 prompt = rag_prompt(chunks, query)
-print("RAG prompt created. Calling inference at", model_id,"\n\n")
+print("RAG prompt created. Calling inference at", config.model_id,"\n\n")
 
-answer = complete_simple(model_id, rag_system_prompt, prompt)
+answer = complete_simple(config.model_id, rag_system_prompt, prompt)
 print(Panel(answer, title="Assistant"))

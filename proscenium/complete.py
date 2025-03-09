@@ -50,7 +50,12 @@ from rich.text import Text
 from aisuite import Client
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
-client = Client()
+provider_configs = {
+    # TODO expose this
+    "ollama": {"timeout": 180},
+}
+
+client = Client(provider_configs=provider_configs)
 
 def complete_simple(
     model_id: str,

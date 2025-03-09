@@ -19,7 +19,9 @@ def embedding_function(
 
 collection_name = "chunks"
 
-def schema_chunks(embedding_fn: model.dense.SentenceTransformerEmbeddingFunction) -> CollectionSchema:
+def schema_chunks(
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
+    ) -> CollectionSchema:
 
     field_id = FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True)
     field_text = FieldSchema(name="text", dtype=DataType.VARCHAR, max_length= 50000)
@@ -34,6 +36,36 @@ def schema_chunks(embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
     return schema
 
 def create_vector_db(
+    uri: str,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    ) -> MilvusClient:
+
+    client = MilvusClient(uri=uri)
+
+    client.create_collection(
+        collection_name = collection_name,
+        schema = schema_chunks(embedding_fn),
+    )
+
+    index_params = client.prepare_index_params()
+
+    index_params.add_index(
+        field_name="vector", 
+        index_type="IVF_FLAT",
+        metric_type="IP",
+        params={"nlist": 1024}
+    )
+
+    client.create_index(
+        collection_name = collection_name,
+        index_params = index_params,
+        sync = False
+    )
+
+    return client
+
+
+def create_vector_db_old(
     db_file_name: Path,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     overwrite: bool = False
@@ -72,12 +104,9 @@ def create_vector_db(
     return client
 
 
-def vector_db(
-    db_file_name: Path,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
-    ) -> MilvusClient:
+def vector_db(uri: str) -> MilvusClient:
 
-    client = MilvusClient(str(db_file_name))
+    client = MilvusClient(uri)
 
     client.load_collection(collection_name)
 
