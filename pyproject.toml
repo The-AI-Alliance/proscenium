@@ -19,7 +19,7 @@ pymilvus = {extras = ["model"], version = "^2.5.4"}
 datasets = "^3.3.2"
 tiktoken = "^0.9.0"
 neo4j = "^5.28.1"
-gofannon = "^0.25.10.1"
+gofannon = {extras = ["langchain", "smolagents"], version = "^0.25.10.1"}
 langchain-community = "^0.3.18"
 langchain-huggingface = "^0.1.2"
 aisuite = {extras = ["openai,anthropic"], version = "^0.1.10"}
