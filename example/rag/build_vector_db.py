@@ -22,9 +22,7 @@ print("Data files to chunk:", config.data_file)
 embedding_fn = embedding_function(config.embedding_model_id)
 print("Embedding model", config.embedding_model_id)
 
-#vector_db_client = create_vector_db(db_file_name, embedding_fn, overwrite=True)
-#print("Vector db stored in file", db_file_name)
-vector_db_client = create_vector_db(config.milvus_uri, embedding_fn)
+vector_db_client = create_vector_db(config.milvus_uri, embedding_fn, overwrite=True)
 print("Vector db at uri", config.milvus_uri)
 
 documents = load_file(config.data_file)

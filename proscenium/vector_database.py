@@ -38,9 +38,13 @@ def schema_chunks(
 def create_vector_db(
     uri: str,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    overwrite: bool = True
     ) -> MilvusClient:
 
     client = MilvusClient(uri=uri)
+
+    if overwrite and client.has_collection(collection_name):
+        client.drop_collection(collection_name)
 
     client.create_collection(
         collection_name = collection_name,
@@ -66,20 +70,24 @@ def create_vector_db(
 
 
 def create_vector_db_old(
-    db_file_name: Path,
+    db_file_name: str,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     overwrite: bool = False
     ) -> MilvusClient:
 
-    if db_file_name.exists():
+    db_file = Path(db_file_name)
+    if db_file.exists():
         if overwrite:
-            db_file_name.unlink()
+            db_file.unlink()
             print("Deleted existing vector db file", db_file_name)
         else:
             print("File", db_file_name, "exists. Use overwrite=True to replace.")
             return None
 
     client = MilvusClient(str(db_file_name))
+
+    if overwrite and client.has_collection(collection_name):
+        client.drop_collection(collection_name)
 
     client.create_collection(
         collection_name = collection_name,
