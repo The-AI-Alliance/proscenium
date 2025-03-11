@@ -2,7 +2,11 @@
 
 GraphRAG output for Proscenium as of March 11, 2025
 
+## Configuration
+
 [example.graph_rag.config.py](../example/graph_rag/config.py)
+
+## Entity Extraction
 
 ```bash
 python -m example.graph_rag.extract_entities
@@ -14,6 +18,8 @@ python -m example.graph_rag.extract_entities
 
 [stdout](./extract_entities.out)
 
+## Load Resolver
+
 ```bash
 python -m example.graph_rag.load_entity_resolver
 ```
@@ -24,10 +30,14 @@ python -m example.graph_rag.load_entity_resolver
 python -m example.graph_rag.load_entity_graph
 ```
 
+## Load Graph
+
 [stdout](./load_entity_graph.out)
 
 ```bash
 python -m example.graph_rag.answer_question
 ```
+
+## Answer Question
 
 [stdout](./answer_question.out)
