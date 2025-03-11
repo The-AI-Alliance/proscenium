@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+
+  ollama:
+
+    container_name: proscenium_ollama
+
+    image: ollama/ollama
+
+    ports:
+      - 11434:11434
+
+    volumes:
+      - $HOME/ollama:/root/.ollama
+
+#    command: ollama run llama3.2 --keepalive 24h
+#    command: /usr/bin/ollama serve & sleep 5 & /usr/bin/ollama run llama3.2

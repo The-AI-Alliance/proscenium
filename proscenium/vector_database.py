@@ -19,7 +19,9 @@ def embedding_function(
 
 collection_name = "chunks"
 
-def schema_chunks(embedding_fn: model.dense.SentenceTransformerEmbeddingFunction) -> CollectionSchema:
+def schema_chunks(
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
+    ) -> CollectionSchema:
 
     field_id = FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True)
     field_text = FieldSchema(name="text", dtype=DataType.VARCHAR, max_length= 50000)
@@ -33,21 +35,31 @@ def schema_chunks(embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
 
     return schema
 
+from urllib.parse import urlsplit
+
 def create_vector_db(
-    db_file_name: Path,
+    uri: str,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-    overwrite: bool = False
+    overwrite: bool = True
     ) -> MilvusClient:
 
-    if db_file_name.exists():
-        if overwrite:
-            db_file_name.unlink()
-            print("Deleted existing vector db file", db_file_name)
-        else:
-            print("File", db_file_name, "exists. Use overwrite=True to replace.")
-            return None
+    uri_fields = urlsplit(uri)
+    client = None
+    if uri_fields[0] == "file":
+        file_path = Path(uri_fields[2][1:])
+        if file_path.exists():
+            if overwrite:
+                file_path.unlink()
+                print("Deleted existing vector db file", file_path)
+            else:
+                print("File", uri_fields[2], "exists. Use overwrite=True to replace.")
+                return None
+        client = MilvusClient(uri=str(file_path))
+    else:
+        client = MilvusClient(uri=uri)
 
-    client = MilvusClient(str(db_file_name))
+    if overwrite and client.has_collection(collection_name):
+        client.drop_collection(collection_name)
 
     client.create_collection(
         collection_name = collection_name,
@@ -71,13 +83,15 @@ def create_vector_db(
 
     return client
 
+def vector_db(uri: str) -> MilvusClient:
 
-def vector_db(
-    db_file_name: Path,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction
-    ) -> MilvusClient:
-
-    client = MilvusClient(str(db_file_name))
+    uri_fields = urlsplit(uri)
+    client = None
+    if uri_fields[0] == "file":
+        file_path = Path(uri_fields[2][1:])
+        client = MilvusClient(uri=str(file_path))
+    else:
+        client = MilvusClient(uri=uri)
 
     client.load_collection(collection_name)
 

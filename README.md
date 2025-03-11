@@ -55,11 +55,29 @@ Subsystem implementations used in these demos:
 ## Setup
 
 ```bash
-python3.11 -m venv venv
+git clone git@github.com:The-AI-Alliance/proscenium.git
+
+cd proscenium
+
+python -m venv venv
 
 . venv/bin/activate
 
-pip install git+https://github.com/The-AI-Alliance/proscenium.git
+python -m pip install .
+
+python -m example.rag.build_vector_db
+```
+
+or
+
+```bash
+git clone git@github.com:The-AI-Alliance/proscenium.git
+
+cd proscenium
+
+docker compose -f .devcontainer/docker-compose.yml up
+
+docker exec -it devcontainer-devcontainer-1 sh -c "cd workspaces/proscenium && python -m example.rag.build_vector_db"
 ```
 
 or

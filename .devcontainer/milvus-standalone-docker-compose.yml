@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  milvus:
+    image: milvusdb/milvus:v2.3.4
+    container_name: milvus
+    restart: always
+    command: ["milvus", "run", "standalone"]
+    ports:
+      - "19530:19530"  # gRPC
+      - "9091:9091"    # monitoring
+    volumes:
+      - milvus_data:/var/lib/milvus
+    environment:
+      - ETCD_ENDPOINTS=etcd:2379
+      - MINIO_ADDRESS=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MILVUS_LOG_LEVEL=info
+    depends_on:
+      - etcd
+      - minio
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: etcd
+    restart: always
+    command: >
+      etcd --name etcd 
+           --data-dir /etcd-data 
+           --listen-client-urls http://0.0.0.0:2379 
+           --advertise-client-urls http://etcd:2379
+    volumes:
+      - etcd_data:/etcd-data
+    ports:
+      - "2379:2379"
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+
+volumes:
+  milvus_data:
+  etcd_data:
+  minio_data:

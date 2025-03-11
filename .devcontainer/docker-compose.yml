@@ -1,0 +1,15 @@
+version: "3.8"
+
+include:
+  - ./milvus-standalone-docker-compose.yml
+  - ./neo4j-docker-compose.yml
+  - ./ollama-docker-compose.yml
+
+services:
+
+  devcontainer:
+    image: mcr.microsoft.com/vscode/devcontainers/python:3.11
+    volumes:
+      - ../..:/workspaces:cached
+    #network_mode: service:db
+    command: sh -c "cd workspaces/proscenium && ls -l && python -m pip install . && sleep infinity"

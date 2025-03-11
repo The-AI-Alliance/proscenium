@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+
+  neo4j:
+
+    container_name: proscenium_neo4j
+
+    image: neo4j
+
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - $HOME/neo4j/data:/data
+      - $HOME/neo4j/logs:/logs
+    environment:
+      - NEO4J_AUTH=none
