@@ -26,11 +26,11 @@ python -m example.graph_rag.load_entity_resolver
 
 [stdout](./load_entity_resolver.out)
 
+## Load Graph
+
 ```bash
 python -m example.graph_rag.load_entity_graph
 ```
-
-## Load Graph
 
 [stdout](./load_entity_graph.out)
 
