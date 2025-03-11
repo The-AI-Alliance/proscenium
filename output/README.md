@@ -8,9 +8,11 @@ GraphRAG output for Proscenium as of March 11, 2025
 python -m example.graph_rag.extract_entities
 ```
 
-[entities.csv](./entities.csv)
+[entities.csv](./entities.csv) is an older copy that is upstream of the calls here
 
-[stdout]()
+[entities-new.csv](./entities.csv) is a new version run with the config on 3/11/25
+
+[stdout](./extract_entities.out)
 
 ```bash
 python -m example.graph_rag.load_entity_resolver
