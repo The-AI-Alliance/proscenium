@@ -2,8 +2,8 @@
 from pathlib import Path
 from pydantic.networks import HttpUrl
 
-# db_file_name = Path("milvus.db")
-milvus_uri = "http://localhost:19530"
+milvus_uri = "file:/milvus.db"
+#milvus_uri = "http://localhost:19530"
 
 embedding_model_id = "all-MiniLM-L6-v2"
 

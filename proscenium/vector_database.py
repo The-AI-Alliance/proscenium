@@ -35,13 +35,28 @@ def schema_chunks(
 
     return schema
 
+from urllib.parse import urlsplit
+
 def create_vector_db(
     uri: str,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     overwrite: bool = True
     ) -> MilvusClient:
 
-    client = MilvusClient(uri=uri)
+    uri_fields = urlsplit(uri)
+    client = None
+    if uri_fields[0] == "file":
+        file_path = Path(uri_fields[2][1:])
+        if file_path.exists():
+            if overwrite:
+                file_path.unlink()
+                print("Deleted existing vector db file", file_path)
+            else:
+                print("File", uri_fields[2], "exists. Use overwrite=True to replace.")
+                return None
+        client = MilvusClient(uri=str(file_path))
+    else:
+        client = MilvusClient(uri=uri)
 
     if overwrite and client.has_collection(collection_name):
         client.drop_collection(collection_name)
@@ -67,50 +82,6 @@ def create_vector_db(
     )
 
     return client
-
-
-def create_vector_db_old(
-    db_file_name: str,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-    overwrite: bool = False
-    ) -> MilvusClient:
-
-    db_file = Path(db_file_name)
-    if db_file.exists():
-        if overwrite:
-            db_file.unlink()
-            print("Deleted existing vector db file", db_file_name)
-        else:
-            print("File", db_file_name, "exists. Use overwrite=True to replace.")
-            return None
-
-    client = MilvusClient(str(db_file_name))
-
-    if overwrite and client.has_collection(collection_name):
-        client.drop_collection(collection_name)
-
-    client.create_collection(
-        collection_name = collection_name,
-        schema = schema_chunks(embedding_fn),
-    )
-
-    index_params = client.prepare_index_params()
-
-    index_params.add_index(
-        field_name="vector", 
-        index_type="IVF_FLAT",
-        metric_type="IP",
-        params={"nlist": 1024}
-    )
-
-    client.create_index(
-        collection_name = collection_name,
-        index_params = index_params,
-        sync = False
-    )
-
-    return client
-
 
 def vector_db(uri: str) -> MilvusClient:
 
