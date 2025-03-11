@@ -7,6 +7,7 @@ from langchain_core.documents.base import Document
 from neo4j import Driver
 
 from rich import print
+from rich.panel import Panel
 
 from pymilvus import MilvusClient
 from pymilvus import model
@@ -88,7 +89,7 @@ def query_for_objects(
             predicate_lc = snakecase(lowercase(predicate.replace('/', '_')))
             query += f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
         query += "RETURN c.name AS name"
-        print(query)
+        print(Panel(query, title="Cypher Query"))
         result = session.run(query)
         objects = []
         print("   Result:")
