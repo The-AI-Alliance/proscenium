@@ -8,7 +8,9 @@ hf_dataset_column = "text"
 num_docs = 4
 # initial version looked at only: doc.metadata["id"] in ['4440632', '4441078']
 
-model_id = "openai:gpt-4o"
+#model_id = "openai:gpt-4o"
+#model_id = "ollama:granite3.1-dense:2b"
+model_id = "ollama:llama3.2"
 
 case_template = """
 [u]{name}[/u]
