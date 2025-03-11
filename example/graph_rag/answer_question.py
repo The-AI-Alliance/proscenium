@@ -20,8 +20,8 @@ logging.getLogger().setLevel(logging.WARNING)
 print_header()
 
 embedding_fn = embedding_function(config.embedding_model_id)
-vector_db_client = vector_db(config.milvus_db_file, embedding_fn)
-print("Connected to vector db stored in", config.milvus_db_file, "with embedding model", config.embedding_model_id)
+vector_db_client = vector_db(config.milvus_uri)
+print("Connected to vector db stored at", config.milvus_uri, "with embedding model", config.embedding_model_id)
 print("\n")
 
 driver = knowledge_graph_client(
