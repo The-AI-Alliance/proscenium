@@ -56,7 +56,7 @@ neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
 
 embedding_model_id = "all-MiniLM-L6-v2"
 
-milvus_db_file = Path("grag-milvus.db")
+milvus_uri = "file:/grag-milvus.db"
 
 system_prompt = "You are a helpful law librarian"
 

@@ -14,8 +14,8 @@ import example.graph_rag.config as config
 embedding_fn = embedding_function(config.embedding_model_id)
 print("Embedding model", config.embedding_model_id)
 
-vector_db_client = create_vector_db(config.milvus_db_file, embedding_fn, overwrite=True)
-print("Vector db stored in file", config.milvus_db_file)
+vector_db_client = create_vector_db(config.milvus_uri, embedding_fn, overwrite=True)
+print("Vector db stored at", config.milvus_uri)
 
 driver = knowledge_graph_client(
     config.neo4j_uri,
