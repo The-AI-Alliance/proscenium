@@ -85,11 +85,7 @@ def query_for_objects(
     subject_predicate_constraints: List[tuple[str, str]]
     ) -> List[str]:
     with driver.session() as session:
-        query = ""
-        for i, (subject, predicate) in enumerate(subject_predicate_constraints):
-            predicate_lc = snakecase(lowercase(predicate.replace('/', '_')))
-            query += f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
-        query += "RETURN c.name AS name"
+        query = config.matching_objects_query(subject_predicate_constraints)
         print(Panel(query, title="Cypher Query"))
         result = session.run(query)
         objects = []

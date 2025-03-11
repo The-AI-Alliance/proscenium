@@ -2,21 +2,12 @@
 from rich import print
 
 from rich.progress import Progress
-from stringcase import snakecase, lowercase
 import csv
 
 from proscenium.know import knowledge_graph_client
 from proscenium.display import print_header
 
 import example.graph_rag.config as config
-
-def add_triple(tx, entity, role, case):
-    query = (
-        "MERGE (e:Entity {name: $entity}) "
-        "MERGE (c:Case {name: $case}) "
-        "MERGE (e)-[r:%s]->(c)"
-    ) % snakecase(lowercase(role.replace('/', '_')))
-    tx.run(query, entity=entity, case=case)
 
 print_header()
 
@@ -40,7 +31,7 @@ with open(config.entity_csv_file) as f:
         with driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n") # empty graph
             for subject, predicate, object in triples:
-                session.execute_write(add_triple, subject, predicate, object)
+                session.execute_write(config.add_triple, subject, predicate, object)
                 progress.update(task_load, advance=1)
 
         driver.close()

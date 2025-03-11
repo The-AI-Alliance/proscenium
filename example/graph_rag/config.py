@@ -1,6 +1,10 @@
+
+from typing import List
+
 from pathlib import Path
 from rich import print
 from rich.panel import Panel
+from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
 hf_dataset_id = "free-law/nh"
@@ -56,9 +60,27 @@ neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
 neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
 
+def add_triple(tx, entity, role, case):
+    query = (
+        "MERGE (e:Entity {name: $entity}) "
+        "MERGE (c:Case {name: $case}) "
+        "MERGE (e)-[r:%s]->(c)"
+    ) % snakecase(lowercase(role.replace('/', '_')))
+    tx.run(query, entity=entity, case=case)
+
 embedding_model_id = "all-MiniLM-L6-v2"
 
 milvus_uri = "file:/grag-milvus.db"
+
+def matching_objects_query(
+    subject_predicate_constraints: List[tuple[str, str]]) -> str:
+    query = ""
+    for i, (subject, predicate) in enumerate(subject_predicate_constraints):
+        predicate_lc = snakecase(lowercase(predicate.replace('/', '_')))
+        query += f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
+    query += "RETURN c.name AS name"
+
+    return query
 
 system_prompt = "You are a helpful law librarian"
 
