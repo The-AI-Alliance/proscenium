@@ -51,7 +51,8 @@ def extract_triples_from_document(
         extract = complete_simple(
             config.model_id,
             util.extraction_system_prompt,
-            extraction_template.format(text = chunk.page_content))
+            extraction_template.format(text = chunk.page_content),
+            rich_output = True)
 
         new_triples = get_triples_from_extract(extract, object, config.predicates)
 
