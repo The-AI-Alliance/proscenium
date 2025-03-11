@@ -1,6 +1,5 @@
 
 from pathlib import Path
-from pydantic.networks import HttpUrl
 
 milvus_uri = "file:/milvus.db"
 #milvus_uri = "http://localhost:19530"
@@ -11,5 +10,5 @@ model_id = "ollama:llama3.2"
 #model_id = "ollama:granite3.1-dense:2b"
 #model_id = "openai:gpt-4o"
 
-url = HttpUrl('https://www.gutenberg.org/cache/epub/8714/pg8714.txt')
+url = 'https://www.gutenberg.org/cache/epub/8714/pg8714.txt'
 data_file = Path("four_plays_of_aeschylus.txt")

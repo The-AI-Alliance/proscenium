@@ -85,7 +85,13 @@ def create_vector_db(
 
 def vector_db(uri: str) -> MilvusClient:
 
-    client = MilvusClient(uri)
+    uri_fields = urlsplit(uri)
+    client = None
+    if uri_fields[0] == "file":
+        file_path = Path(uri_fields[2][1:])
+        client = MilvusClient(uri=str(file_path))
+    else:
+        client = MilvusClient(uri=uri)
 
     client.load_collection(collection_name)
 
