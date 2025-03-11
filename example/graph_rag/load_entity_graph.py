@@ -6,6 +6,7 @@ from stringcase import snakecase, lowercase
 import csv
 
 from proscenium.know import knowledge_graph_client
+from proscenium.display import print_header
 
 import example.graph_rag.config as config
 
@@ -16,6 +17,8 @@ def add_triple(tx, entity, role, case):
         "MERGE (e)-[r:%s]->(c)"
     ) % snakecase(lowercase(role.replace('/', '_')))
     tx.run(query, entity=entity, case=case)
+
+print_header()
 
 print("Parsing triples from", config.entity_csv_file)
 

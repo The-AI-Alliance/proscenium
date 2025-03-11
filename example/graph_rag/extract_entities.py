@@ -5,6 +5,7 @@ from rich import print
 from rich.progress import Progress
 
 from proscenium.read import load_hugging_face_dataset
+from proscenium.display import print_header
 
 # Problem-specific configuration:
 import example.graph_rag.config as config
@@ -12,6 +13,8 @@ from example.graph_rag.util import extract_triples_from_document
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
+
+print_header()
 
 docs = load_hugging_face_dataset(config.hf_dataset_id, page_content_column=config.hf_dataset_column)
 
