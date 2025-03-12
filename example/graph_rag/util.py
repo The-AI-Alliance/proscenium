@@ -1,8 +1,6 @@
 
 from typing import List
 
-from stringcase import snakecase, lowercase
-
 from langchain_core.documents.base import Document
 from neo4j import Driver
 
