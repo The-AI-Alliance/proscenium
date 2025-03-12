@@ -1,33 +1,31 @@
-# Proscenium Output
+# GraphRAG
 
-GraphRAG output for Proscenium as of March 11, 2025
+Includes output as configured on March 11, 2025.
 
-[example.graph_rag.config.py](../example/graph_rag/config.py)
+## Configuration
 
-```bash
-python -m example.graph_rag.extract_entities
-```
+[example/graph_rag/config.py](./config.py)
 
-[entities.csv](./entities.csv) is an older copy that is upstream of the calls here
+## Entity Extraction
 
-[entities-new.csv](./entities.csv) is a new version run with the config on 3/11/25
+`python -m example.graph_rag.extract_entities` [stdout](./output/extract_entities.out)
 
-[stdout](./extract_entities.out)
+[entities.csv](./output/entities.csv) is an older copy that is upstream of the calls here
 
-```bash
-python -m example.graph_rag.load_entity_resolver
-```
+[entities-new.csv](./output/entities.csv) is a new version run with the config on 3/11/25
 
-[stdout](./load_entity_resolver.out)
+## Load Resolver
 
-```bash
-python -m example.graph_rag.load_entity_graph
-```
+`python -m example.graph_rag.load_entity_resolver` [stdout](./output/load_entity_resolver.out)
 
-[stdout](./load_entity_graph.out)
+## Load Graph
 
-```bash
-python -m example.graph_rag.answer_question
-```
+`python -m example.graph_rag.load_entity_graph` [stdout](./output/load_entity_graph.out)
 
-[stdout](./answer_question.out)
+## Answer Question
+
+`python -m example.graph_rag.answer_question` [stdout](./output/answer_question.out)
+
+## History
+
+Taken from python notebook on a [branch](https://github.com/ibm-granite-community/granite-legal-cookbook/blob/158-legal-graph-rag/recipes/Graph/Entity_Extraction_from_NH_Caselaw.ipynb)
