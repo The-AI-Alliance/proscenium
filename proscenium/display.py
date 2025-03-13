@@ -3,6 +3,10 @@ from typing import List
 
 from rich import print
 from rich.table import Table
+from rich.text import Text
+from rich.panel import Panel
+from rich.console import Group
+from pymilvus import MilvusClient
 
 def print_header() -> None:
     print("[bold]Proscenium[/bold]", ":performing_arts:")
@@ -37,3 +41,43 @@ def display_pairs(subject_predicate_pairs: List[tuple[str, str]], title: str) ->
     for pair in subject_predicate_pairs:
         table.add_row(*pair)
     print(table)
+
+def display_collection(client: MilvusClient, collection_name: str) -> None:
+    print("Collection row count:", client.get_collection_stats(collection_name)['row_count'])
+    desc = client.describe_collection(collection_name)
+    print(desc)
+
+    params_text = Text(f"""
+    Collection Name: {desc['collection_name']}
+    Auto ID: {desc['auto_id']}
+    Num Shards: {desc['num_shards']}
+    Description: {desc['description']}
+    Functions: {desc['functions']}
+    Aliases: {desc['aliases']}
+    Collection ID: {desc['collection_id']}
+    Consistency Level: {desc['consistency_level']}
+    Properties: {desc['properties']}
+    Num Partitions: {desc['num_partitions']}
+    Enable Dynamic Field: {desc['enable_dynamic_field']}""")
+
+    fields_table = Table(title="Fields", show_lines=True)
+    fields_table.add_column("id", justify="left", style="blue")
+    fields_table.add_column("name", justify="left", style="green")
+    fields_table.add_column("description", justify="left", style="green")
+    fields_table.add_column("type", justify="left", style="green")
+    fields_table.add_column("params", justify="left", style="green")
+    fields_table.add_column("auto_id", justify="left", style="green")
+    fields_table.add_column("is_primary", justify="left", style="green")
+    for field in desc['fields']:
+        fields_table.add_row(
+            str(field['field_id']),            # int
+            field['name'],
+            field['description'],
+            str(field['type']),                # Milvus DataType
+            "\n".join([f"{k}: {v}" for k, v in field['params'].items()]),
+            str(field.get('auto_id', "-")),    # bool
+            str(field.get('is_primary', "-"))) # bool
+
+    panel = Panel(Group(params_text, fields_table), title=f"Collection {collection_name}")
+
+    print(panel)

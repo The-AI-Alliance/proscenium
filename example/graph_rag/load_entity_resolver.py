@@ -9,6 +9,7 @@ from proscenium.vector_database import add_chunks_to_vector_db
 from proscenium.vector_database import embedding_function
 from proscenium.know import knowledge_graph_client
 from proscenium.vector_database import collection_name
+from proscenium.display import display_collection
 
 import example.graph_rag.config as config
 
@@ -33,5 +34,4 @@ with driver.session() as session:
 
 info = add_chunks_to_vector_db(vector_db_client, embedding_fn, names)
 print(info['insert_count'], "chunks inserted")
-print("Collection row count:", vector_db_client.get_collection_stats(collection_name)['row_count'])
-# print(vector_db_client.describe_collection(collection_name))
+display_collection(vector_db_client, collection_name)
