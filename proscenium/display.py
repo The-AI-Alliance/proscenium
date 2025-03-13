@@ -43,9 +43,9 @@ def display_pairs(subject_predicate_pairs: List[tuple[str, str]], title: str) ->
     print(table)
 
 def display_collection(client: MilvusClient, collection_name: str) -> None:
+
     print("Collection row count:", client.get_collection_stats(collection_name)['row_count'])
     desc = client.describe_collection(collection_name)
-    print(desc)
 
     params_text = Text(f"""
     Collection Name: {desc['collection_name']}
