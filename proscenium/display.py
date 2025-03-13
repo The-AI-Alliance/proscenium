@@ -44,7 +44,7 @@ def display_pairs(subject_predicate_pairs: List[tuple[str, str]], title: str) ->
 
 def display_collection(client: MilvusClient, collection_name: str) -> None:
 
-    print("Collection row count:", client.get_collection_stats(collection_name)['row_count'])
+    stats = client.get_collection_stats(collection_name)
     desc = client.describe_collection(collection_name)
 
     params_text = Text(f"""
@@ -59,6 +59,8 @@ def display_collection(client: MilvusClient, collection_name: str) -> None:
     Properties: {desc['properties']}
     Num Partitions: {desc['num_partitions']}
     Enable Dynamic Field: {desc['enable_dynamic_field']}""")
+
+    params_panel = Panel(params_text, title="Params")
 
     fields_table = Table(title="Fields", show_lines=True)
     fields_table.add_column("id", justify="left", style="blue")
@@ -78,6 +80,12 @@ def display_collection(client: MilvusClient, collection_name: str) -> None:
             str(field.get('auto_id', "-")),    # bool
             str(field.get('is_primary', "-"))) # bool
 
-    panel = Panel(Group(params_text, fields_table), title=f"Collection {collection_name}")
+    stats_text = Text("\n".join([f"{k}: {v}" for k, v in stats.items()]))
+    stats_panel = Panel(stats_text, title="Stats")
+
+    panel = Panel(Group(
+        params_panel,
+        fields_table,
+        stats_panel), title=f"Collection {collection_name}")
 
     print(panel)
