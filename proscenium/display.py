@@ -6,7 +6,7 @@ from rich.table import Table
 from rich.text import Text
 from rich.panel import Panel
 from rich.console import Group
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, DataType
 
 def print_header() -> None:
     print("[bold]Proscenium[/bold]", ":performing_arts:")
@@ -73,7 +73,7 @@ def display_collection(client: MilvusClient, collection_name: str) -> None:
             str(field['field_id']),            # int
             field['name'],
             field['description'],
-            str(field['type']),                # Milvus DataType
+            field['type'].name,                # Milvus DataType
             "\n".join([f"{k}: {v}" for k, v in field['params'].items()]),
             str(field.get('auto_id', "-")),    # bool
             str(field.get('is_primary', "-"))) # bool
