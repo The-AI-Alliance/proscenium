@@ -130,7 +130,7 @@ def apply_tools(
     tool_desc_list: list,
     tool_map: dict,
     client: Client,
-    model: str):
+    model: str) -> str:
 
     messages = [
         {"role": "system", "content": system_message},
