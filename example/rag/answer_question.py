@@ -5,8 +5,8 @@ import os
 from rich import print
 from rich.panel import Panel
 
-from proscenium.display import print_header
-from proscenium.display import display_chunk_hits
+from proscenium.display import header
+from proscenium.display import chunk_hits_table
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks
@@ -17,7 +17,7 @@ import example.rag.config as config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-print_header()
+print(header())
 
 print(Panel(query, title="User"))
 
@@ -31,7 +31,7 @@ print("Vector db at uri", config.milvus_uri)
 
 chunks = closest_chunks(vector_db_client, embedding_fn, query)
 print("Found", len(chunks), "closest chunks")
-display_chunk_hits(chunks)
+print(chunk_hits_table(chunks))
 
 prompt = rag_prompt(chunks, query)
 print("RAG prompt created. Calling inference at", config.model_id,"\n\n")

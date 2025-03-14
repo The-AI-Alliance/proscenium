@@ -1,7 +1,7 @@
 from rich import print
 from rich.panel import Panel
 from thespian.actors import ActorSystem
-from proscenium.display import print_header
+from proscenium.display import header
 
 from gofannon.basic_math.addition import Addition
 from gofannon.basic_math.subtraction import Subtraction
@@ -20,7 +20,7 @@ abacus_actor_class = util.tool_applier_actor_class(
 
 tool_applier = ActorSystem().createActor(abacus_actor_class)
 
-print_header()
+print(header())
 
 question = "What is 33312-457? And what is 3+3?"
 # question = "What is your favorite color?"

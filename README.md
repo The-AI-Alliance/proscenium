@@ -33,13 +33,12 @@ A few of the initial goals of this project include:
 The purpose of this repository is to show several examples of these sub-systems
 working together in a way that mimics patterns highlighted in modern agentic frameworks.
 
-The will include
+The include
 
-- Tool use
-- Reflection
+- [Tool use](./example/tools/)
 - [RAG](./example/rag/)
 - [GraphRAG](./example/graph_rag/)
-- ...
+- Reflection (coming soon)
 
 Subsystem implementations used in these demos:
 

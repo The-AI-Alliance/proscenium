@@ -9,7 +9,7 @@ from proscenium.complete import complete_simple
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.know import knowledge_graph_client
-from proscenium.display import print_header, display_triples, display_pairs
+from proscenium.display import header, triples_table, pairs_table
 
 import example.graph_rag.util as util
 import example.graph_rag.config as config
@@ -17,7 +17,7 @@ import example.graph_rag.config as config
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
 
-print_header()
+print(header())
 
 embedding_fn = embedding_function(config.embedding_model_id)
 vector_db_client = vector_db(config.milvus_uri)
@@ -43,12 +43,12 @@ print("\n")
 if len(question_entity_triples) == 0:
     print("No triples extracted from question")
     sys.exit(1)
-display_triples(question_entity_triples, "Query Triples")
+print(triples_table(question_entity_triples, "Query Triples"))
 
 print("Finding entity matches for triples")
 subject_predicate_pairs = util.find_matching_objects(vector_db_client, embedding_fn, question_entity_triples)
 print("\n")
-display_pairs(subject_predicate_pairs, "Subject Predicate Constraints")
+pairs_table(subject_predicate_pairs, "Subject Predicate Constraints")
 
 print("Querying for objects that match those constraints")
 object_names = util.query_for_objects(driver, subject_predicate_pairs)
