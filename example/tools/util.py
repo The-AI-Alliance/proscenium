@@ -12,25 +12,24 @@ from proscenium.invoke import process_tools
 def tool_applier_actor_class(
     tools: List[BaseTool],
     system_message: str,
-    model_id: str
-):
+    model_id: str,
+    temperature: float = 0.75,
+    rich_output: bool = False):
+
+    tool_map, tool_desc_list = process_tools(tools)
 
     class ToolApplier(Actor):
-
-        client = Client()
-
-        tool_map, tool_desc_list = process_tools(tools)
 
         def receiveMessage(self, message, sender):
 
             response = apply_tools(
-                system_message=system_message,
-                message=message,
-                tool_desc_list=self.tool_desc_list,
-                tool_map=self.tool_map,
-                client=self.client,
-                model=model_id
-            )
+                model_id = model_id,
+                system_message = system_message,
+                message = message,
+                tool_desc_list = tool_desc_list,
+                tool_map = tool_map,
+                temperature = temperature,
+                rich_output = rich_output)
 
             self.send(sender, response)
 
