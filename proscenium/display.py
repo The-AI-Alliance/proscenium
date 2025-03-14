@@ -6,6 +6,7 @@ from rich.table import Table
 from rich.text import Text
 from rich.panel import Panel
 from rich.console import Group
+
 from pymilvus import MilvusClient
 
 def print_header() -> None:

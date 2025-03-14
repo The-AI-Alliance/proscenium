@@ -37,8 +37,8 @@ The will include
 
 - Tool use
 - Reflection
-- RAG
-- GraphRAG
+- [RAG](./example/rag/)
+- [GraphRAG](./example/graph_rag/)
 - ...
 
 Subsystem implementations used in these demos:

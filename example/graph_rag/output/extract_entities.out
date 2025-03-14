@@ -1,0 +1,689 @@
+Proscenium 🎭
+The AI Alliance
+
+using the first 4 documents of 4 from HF dataset free-law/nh
+╭─────────────────────────────────────────────── Wyman v. Stark ───────────────────────────────────────────────╮
+│                                                                                                              │
+│ Louis C. Wyman v. John A. Durkin Robert L. Stark, Secretary of State Carmen Chimento                         │
+│ New Hampshire Reports, Volume 115 pages 1-3                                                                  │
+│ Court: New Hampshire Supreme Court                                                                           │
+│ Decision Date: 1975-01-06                                                                                    │
+│ Citations: 115 N.H. 1                                                                                        │
+│                                                                                                              │
+│ Docket Number: No. 7112                                                                                      │
+│ Jurisdiction: New Hampshire                                                                                  │
+│ Judges:                                                                                                      │
+│ Parties: Louis C. Wyman v. John A. Durkin Robert L. Stark, Secretary of State Carmen Chimento                │
+│                                                                                                              │
+│ Word Count: 683, Character Count: 4226                                                                       │
+│ Last Updated: 2021-08-10T17:25:43.934256+00:00, Provenance: CAP                                              │
+│ Id: 4439812                                                                                                  │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────── complete_simple call ────────────────────────────────────────────╮
+│                                                                                                              │
+│     model_id: ollama:llama3.2                                                                                │
+│     temperature: 0.75                                                                                        │
+│                                                                                                              │
+│                                                   Messages                                                   │
+│ ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Role   ┃ Content                                                                                         ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ system │ You are an entity extractor                                                                     │ │
+│ ├────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ user   │ Below is a list of entity categories:                                                           │ │
+│ │        │                                                                                                 │ │
+│ │        │ Judge/Justice: The name of the judge or justice involved in the case, including their role      │ │
+│ │        │ (e.g., trial judge, appellate judge, presiding justice).                                        │ │
+│ │        │ Precedent Cited: Previous case law referred to in the case.                                     │ │
+│ │        │                                                                                                 │ │
+│ │        │ Given this list of entity categories, you will be asked to extract entities belonging to these  │ │
+│ │        │ categories from a text passage.                                                                 │ │
+│ │        │ Consider only the list of entity categories above; do not extract any additional entities.      │ │
+│ │        │ For each entity found, list the category and the entity, separated by a semicolon.              │ │
+│ │        │ Do not use the words "Entity" or "Category".                                                    │ │
+│ │        │                                                                                                 │ │
+│ │        │ Find the entities in the following text, and list them in the format specified above:           │ │
+│ │        │                                                                                                 │ │
+│ │        │ "Per curiam.\nThis transfer arises out of the same case which was the subject matter of the     │ │
+│ │        │ petition for writ of prohibition in Durkin v. Hillsborough County Superior Court, 114 N.H. 788, │ │
+│ │        │ 330 A.2d 777 (1974). The Superior Court (Bois, J.) has transferred without ruling seven         │ │
+│ │        │ questions, the first of which is as follows: \u201cDoes the Superior Court have jurisdiction    │ │
+│ │        │ either through RSA 68:4 II; other jurisdictional statutes or through precedent, to invalidate   │ │
+│ │        │ an election for United States Senator?\u201d\nThe several States may regulate the conduct of    │ │
+│ │        │ senatorial elections and may provide procedures necessary to guard against irregularity and     │ │
+│ │        │ error in the tabulation of votes and against fraud and corrupt practices. U.S. Const. art. I,   │ │
+│ │        │ \u00a7 4; Smiley v. Holm, 285 U.S. 355 (1932). They may provide procedures for a recount so     │ │
+│ │        │ long as they do not impair or frustrate the Senate\u2019s ability to make an independent        │ │
+│ │        │ judgment. Roudebush v. Hartke, 405 U.S. 15 (1972).\nThe proceedings before the ballot law       │ │
+│ │        │ commission are an integral part of this State\u2019s elections laws under U.S. Const. art. I,   │ │
+│ │        │ \u00a7 4. Roudebush v. Hartke, 405 U.S. 15 (1972); Durkin v. Snow, No. 74-359 (D.N.H. Dec. 18,  │ │
+│ │        │ 1974) (three-judge court). On the record before us and the arguments of counsel, there is no    │ │
+│ │        │ indication that the ballot law commission has exceeded its powers under the statute (RSA ch.    │ │
+│ │        │ 68), or failed to conscientiously afford all candidates a fair opportunity to be fully heard in │ │
+│ │        │ a manner consistent with due process. The ballot law commission has ordered a certificate of    │ │
+│ │        │ election to be issued to Candidate Wyman from which order Candidate Durkin has filed an appeal  │ │
+│ │        │ to the Senate of the United States. RSA 68:11.\nThe Senate of the United States under article   │ │
+│ │        │ I, section 5 of the Constitution of the United States, like our own senate under part II,       │ │
+│ │        │ article 35 of the New Hampshire constitution, is vested with the power to judge the election    │ │
+│ │        │ and qualifications of its own members including the complaints which are the subject matter of  │ │
+│ │        │ these proceedings. Barry v. United States, 279 U.S. 597 (1928); Petition of Dondero, 94 N.H.    │ │
+│ │        │ 236, 51 A.2d 39 (1947); RSA 68:11; RSA ch. 67.\nThe petition in Hillsborough County Superior    │ │
+│ │        │ Court bases its jurisdictional claim upon the last section of RSA 68:4 II. That section after   │ │
+│ │        │ vesting exclusive jurisdiction in the ballot law commission states that \u201cnothing contained │ │
+│ │        │ in this paragraph shall be construed to bar any person from recourse to the superior court on   │ │
+│ │        │ other questions, within the jurisdiction of such court, relating to the legality or regularity  │ │
+│ │        │ of biennial elections or the results thereof.\u201d However this language relates only to       │ │
+│ │        │ matters which are \u201cwithin the jurisdiction of such court.\u201d Certain statutes give the  │ │
+│ │        │ courts jurisdiction in elections matters, e.g., RSA 64:6 and RSA 68:11. The latter statute      │ │
+│ │        │ however specifically excludes cases of \u201ccontested elections for the offices of United      │ │
+│ │        │ States senator, representatives in congress, state senator or representative to the general     │ │
+│ │        │ court in view of the constitutional provisions vesting in both houses of congress and both      │ │
+│ │        │ houses of the general court exclusive jurisdiction over the elections and qualifications of     │ │
+│ │        │ their respective members.\u201d\nTraditionally our courts have not taken jurisdiction over      │ │
+│ │        │ disputes involving elections to legislative bodies either state or federal. We find no          │ │
+│ │        │ statutory authority under RSA 68:4 II or any other jurisdictional statute or any binding        │ │
+│ │        │ precedent which gives the superior court jurisdiction to invalidate an election to the Senate   │ │
+│ │        │ of the United States.\nThe answer to question 1 is therefore \u201cNo\u201d and it is           │ │
+│ │        │ unnecessary to answer the remaining questions transferred.\nRemanded."                          │ │
+│ │        │                                                                                                 │ │
+│ └────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────── Response ──────────────────────────────────────────────────╮
+│ Here are the extracted entities in the format specified above:                                               │
+│                                                                                                              │
+│ Bois, J; Judge/Justice                                                                                       │
+│ U.S. Const. art. I, § 4; Precedent Cited                                                                     │
+│ Roudebush v. Hartke; Precedent Cited                                                                         │
+│ Durkin v. Hillsborough County Superior Court; Precedent Cited                                                │
+│ Smiley v. Holm; Precedent Cited                                                                              │
+│ 285 U.S. 355; Precedent Cited                                                                                │
+│ 405 U.S. 15; Precedent Cited                                                                                 │
+│ U.S. Const. art. I, § 4; Precedent Cited                                                                     │
+│ Barry v. United States; Precedent Cited                                                                      │
+│ Petition of Dondero; Precedent Cited                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Extracting entities... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   0% -:--:--ERROR:root:Error parsing line <<<Here are the extracted entities in the format specified above:>>>
+ERROR:root:Error parsing line <<<>>>
+WARNING:root:Skipping line <<<Bois, J; Judge/Justice>>> due to unknown role: Bois, J
+WARNING:root:Skipping line <<<U.S. Const. art. I, § 4; Precedent Cited>>> due to unknown role: U.S. Const. art. I, § 4
+WARNING:root:Skipping line <<<Roudebush v. Hartke; Precedent Cited>>> due to unknown role: Roudebush v. Hartke
+WARNING:root:Skipping line <<<Durkin v. Hillsborough County Superior Court; Precedent Cited>>> due to unknown role: Durkin v. Hillsborough County Superior Court
+WARNING:root:Skipping line <<<Smiley v. Holm; Precedent Cited>>> due to unknown role: Smiley v. Holm
+WARNING:root:Skipping line <<<285 U.S. 355; Precedent Cited>>> due to unknown role: 285 U.S. 355
+WARNING:root:Skipping line <<<405 U.S. 15; Precedent Cited>>> due to unknown role: 405 U.S. 15
+WARNING:root:Skipping line <<<U.S. Const. art. I, § 4; Precedent Cited>>> due to unknown role: U.S. Const. art. I, § 4
+WARNING:root:Skipping line <<<Barry v. United States; Precedent Cited>>> due to unknown role: Barry v. United States
+WARNING:root:Skipping line <<<Petition of Dondero; Precedent Cited>>> due to unknown role: Petition of Dondero
+Found 0 triples in chunk 1 of 1
+╭─────────────────── Engineering Associates of New England, Inc. v. B & L Liquidating Corp. ───────────────────╮
+│                                                                                                              │
+│ Engineering Associates of New England, Inc. v. B & L Liquidating Corporation                                 │
+│ New Hampshire Reports, Volume 115 pages 508-512                                                              │
+│ Court: New Hampshire Supreme Court                                                                           │
+│ Decision Date: 1975-09-30                                                                                    │
+│ Citations: 115 N.H. 508                                                                                      │
+│                                                                                                              │
+│ Docket Number: No. 6958                                                                                      │
+│ Jurisdiction: New Hampshire                                                                                  │
+│ Judges: All concurred.                                                                                       │
+│ Parties: Engineering Associates of New England, Inc. v. B & L Liquidating Corporation                        │
+│                                                                                                              │
+│ Word Count: 1307, Character Count: 7925                                                                      │
+│ Last Updated: 2021-08-10T17:25:43.934256+00:00, Provenance: CAP                                              │
+│ Id: 4440959                                                                                                  │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────── complete_simple call ────────────────────────────────────────────╮
+│                                                                                                              │
+│     model_id: ollama:llama3.2                                                                                │
+│     temperature: 0.75                                                                                        │
+│                                                                                                              │
+│                                                   Messages                                                   │
+│ ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Role   ┃ Content                                                                                         ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ system │ You are an entity extractor                                                                     │ │
+│ ├────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ user   │ Below is a list of entity categories:                                                           │ │
+│ │        │                                                                                                 │ │
+│ │        │ Judge/Justice: The name of the judge or justice involved in the case, including their role      │ │
+│ │        │ (e.g., trial judge, appellate judge, presiding justice).                                        │ │
+│ │        │ Precedent Cited: Previous case law referred to in the case.                                     │ │
+│ │        │                                                                                                 │ │
+│ │        │ Given this list of entity categories, you will be asked to extract entities belonging to these  │ │
+│ │        │ categories from a text passage.                                                                 │ │
+│ │        │ Consider only the list of entity categories above; do not extract any additional entities.      │ │
+│ │        │ For each entity found, list the category and the entity, separated by a semicolon.              │ │
+│ │        │ Do not use the words "Entity" or "Category".                                                    │ │
+│ │        │                                                                                                 │ │
+│ │        │ Find the entities in the following text, and list them in the format specified above:           │ │
+│ │        │                                                                                                 │ │
+│ │        │ "Lampron, J.\nAction by plaintiff Engineering Associates of New England, Inc., a New Llampshire │ │
+│ │        │ corporation with a prinicipal place of business in Manchester, against W. & L. E. Gurley, a New │ │
+│ │        │ York corporation with a principal place of business in Troy, New York, later known as B & L     │ │
+│ │        │ Liquidating Corporation, to recover commissions allegedly earned under a sales representative   │ │
+│ │        │ agreement with Gurley. Service of plaintiff\u2019s writ, dated January 18, 1969, was made on    │ │
+│ │        │ the secretary of state pursuant to RSA 300:14 (1966), which was then in effect, and notice sent │ │
+│ │        │ to Gurley at its office in Troy.\nB & L Liquidating appeared specially and moved to dismiss     │ │
+│ │        │ plaintiff\u2019s action on the following grounds: (1) Defendant did not enter into a contract   │ │
+│ │        │ which was to be performed in whole or in part in New Hampshire; (2) defendant was not           │ │
+│ │        │ registered to do business and was not doing business in New Hampshire; and (3) Plaintiff\u2019s │ │
+│ │        │ claim should have been brought in the New York court which was supervising the liquidation of B │ │
+│ │        │ & L Liquidating, formerly W. & L. E. Gurley. Hearing before King, J., who reserved and          │ │
+│ │        │ transferred without ruling, on an agreed statement of facts, the question \u201cwhether the     │ │
+│ │        │ plaintiff has jurisdiction over and can sue B 8c L Liquidating Corporation, which was dissolved │ │
+│ │        │ on January 21,1969.\u201d\nRSA 300:14 (1966) read in pertinent part as follows: \u201cIf a      │ │
+│ │        │ foreign corporation makes a contract with a resident of New Hampshire to be performed in whole  │ │
+│ │        │ or in part by either party in New Hampshire ... such ...  shall be deemed to be doing business  │ │
+│ │        │ in New Hampshire by such foreign corporation and shall be deemed equivalent to the appointment  │ │
+│ │        │ by such foreign corporation of the secretary of state of New Hampshire ... to be its true and   │ │
+│ │        │ lawful attorney upon whom may be served all lawful process in any actions or proceedings        │ │
+│ │        │ against such foreign corporation arising from or growing out of such contract\nOn August 4,     │ │
+│ │        │ 1961, plaintiff and Gurley entered into a written contract whereby plaintiff became             │ │
+│ │        │ defendant\u2019s sales representative for all the New England States including New Hampshire,   │ │
+│ │        │ excepting only Fairfield County in Connecticut. It is not disputed that plaintiff is a          │ │
+│ │        │ \u201cresident\u201d of New Hampshire within the statute. Under the terms of the contract,      │ │
+│ │        │ which was in effect between 1961 and 1968, plaintiff undertook the following obligations. It    │ │
+│ │        │ was to solicit orders for Gurley products in New Hampshire and in the rest of New England, and  │ │
+│ │        │ distribute Gurley advertising; also make sales of Gurley products and advise Gurley of all      │ │
+│ │        │ major accounts in New Hampshire and elsewhere in the territory. Sales acknowledgments and       │ │
+│ │        │ invoices concerning orders solicited pursuant to the contract in all the territory were mailed  │ │
+│ │        │ to New Hampshire and the resulting commissions were paid to the plaintiff in this State.        │ │
+│ │        │ Various Gurley personnel came to New Hampshire six times a year to consult with plaintiff in    │ │
+│ │        │ order to promote sales of Gurley products in New England.\nIt is clear that this was a contract │ │
+│ │        │ between a resident of New Hampshire and a foreign corporation which was to be, and was, partly  │ │
+│ │        │ performed in New Hampshire. The present controversy con cerning sales made by Gurley to a       │ │
+│ │        │ Massachusetts corporation is based allegedly on a clause in that contract by which commissions  │ │
+│ │        │ at a specified rate were to be paid to plaintiff for sales made in its territory even though    │ │
+│ │        │ not directly solicited by it. We hold that this contract and plaintiff\u2019s action thereunder │ │
+│ │        │ came within the terms of RSA 300:14 (1966), under the provisions of which service of process on │ │
+│ │        │ the defendant was made.\nThis court has previously stated, and recently reiterated, that it is  │ │
+│ │        │ the objective of a long-arm statute such as RSA 300:14 (1966) to allow the exercise of          │ │
+│ │        │ jurisdiction over foreign corporations to the full extent of the constitutional limit. Leeper   │ │
+│ │        │ v. Leeper, 114 N.H. 294, 296, 319 A.2d 626, 627-28 (1974); Roy v. Transairco, Inc., 112 N.H.    │ │
+│ │        │ 171, 173, 291 A.2d 605, 606 (1972). This limit is met if the exercise of jurisdiction is        │ │
+│ │        │ reasonable from the standpoint of New Hampshire\u2019s interest in the litigation and is        │ │
+│ │        │ consistent with the principles of fair play and substantial justice. International Shoe Co. v.  │ │
+│ │        │ Washington, 326 U.S. 310, 316 (1945).\nPlaintiff alleges that the commissions which it seeks    │ │
+│ │        │ arose out of the contract of the parties which was to be performed in New Hampshire and the     │ │
+│ │        │ other New England States. Plaintiff\u2019s pleadings, and all reasonable inferences therefrom,  │ │
+│ │        │ are to be taken as true and construed most favorably to it in determining the issue of          │ │
+│ │        │ jurisdiction which is                                                                           │ │
+│ │        │                                                                                                 │ │
+│ └────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────── Response ──────────────────────────────────────────────────╮
+│ Here are the entities extracted from the text passage:                                                       │
+│                                                                                                              │
+│ Judge/Justice; King, J.                                                                                      │
+│ Precedent Cited; Leeper v. Leeper, 114 N.H. 294, 296, 319 A.2d 626, 627-28 (1974); Roy v. Transairco, Inc.,  │
+│ 112 N.H. 171, 173, 291 A.2d 605, 606 (1972); International Shoe Co. v. Washington, 326 U.S. 310, 316 (1945)  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Extracting entities... ━━━━━━━━━━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  25% -:--:--ERROR:root:Error parsing line <<<Here are the entities extracted from the text passage:>>>
+ERROR:root:Error parsing line <<<>>>
+ERROR:root:Error parsing line <<<Precedent Cited; Leeper v. Leeper, 114 N.H. 294, 296, 319 A.2d 626, 627-28 (1974); Roy v. Transairco, Inc., 112 N.H. 171, 173, 291 A.2d 605, 606 (1972); International Shoe Co. v. Washington, 326 U.S. 310, 316 (1945)>>>
+Found 1 triples in chunk 1 of 2
+╭──────────────────────────────────────────── complete_simple call ────────────────────────────────────────────╮
+│                                                                                                              │
+│     model_id: ollama:llama3.2                                                                                │
+│     temperature: 0.75                                                                                        │
+│                                                                                                              │
+│                                                   Messages                                                   │
+│ ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Role   ┃ Content                                                                                         ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ system │ You are an entity extractor                                                                     │ │
+│ ├────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ user   │ Below is a list of entity categories:                                                           │ │
+│ │        │                                                                                                 │ │
+│ │        │ Judge/Justice: The name of the judge or justice involved in the case, including their role      │ │
+│ │        │ (e.g., trial judge, appellate judge, presiding justice).                                        │ │
+│ │        │ Precedent Cited: Previous case law referred to in the case.                                     │ │
+│ │        │                                                                                                 │ │
+│ │        │ Given this list of entity categories, you will be asked to extract entities belonging to these  │ │
+│ │        │ categories from a text passage.                                                                 │ │
+│ │        │ Consider only the list of entity categories above; do not extract any additional entities.      │ │
+│ │        │ For each entity found, list the category and the entity, separated by a semicolon.              │ │
+│ │        │ Do not use the words "Entity" or "Category".                                                    │ │
+│ │        │                                                                                                 │ │
+│ │        │ Find the entities in the following text, and list them in the format specified above:           │ │
+│ │        │                                                                                                 │ │
+│ │        │  presented by the transferred quest ion. Leeper v. Leeper, supra at 297, 319 A.2d at 628. This  │ │
+│ │        │ State has an important interest in protecting the rights of its residents under such contracts  │ │
+│ │        │ to insure the orderly and efficient transaction of commerce. See Hanson v. Denckla, 357 U.S.    │ │
+│ │        │ 235, 250-51 (1958). The fact that the sales in question did not occur in New Hampshire does not │ │
+│ │        │ preclude the assertion of jurisdiction by this State, if, as alleged, they are connected with   │ │
+│ │        │ the contract to be performed here in part. Taylor v. Company, 97 N.H. 517, 521, 92 A.2d 910,    │ │
+│ │        │ 913 (1952); Sanders Associates Inc. v. Galion Iron Works & Mfg. Co., 304 F.2d 915, 923 (1st     │ │
+│ │        │ Cir. 1962); see Perkins v. Benguet Mining Co., 342 U.S. 437 (1952); Restatement (Second) of     │ │
+│ │        │ Conflict of Laws \u00a7 35, Comment e at 145 (1971).\nFurthermore, by entering into its         │ │
+│ │        │ contract with this New Hampshire plaintiff, the defendant purposefully availed itself of the    │ │
+│ │        │ privilege of conducting business within this State, thus invoking the benefit and protection of │ │
+│ │        │ its laws. Hanson v. Denckla, supra at 253; Leeper v. Leeper, 114 N.H. 294, 297, 319 A.2d 626,   │ │
+│ │        │ 628 (1974).\nAssertion of jurisdiction over defendant under RSA 300:14 (1966) provides a local  │ │
+│ │        │ forum for a local plaintiff on a cause of action generated by a contract purposely entered into │ │
+│ │        │ by the defendant which by its terms was to be performed in part in New Hampshire as well as in  │ │
+│ │        │ other New England States. There has been no showing that requiring defendant to defend this     │ │
+│ │        │ action in this State would cause it serious inconvenience. We hold that under the circumstances │ │
+│ │        │ subjecting the defendant to the jurisdiction of New Hampshire courts does not violate the       │ │
+│ │        │ notions of fairness and justice required by due process. International Shoe Co. v. Washington,  │ │
+│ │        │ 326 U.S. 310 (1945); Whitaker Corp. v. United Aircraft Corp., 482 F.2d 1079 (1st Cir. 1973);    │ │
+│ │        │ Leeper v. Leeper, 114 N.H. 294, 319 A.2d 626 (1974).\nThe fact that the defendant has changed   │ │
+│ │        │ its corporate name does not relieve it of any liability it may have incurred under its contract │ │
+│ │        │ with the plaintiff. 18 Am. Jur. 2d Corporations \u00a7 145 (1965). Nor does the fact that it    │ │
+│ │        │ began dissolution proceedings about five months before this action was initiated prevent its    │ │
+│ │        │ maintenance. New York Business Corporation Law \u00a7\u00a7 1001-09 (McKinney 1963). Section    │ │
+│ │        │ 1006 provides (a) that a dissolved corporation may continue to function for the purpose of      │ │
+│ │        │ winding up its affairs and (b) that its dissolution shall not affect any remedy available to or │ │
+│ │        │ against it for any right or claim existing or any liability incurred before such dissolution.   │ │
+│ │        │ We do not consider that this statute requires that plaintiff\u2019s claim be litigated in New   │ │
+│ │        │ York courts or makes them a more convenient forum. See 36 Am. Jur. 2d Foreign Corporations      │ │
+│ │        │ \u00a7\u00a7 445-46 (1968).\nThe answer to the transferred question is \u201cyes\u201d, the     │ │
+│ │        │ plaintiff has acquired jurisdiction over and can sue B & L Liquidating Corporation which was    │ │
+│ │        │ dissolved on January 21, 1969.\nRemanded.\nAll concurred."                                      │ │
+│ │        │                                                                                                 │ │
+│ └────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────── Response ──────────────────────────────────────────────────╮
+│ Here are the extracted entities:                                                                             │
+│                                                                                                              │
+│ Judge/Justice; Leeper, supra at 297                                                                          │
+│ Precedent Cited; Hanson v. Denckla, 357 U.S. 235, 250-51 (1958)                                              │
+│ Precedent Cited; Taylor v. Company, 97 N.H. 517, 521, 92 A.2d 910, 913 (1952)                                │
+│ Precedent Cited; Perkins v. Benguet Mining Co., 342 U.S. 437 (1952)                                          │
+│ Precedent Cited; Restatement (Second) of Conflict of Laws § 35, Comment e at 145 (1971)                      │
+│ Precedent Cited; Hanson v. Denckla, supra at 253                                                             │
+│ Precedent Cited; Leeper v. Leeper, 114 N.H. 294, 297, 319 A.2d 626, 628 (1974)                               │
+│ Precedent Cited; International Shoe Co. v. Washington, 326 U.S. 310 (1945)                                   │
+│ Precedent Cited; Whitaker Corp. v. United Aircraft Corp., 482 F.2d 1079 (1st Cir. 1973)                      │
+│ Judge/Justice; Leeper, supra at 294                                                                          │
+│ Precedent Cited; Leeper v. Leeper, 114 N.H. 294, 319 A.2d 626 (1974)                                         │
+│ Precedent Cited; New York Business Corporation Law §1001-09 (McKinney 1963)                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Extracting entities... ━━━━━━━━━━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  25% -:--:--ERROR:root:Error parsing line <<<Here are the extracted entities:>>>
+ERROR:root:Error parsing line <<<>>>
+Found 12 triples in chunk 2 of 2
+╭────────────────────────────────────────── Opinion of the Justices ───────────────────────────────────────────╮
+│                                                                                                              │
+│ Opinion of the Justices                                                                                      │
+│ New Hampshire Reports, Volume 115 pages 44-47                                                                │
+│ Court: New Hampshire Supreme Court                                                                           │
+│ Decision Date: 1975-02-07                                                                                    │
+│ Citations: 115 N.H. 44                                                                                       │
+│                                                                                                              │
+│ Docket Number: No. 7122                                                                                      │
+│ Jurisdiction: New Hampshire                                                                                  │
+│ Judges: Frank R. Kf.nison                                                                                    │
+│ Parties: Opinion of the Justices                                                                             │
+│                                                                                                              │
+│ Word Count: 1508, Character Count: 8794                                                                      │
+│ Last Updated: 2021-08-10T17:25:43.934256+00:00, Provenance: CAP                                              │
+│ Id: 4439055                                                                                                  │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────── complete_simple call ────────────────────────────────────────────╮
+│                                                                                                              │
+│     model_id: ollama:llama3.2                                                                                │
+│     temperature: 0.75                                                                                        │
+│                                                                                                              │
+│                                                   Messages                                                   │
+│ ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Role   ┃ Content                                                                                         ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ system │ You are an entity extractor                                                                     │ │
+│ ├────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ user   │ Below is a list of entity categories:                                                           │ │
+│ │        │                                                                                                 │ │
+│ │        │ Judge/Justice: The name of the judge or justice involved in the case, including their role      │ │
+│ │        │ (e.g., trial judge, appellate judge, presiding justice).                                        │ │
+│ │        │ Precedent Cited: Previous case law referred to in the case.                                     │ │
+│ │        │                                                                                                 │ │
+│ │        │ Given this list of entity categories, you will be asked to extract entities belonging to these  │ │
+│ │        │ categories from a text passage.                                                                 │ │
+│ │        │ Consider only the list of entity categories above; do not extract any additional entities.      │ │
+│ │        │ For each entity found, list the category and the entity, separated by a semicolon.              │ │
+│ │        │ Do not use the words "Entity" or "Category".                                                    │ │
+│ │        │                                                                                                 │ │
+│ │        │ Find the entities in the following text, and list them in the format specified above:           │ │
+│ │        │                                                                                                 │ │
+│ │        │ "To the Honorable Senate:\nThe undersignedjustices of the supreme court submit the following    │ │
+│ │        │ answer to the question presented by your resolution adopted January 15, 1975, and filed with    │ │
+│ │        │ this court on January 20, 1975. Interested parties were permitted to file memoranda until       │ │
+│ │        │ January 31, 1975. Your question relates to New Hampshire constitution, part II, article 49      │ │
+│ │        │ which reads in part as follows: \u201c[W]hen the president of the senate shall exercise the     │ │
+│ │        │ office of governor, he shall not hold his office in the senate.\u201d This provision has been a │ │
+│ │        │ part of the constitution since its adoption on August 27, 1792. Your question reads as follows: │ │
+│ │        │ \u201cWhen the president of the senate is acting governor pursuant to the provisions of Part 2, │ │
+│ │        │ Article 49 of the New Hampshire Constitution, is he prohibited from holding his office as       │ │
+│ │        │ president of the senate only, or is he prohibited from acting in any manner as a member of the  │ │
+│ │        │ senate?\u201d\nPart II, article 49 was the subject of consideration by the court in 1890 in an  │ │
+│ │        │ opinion by Chief Justice Doe in which it was pointed out that under the provisions of the       │ │
+│ │        │ constitution of 1784, during brief periods of absence by the Governor-elect (then styled the    │ │
+│ │        │ president) in 1784 and 1785, the duties of the Governor were performed by the senior senator,   │ │
+│ │        │ acting as Governor pro tem. Attorney General v. Taggart, 66 N.H. 362, 364, 29 A. 1027, 1028     │ │
+│ │        │ (1890); see New Hampshire Constitutional Convention Manual, 1918, 78, 89; X Prov. & State       │ │
+│ │        │ Papers 85 (1877). Under the 1784 constitution the \u201cPresident\u201d also presided in the    │ │
+│ │        │ senate, where he had \u201ca vote equal with any other member\u201d and also \u201ca casting    │ │
+│ │        │ vote in case of a tie\u201d. J. F. Colby, Manual of the Constitution of New Hampshire 101, 114  │ │
+│ │        │ (1912). Unlike the Governor under the constitution of 1792, however, the president did not have │ │
+│ │        │ the veto power now conferred on the Governor by New Hampshire constitution, part II, article    │ │
+│ │        │ 44. Hence under the prior constitution, as appears from the Taggart opinion supra, the senior   │ │
+│ │        │ senator, while acting as \u201cpresident\u201d pro tem also presided in the senate and sat with │ │
+│ │        │ the council, by virtue of the provision of the constitution then in force. The court then held  │ │
+│ │        │ that the words used in part II, article 49 of the present constitution \u201cshould be          │ │
+│ │        │ construed in the sense in which they were employed\u201d, and effect given to the article       │ │
+│ │        │ \u201cin its comprehensive and usual sense\u201d. Attorney General v. Taggart, supra at 364, 29 │ │
+│ │        │ A. at 1028-29. It also observed: \u201cBy accepting the office of the president of the senate,  │ │
+│ │        │ the defendant accepted the executive work which art. 49 imposes upon the president of the       │ │
+│ │        │ senate when the governor\u2019s chair is vacant\u201d. Id. at 372, 29 A. at 1032. See also      │ │
+│ │        │ Opinion of the Justices, 87 N.H. 489, 177 A. 655 (1935).\nExamination of comparable provisions  │ │
+│ │        │ of constitutions of other States has disclosed no identical provision elsewhere, although many  │ │
+│ │        │ provide for succession to the Governor by a lieutenant governor or a president of the senate    │ │
+│ │        │ under similar circumstances. See Index Digest of State Constitutions 509-15 (2d ed. 1959); 38   │ │
+│ │        │ Am. Jur. 2d Governor \u00a7\u00a7 13-15, at 942-43 (1968); Chadwick v. Earhart, 11 Ore. 389, 4  │ │
+│ │        │ P. 1180 (1884).\nOur attention has been called to an excerpt from a report to the 1792          │ │
+│ │        │ convention made on June 2, 1792, by the four-man committee of which William Plumer was          │ │
+│ │        │ chairman. The excerpt stated in part: \u201c[I]t appears that under the head  Senate, the       │ │
+│ │        │ people have directed the Senate to elect their own President, and authorized him to fill the    │ │
+│ │        │ chair of Governor when vacant, but when he exercises the office of Governor he shall not hold   │ │
+│ │        │ the office of President of the Senate ....\u201d Journal of the 1792 Convention; X Prov. &      │ │
+│ │        │ State Papers 143 (1877). The suggestion is that the statement is a \u201ccontemporary           │ │
+│ │        │ report\u201d of an understanding of the meaning of what is now article 49.\nHowever, the report │ │
+│ │        │ of the committee was made following the first submission to the voters, in May 1792, of         │ │
+│ │        │ seventy-two separate amendments to the constitution of 1784, and before the second submission   │ │
+│ │        │ to the voters in August 1792, which was                                                         │ │
+│ │        │                                                                                                 │ │
+│ └────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────── Response ──────────────────────────────────────────────────╮
+│ Here is the list of extracted entities:                                                                      │
+│                                                                                                              │
+│ Judge/Justice; Chief Justice Doe; William Plumer                                                             │
+│                                                                                                              │
+│ Precedent Cited; Attorney General v. Taggart, 66 N.H. 362, 364, 29 A. 1027, 1028 (1890); Opinion of the      │
+│ Justices, 87 N.H. 489, 177 A. 655 (1935)                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Extracting entities... ━━━━━━━━━━━━━━━━━━━━╺━━━━━━━━━━━━━━━━━━━  50% -:--:--ERROR:root:Error parsing line <<<Here is the list of extracted entities:>>>
+ERROR:root:Error parsing line <<<>>>
+ERROR:root:Error parsing line <<<Judge/Justice; Chief Justice Doe; William Plumer >>>
+ERROR:root:Error parsing line <<<>>>
+ERROR:root:Error parsing line <<<Precedent Cited; Attorney General v. Taggart, 66 N.H. 362, 364, 29 A. 1027, 1028 (1890); Opinion of the Justices, 87 N.H. 489, 177 A. 655 (1935)>>>
+Found 0 triples in chunk 1 of 2
+╭──────────────────────────────────────────── complete_simple call ────────────────────────────────────────────╮
+│                                                                                                              │
+│     model_id: ollama:llama3.2                                                                                │
+│     temperature: 0.75                                                                                        │
+│                                                                                                              │
+│                                                   Messages                                                   │
+│ ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Role   ┃ Content                                                                                         ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ system │ You are an entity extractor                                                                     │ │
+│ ├────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ user   │ Below is a list of entity categories:                                                           │ │
+│ │        │                                                                                                 │ │
+│ │        │ Judge/Justice: The name of the judge or justice involved in the case, including their role      │ │
+│ │        │ (e.g., trial judge, appellate judge, presiding justice).                                        │ │
+│ │        │ Precedent Cited: Previous case law referred to in the case.                                     │ │
+│ │        │                                                                                                 │ │
+│ │        │ Given this list of entity categories, you will be asked to extract entities belonging to these  │ │
+│ │        │ categories from a text passage.                                                                 │ │
+│ │        │ Consider only the list of entity categories above; do not extract any additional entities.      │ │
+│ │        │ For each entity found, list the category and the entity, separated by a semicolon.              │ │
+│ │        │ Do not use the words "Entity" or "Category".                                                    │ │
+│ │        │                                                                                                 │ │
+│ │        │ Find the entities in the following text, and list them in the format specified above:           │ │
+│ │        │                                                                                                 │ │
+│ │        │  occasioned by inconsistencies resulting from the first submission. Thus it was an analysis of  │ │
+│ │        │ the result of the action of the voters on May 19, 1792, rather than an interpretation of any    │ │
+│ │        │ particular provision of the constitution as finally revised in August 1792.\nThe report was     │ │
+│ │        │ pointing out that by the adoption of amendments 23 and 38 the voters had provided that a        │ │
+│ │        │ president of the senate rather than the president of the State should preside over that body    │ │
+│ │        │ and should act in place of the Governor in case of a vacancy, instead of having the senior      │ │
+│ │        │ senator so act as provided by the constitution of 1784. The report continued, by pointing out   │ │
+│ │        │ what resulted from acceptance of amendment 39 and rejection of amendment 40; namely that the    │ │
+│ │        │ title of the chief executive was changed from president to Governor, but he would retain his    │ │
+│ │        │ authority to vote in the senate, and to have a \u201ccasting vote in case of a tie\u201d as     │ │
+│ │        │ provided by the constitution of 1784. Journal of the 1792 Convention; X Prov. & State Papers    │ │
+│ │        │ 121, 142 (1877).\nThese and other inconsistencies prompted the second submission to the voters  │ │
+│ │        │ in August 1792 of several headings of the constitution submitted as a whole (X Prov. & State    │ │
+│ │        │ Papers 152-59) which served to eliminate the provisions of the prior constitution intended to   │ │
+│ │        │ have been \u201cexpunged\u201d by amendment 40. Thus the remark of the committee made in June   │ │
+│ │        │ 1792 is not controlling of the interpretation of article 49 as approved in August 1792.\nIt is  │ │
+│ │        │ self-evident, that there was no intention under the constitution of 1792 to permit the          │ │
+│ │        │ president of the senate while \u201cexercising\u201d the office of governor to vote as a member │ │
+│ │        │ of the senate, upon a measure which he might as Governor pro tem be called upon to either sign  │ │
+│ │        │ or veto, or if then vetoed, to thereafter vote in the senate, upon reconsideration as provided  │ │
+│ │        │ by part II, article 44, or article 45. It is our opinion that not every temporary absence of    │ │
+│ │        │ the Governor from the State would necessarily disqualify the president of the senate from       │ │
+│ │        │ \u201cholding\u201d his office as a member of the senate. If a vacancy in the chair of Governor │ │
+│ │        │ which arises during a legislative session is occasioned only by brief or temporary absence of   │ │
+│ │        │ the Governor from the State, then the proscription imposed by article 49 would not necessarily  │ │
+│ │        │ come into play. When the president of the senate is required to act as Governor pro tem he may  │ │
+│ │        │ exercise ceremonial, routine, signatory, proclamatory, ministerial, and similar functions of    │ │
+│ │        │ the gubernatorial office, without losing his right to act as a member of the senate.\nSubject   │ │
+│ │        │ to the foregoing exception, it is our opinion that the phrase of part II, article 49,           │ │
+│ │        │ \u201cshall not hold his office in the senate\u201d, prevents the president of the senate from  │ │
+│ │        │ occupying his constitutional office of senator, and also his position as president of the       │ │
+│ │        │ senate, during the time that he \u201cshall exercise the office of governor\u201d.\nFrank R.    │ │
+│ │        │ Kf.nison\nLaurence I. Duncan\nEdward J. Lampron\nWilliam A. Grimes\nRobert F. Griffith"         │ │
+│ │        │                                                                                                 │ │
+│ └────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────── Response ──────────────────────────────────────────────────╮
+│ Here are the extracted entities:                                                                             │
+│                                                                                                              │
+│ Judge/Justice: Frank R. Kf.nison; Laurence I. Duncan; Edward J. Lampron; William A. Grimes; Robert F.        │
+│ Griffith                                                                                                     │
+│ Precedent Cited: Journal of the 1792 Convention                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Extracting entities... ━━━━━━━━━━━━━━━━━━━━╺━━━━━━━━━━━━━━━━━━━  50% -:--:--ERROR:root:Error parsing line <<<Here are the extracted entities:>>>
+ERROR:root:Error parsing line <<<>>>
+ERROR:root:Error parsing line <<<Judge/Justice: Frank R. Kf.nison; Laurence I. Duncan; Edward J. Lampron; William A. Grimes; Robert F. Griffith>>>
+ERROR:root:Error parsing line <<<Precedent Cited: Journal of the 1792 Convention>>>
+Found 0 triples in chunk 2 of 2
+╭────────────────────────────────────────────── State v. Collins ──────────────────────────────────────────────╮
+│                                                                                                              │
+│ State of New Hampshire v. Russell E. Collins, Jr.                                                            │
+│ New Hampshire Reports, Volume 115 pages 499-504                                                              │
+│ Court: New Hampshire Supreme Court                                                                           │
+│ Decision Date: 1975-09-30                                                                                    │
+│ Citations: 115 N.H. 499                                                                                      │
+│                                                                                                              │
+│ Docket Number: No. 6862                                                                                      │
+│ Jurisdiction: New Hampshire                                                                                  │
+│ Judges: All concurred.                                                                                       │
+│ Parties: State of New Hampshire v. Russell E. Collins, Jr.                                                   │
+│                                                                                                              │
+│ Word Count: 1547, Character Count: 9103                                                                      │
+│ Last Updated: 2021-08-10T17:25:43.934256+00:00, Provenance: CAP                                              │
+│ Id: 4438975                                                                                                  │
+│                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────── complete_simple call ────────────────────────────────────────────╮
+│                                                                                                              │
+│     model_id: ollama:llama3.2                                                                                │
+│     temperature: 0.75                                                                                        │
+│                                                                                                              │
+│                                                   Messages                                                   │
+│ ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Role   ┃ Content                                                                                         ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ system │ You are an entity extractor                                                                     │ │
+│ ├────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ user   │ Below is a list of entity categories:                                                           │ │
+│ │        │                                                                                                 │ │
+│ │        │ Judge/Justice: The name of the judge or justice involved in the case, including their role      │ │
+│ │        │ (e.g., trial judge, appellate judge, presiding justice).                                        │ │
+│ │        │ Precedent Cited: Previous case law referred to in the case.                                     │ │
+│ │        │                                                                                                 │ │
+│ │        │ Given this list of entity categories, you will be asked to extract entities belonging to these  │ │
+│ │        │ categories from a text passage.                                                                 │ │
+│ │        │ Consider only the list of entity categories above; do not extract any additional entities.      │ │
+│ │        │ For each entity found, list the category and the entity, separated by a semicolon.              │ │
+│ │        │ Do not use the words "Entity" or "Category".                                                    │ │
+│ │        │                                                                                                 │ │
+│ │        │ Find the entities in the following text, and list them in the format specified above:           │ │
+│ │        │                                                                                                 │ │
+│ │        │ "Grimes, J.\nThe main issues in this case involve the questions of whether the double jeopardy  │ │
+│ │        │ clause prevents a prisoner who has been subjected to prison discipline from being convicted of  │ │
+│ │        │ a crime arising out of the same incident, whether there has been a denial of a speedy trial,    │ │
+│ │        │ whether a statement made to the warden without Miranda warnings was admissible, whether it was  │ │
+│ │        │ error to permit it to be disclosed that the alleged crime occurred while defendant was in       │ │
+│ │        │ prison, and whether interference by the trialjustice denied defendant a fair trial.\nOn August  │ │
+│ │        │ 6, 1971, at the State prison, a prisoner (Staples) suffered puncture-type wounds in his abdomen │ │
+│ │        │ and back. Defendant was a prisoner at the institution serving a sentence for assault with       │ │
+│ │        │ intent to murder a police officer. The wounded man said he saw an ice pick in defendant\u2019s  │ │
+│ │        │ hands. The victim was taken to the Concord Hospital. The warden testified that sometime later   │ │
+│ │        │ someone from the hospital telephoned the prison to find out what kind of weapon had been used   │ │
+│ │        │ and to locate it. The warden went to a segregation room where defendant was confined and asked  │ │
+│ │        │ what instrument had been used. Defendant replied that it was an ice pick and that he had thrown │ │
+│ │        │ it away. This evidence was introduced subject to exception at defendant\u2019s trial. That same │ │
+│ │        │ night, defendant was placed in solitary confinement until September 3,1971, and thereafter      │ │
+│ │        │ following an assault on another inmate, he was placed indefinitely in punitive segregation.\nOn │ │
+│ │        │ May 2, 1972, defendant filed a civil rights action against the warden in the United States      │ │
+│ │        │ District Court for the District of New Hampshire, in which he sought to enjoin further punitive │ │
+│ │        │ segregation. On February 23, 1973, the court ruled that Collins had been deprived of his        │ │
+│ │        │ constitutional rights and ordered his release from punitive segregation and suggested a         │ │
+│ │        │ disciplinary hearing meeting due process requirements. Collins v. Hancock, 354 F. Supp. 1253    │ │
+│ │        │ (D.N.H. 1973).\nOn October 17, 1972, Collins was indicted for aggravated assault on Staples on  │ │
+│ │        │ August 6, 1971. The case was set to be tried on December 18, 1972. On December 14, 1972, the    │ │
+│ │        │ State moved for a continuance in order to complete proceedings to obtain a prisoner from        │ │
+│ │        │ another State as a witness under RSA 613-A:6 (1959). Trial began on May 2, 1973, before Grant,  │ │
+│ │        │ J. Collins was found guilty and sentenced to not more than ten nor less than five years to run  │ │
+│ │        │ consecutively with the sentence he was then serving. All questions of law raised by the         │ │
+│ │        │ defendant were transferred by Loughlin, J.\nI. Double Jeopardy\nDefendant claims that, his      │ │
+│ │        │ rights under the double jeopardy clauses of both the Constitutions of the United States and     │ │
+│ │        │ this State have been violated since he is being punished twice for the same act. Defendant      │ │
+│ │        │ misconceives the reach of the double jeopardy clauses. They do not prevent one from being       │ │
+│ │        │ punished twice for the same act, but from being tried and convicted for the same offense. Breed │ │
+│ │        │ v. Jones, 421 U.S. 519 (1975). A single act may constitute more than one offense. Gore v.       │ │
+│ │        │ United States, 357 U.S. 386 (1958). The incident of August 6, 1971, was a breach of prison      │ │
+│ │        │ discipline and also constituted a crime under State law. The discipline meted out by prison     │ │
+│ │        │ authorities in the form of solitary confinement did not put defendant in jeopardy so as to bar  │ │
+│ │        │ his prosecution for the criminal offense. People v. Eggleston, 255 Cal. App. 2d 337, 63 Cal.    │ │
+│ │        │ Rptr. 104 (1967); Patterson v. United States, 183 F.2d 327 (4th Cir. 1950); Mullican v. United  │ │
+│ │        │ States, 252 F.2d 398 (5th Cir. 1958). Defendant\u2019s reliance on Waller v. Florida, 397 U.S.  │ │
+│ │        │ 387 (1970), is misplaced. The narrow holding of that case only prohibited two courts deriving   │ │
+│ │        │ their power from the same source from placing a subject on trial for the same offense.\nII.     │ │
+│ │        │ Speedy Trial\nThe offense occurred on August 6, 1971. Defendant was indicted on October 17,     │ │
+│ │        │ 1972. His case was set to be tried on December 18, 1972, but due to the continuance already     │ │
+│ │        │ mentioned was begun on May 2, 1973. Defendant does not argue that the time between indictment   │ │
+│ │        │ and trial deprived him of his right but rather that his being placed in solitary confinement    │ │
+│ │        │ constituted an arrest and that the time began to run from that time. It is true that the speedy │ │
+│ │        │ trial right attaches at the time of arrest or indictment, whichever occurs first. United States │ │
+│ │        │ v. Parish, 468 F.2d 1129 (D.C. Cir. 1972); ABA Standards Relating to Speedy Trial \u00a7 2.2    │ │
+│ │        │ (Approved Draft 1967). However, his solitary confinement did not constitute                     │ │
+│ │        │                                                                                                 │ │
+│ └────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────── Response ──────────────────────────────────────────────────╮
+│ Here is the list of extracted entities:                                                                      │
+│                                                                                                              │
+│ Judge/Justice; Grimes, J.; Grant, J.; Loughlin, J.                                                           │
+│ Precedent Cited; Breed v. Jones, 421 U.S. 519 (1975); Gore v. United States, 357 U.S. 386 (1958); People v.  │
+│ Eggleston, 255 Cal. App. 2d 337, 63 Cal. Rptr. 104 (1967); Patterson v. United States, 183 F.2d 327 (4th     │
+│ Cir. 1950); Mullican v. United States, 252 F.2d 398 (5th Cir. 1958); Waller v. Florida, 397 U.S. 387 (1970)  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Extracting entities... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╺━━━━━━━━━  75% -:--:--ERROR:root:Error parsing line <<<Here is the list of extracted entities:>>>
+ERROR:root:Error parsing line <<<>>>
+ERROR:root:Error parsing line <<<Judge/Justice; Grimes, J.; Grant, J.; Loughlin, J.>>>
+ERROR:root:Error parsing line <<<Precedent Cited; Breed v. Jones, 421 U.S. 519 (1975); Gore v. United States, 357 U.S. 386 (1958); People v. Eggleston, 255 Cal. App. 2d 337, 63 Cal. Rptr. 104 (1967); Patterson v. United States, 183 F.2d 327 (4th Cir. 1950); Mullican v. United States, 252 F.2d 398 (5th Cir. 1958); Waller v. Florida, 397 U.S. 387 (1970)>>>
+Found 0 triples in chunk 1 of 2
+╭──────────────────────────────────────────── complete_simple call ────────────────────────────────────────────╮
+│                                                                                                              │
+│     model_id: ollama:llama3.2                                                                                │
+│     temperature: 0.75                                                                                        │
+│                                                                                                              │
+│                                                   Messages                                                   │
+│ ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Role   ┃ Content                                                                                         ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ system │ You are an entity extractor                                                                     │ │
+│ ├────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤ │
+│ │ user   │ Below is a list of entity categories:                                                           │ │
+│ │        │                                                                                                 │ │
+│ │        │ Judge/Justice: The name of the judge or justice involved in the case, including their role      │ │
+│ │        │ (e.g., trial judge, appellate judge, presiding justice).                                        │ │
+│ │        │ Precedent Cited: Previous case law referred to in the case.                                     │ │
+│ │        │                                                                                                 │ │
+│ │        │ Given this list of entity categories, you will be asked to extract entities belonging to these  │ │
+│ │        │ categories from a text passage.                                                                 │ │
+│ │        │ Consider only the list of entity categories above; do not extract any additional entities.      │ │
+│ │        │ For each entity found, list the category and the entity, separated by a semicolon.              │ │
+│ │        │ Do not use the words "Entity" or "Category".                                                    │ │
+│ │        │                                                                                                 │ │
+│ │        │ Find the entities in the following text, and list them in the format specified above:           │ │
+│ │        │                                                                                                 │ │
+│ │        │  an arrest for the crime with which he was later indicted. His solitary confinement was not for │ │
+│ │        │ the purpose of having him available to answer for the commission of this crime (RSA 594:1       │ │
+│ │        │ (1965); State v. Hutton, 108 N.H. 279, 285, 235 A.2d 117, 121 (1967); State v. Murray, 106 N.H. │ │
+│ │        │ 71, 73, 205 A.2d 29, 30 (1964)), but rather was a matter of prison discipline. Although the     │ │
+│ │        │ time does not start to run with regard to the right to a speedy trial until the defendant is    │ │
+│ │        │ charged, due process may require dismissal if the delay in prosecution caused actual prejudice  │ │
+│ │        │ to defendant\u2019s right to a fair trial. United States v. Marion, 404 U.S. 307 (1971).        │ │
+│ │        │ Defendant claims such prejudice but he has proved none. He has not been able to show that his   │ │
+│ │        │ inability to find more than one witness who remembered the event and that his inability to      │ │
+│ │        │ establish a defense of self-defense were the result of the delay in obtaining an indictment.    │ │
+│ │        │ The trial court\u2019s denial of defendant\u2019s motion to dismiss on this ground includes an  │ │
+│ │        │ implied finding of no prejudice, which is supported by the record.\nIII. The Prison As the      │ │
+│ │        │ Scene of the Crime\nWe find without merit defendant\u2019s claim that revelation to the jury    │ │
+│ │        │ that the crime occurred in prison and thereby the fact that defendant had a previous felony     │ │
+│ │        │ conviction denied him a fair trial. We agree with the trial court that it would have been next  │ │
+│ │        │ to impossible to conduct the trial without reference to the scene of the crime and failure to   │ │
+│ │        │ attempt to do so was not an abuse of discretion. In any event, the defendant\u2019s prior       │ │
+│ │        │ record was properly admitted under limiting instructions on the question of his credibility as  │ │
+│ │        │ a witness when he took the stand.\nIV. Conduct of the Trial Justice\nAlso without merit is      │ │
+│ │        │ defendant\u2019s claim that the trial justice showed prejudice by not allowing him to put the   │ │
+│ │        │ court reporter at another hearing on the stand regarding prior statements of the warden, a      │ │
+│ │        │ prosecution witness, and by interrupting defendant\u2019s counsel during his opening statement  │ │
+│ │        │ on the ground he was arguing when there had been no objection by the prosecution. As to the     │ │
+│ │        │ first incident, the court properly exercised its discretion in requiring use of the             │ │
+│ │        │ stenographic record in cross-examination of the witness. When the record became available       │ │
+│ │        │ through the notes of the court reporter, the court properly required that the warden be         │ │
+│ │        │ interrogated first as to his prior testimony which was claimed to be inconsistent with his      │ │
+│ │        │ testimony at trial. After this was done, defense counsel declined the opportunity to call the   │ │
+│ │        │ court reporter. We find no error or prejudice resulting from the manner the matter was handled  │ │
+│ │        │ by the court.\nAlthough operating in the adversary system, trial judges are not mere referees.  │ │
+│ │        │ They have the right and in fact the duty to see that trials are conducted in a fair and orderly │ │
+│ │        │ manner, and may on their own, without waiting for objection from opposing counsel, control the  │ │
+│ │        │ conduct of counsel and the introduction of evidence. Such action does not demonstrate prejudice │ │
+│ │        │ but rather a proper concern for the real purpose of the adversary system. See ABA Standards     │ │
+│ │        │ Relating to The Function of the Trial Judge \u00a7 1.1 (Approved Draft 1972).\nV. The           │ │
+│ │        │ Statements to the Warden\nDefendant\u2019s claim relating to the admission of the statements    │ │
+│ │        │ made by him to the warden on the night of the incident in question is without substance.\nWe    │ │
+│ │        │ need not and do not decide whether there had been a valid waiver of defendant\u2019s fifth      │ │
+│ │        │ amendment rights because as the trial developed the defendant could not have been prejudiced by │ │
+│ │        │ the admission of the statements. There was ample independent evidence that defendant stabbed    │ │
+│ │        │ the victim so that the admissions of the defendant were not required to make out a prima facie  │ │
+│ │        │ case. Defense counsel in his opening stated that there was no denial that there had been an     │ │
+│ │        │ \u201coccurrence\u201d and that it was a matter of self- defense. The defendant took the stand  │ │
+│ │        │ and freely admitted that he had stabbed the victim a number of times with a weapon which from   │ │
+│ │        │ his description resembled an ice pick. The fact that defendant stabbed the victim was not       │ │
+│ │        │ therefore a contested issue in the case and there is no possibility that the admission of the   │ │
+│ │        │ statement could have prejudiced the defendant.\nExceptions overruled.\nAll concurred."          │ │
+│ │        │                                                                                                 │ │
+│ └────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────────────────────────────────────── Response ──────────────────────────────────────────────────╮
+│ Here are the entities extracted from the text passage:                                                       │
+│                                                                                                              │
+│ Judge/Justice; 279, 285                                                                                      │
+│ Judge/Justice; 71, 73                                                                                        │
+│ United States v. Marion;                                                                                     │
+│ ABA Standards Relating to The Function of the Trial Judge                                                    │
+│ Presiding Justice                                                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Extracting entities... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╺━━━━━━━━━  75% -:--:--ERROR:root:Error parsing line <<<Here are the entities extracted from the text passage:>>>
+ERROR:root:Error parsing line <<<>>>
+WARNING:root:Skipping line <<<United States v. Marion; >>> due to unknown role: United States v. Marion
+ERROR:root:Error parsing line <<<ABA Standards Relating to The Function of the Trial Judge >>>
+ERROR:root:Error parsing line <<<Presiding Justice>>>
+Found 2 triples in chunk 2 of 2
+Wrote entity triples to entities.csv
+Extracting entities... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
