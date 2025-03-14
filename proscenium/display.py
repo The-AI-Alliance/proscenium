@@ -6,7 +6,7 @@ from rich.table import Table
 from rich.text import Text
 from rich.panel import Panel
 from rich.console import Group
-from pymilvus import MilvusClient, DataType
+from pymilvus import MilvusClient
 
 def print_header() -> None:
     print("[bold]Proscenium[/bold]", ":performing_arts:")
@@ -89,3 +89,84 @@ def display_collection(client: MilvusClient, collection_name: str) -> None:
         stats_panel), title=f"Collection {collection_name}")
 
     print(panel)
+
+def messages_table(messages: list) -> Table:
+
+    table = Table(title="Messages in Chat Context", show_lines=True)
+    table.add_column("Role", justify="left", style="blue")
+    table.add_column("Content", justify="left", style="green")
+    for message in messages:
+        if type(message) is dict:
+            role = message["role"]
+            content = ""
+            if role == 'tool':
+                content = f"""tool call id = {message['tool_call_id']}
+fn name = {message['name']}
+result = [black]{message['content']}"""
+            elif role == 'assistant':
+                content = f"""{str(message)}"""
+            else:
+                content = message['content']
+            table.add_row(role, content)
+        else:
+            role = message.role
+            content = ""
+            if role == 'tool':
+                content = f"""tool call id = {message.tool_call_id}
+fn name = {message.name}
+result = [black]{message['content']}"""
+            elif role == 'assistant':
+                content = f"""{str(message)}"""
+            else:
+                content = message.content
+            table.add_row(role, content)
+
+    return table
+
+def complete_with_tools_panel(
+    title: str,
+    model_id: str,
+    tool_desc_list: list,
+    messages: list,
+    temperature: float) -> Panel:
+
+    text = Text(f"""
+model_id: {model_id}
+temperature: {temperature}
+""")
+
+    panel = Panel(Group(
+        text,
+        function_descriptions_table(tool_desc_list),
+        messages_table(messages)), title=title)
+
+    return panel
+
+def parameters_table(parameters: list[dict]) -> Table:
+    table = Table(title="Parameters", show_lines=False)
+    table.add_column("name", justify="left", style="blue")
+    table.add_column("type", justify="left", style="green")
+    table.add_column("description", justify="left", style="green")
+    for name, props in parameters['properties'].items():
+        table.add_row(name, props['type'], props['description'])    
+    #"\n".join([f"{k}: {v}" for k, v in fn['parameters'].items()]
+    return table
+
+def function_descriptions_table(function_descriptions: list[dict]) -> Table:
+
+    table = Table(title="Function Descriptions", show_lines=True)
+    table.add_column("type", justify="left", style="blue")
+    table.add_column("name", justify="left", style="blue")
+    table.add_column("description", justify="left", style="green")
+    table.add_column("parameters", justify="left", style="green")
+
+    for fd in function_descriptions:
+        fn = fd['function']
+        table.add_row(
+            fd['type'],
+            fn['name'],
+            fn['description'],
+            parameters_table(fn['parameters'])
+        )
+
+    return table
