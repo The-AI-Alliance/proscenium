@@ -5,11 +5,11 @@ from rich.progress import Progress
 import csv
 
 from proscenium.know import knowledge_graph_client
-from proscenium.display import print_header
+from proscenium.display import header
 
 import example.graph_rag.config as config
 
-print_header()
+print(header())
 
 print("Parsing triples from", config.entity_csv_file)
 

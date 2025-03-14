@@ -6,7 +6,7 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
-from proscenium.display import print_header
+from proscenium.display import header
 from proscenium.complete import apply_tools
 from proscenium.invoke import process_tools
 
@@ -14,7 +14,7 @@ tools = [Addition, Subtraction, Multiplication, Division]
 
 tool_map, tool_desc_list = process_tools(tools)
 
-print_header()
+print(header())
 
 answer = apply_tools(
     model_id = "ollama:llama3.2",

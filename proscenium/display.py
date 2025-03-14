@@ -9,41 +9,52 @@ from rich.console import Group
 
 from pymilvus import MilvusClient
 
-def print_header() -> None:
-    print("[bold]Proscenium[/bold]", ":performing_arts:")
-    print("[bold]The AI Alliance[/bold]")
+def header() -> Text:
+    text = Text("""[bold]Proscenium[/bold] :performing_arts:
+[bold]The AI Alliance[/bold]""")
     # TODO version, timestamp, ...
-    print()
+    return text
 
-def display_chunk_hits(
+def chunk_hits_table(
     chunks: list[dict]
-):
+) -> Table:
+
     table = Table(title="Closest Chunks", show_lines=True)
     table.add_column("id", justify="right", style="cyan")
     table.add_column("distance", style="magenta")
     table.add_column("entity.text", justify="right", style="green")
     for chunk in chunks:
         table.add_row(str(chunk['id']), str(chunk['distance']), chunk['entity']['text'])
-    print(table)
+    return table
 
-def display_triples(triples: List[tuple[str, str, str]], title: str) -> None:
+def triples_table(
+    triples: List[tuple[str, str, str]],
+    title: str) -> Table:
+
     table = Table(title=title, show_lines=False)
     table.add_column("Subject", justify="left", style="blue")
     table.add_column("Predicate", justify="left", style="green")
     table.add_column("Object", justify="left", style="red")
     for triple in triples:
         table.add_row(*triple)
-    print(table)
 
-def display_pairs(subject_predicate_pairs: List[tuple[str, str]], title: str) -> None:
+    return table
+
+def pairs_table(
+    subject_predicate_pairs: List[tuple[str, str]],
+    title: str) -> Table:
+
     table = Table(title=title, show_lines=False)
     table.add_column("Subject", justify="left", style="blue")
     table.add_column("Predicate", justify="left", style="green")
     for pair in subject_predicate_pairs:
         table.add_row(*pair)
-    print(table)
 
-def display_collection(client: MilvusClient, collection_name: str) -> None:
+    return table
+
+def collection_panel(
+    client: MilvusClient,
+    collection_name: str) -> Panel:
 
     stats = client.get_collection_stats(collection_name)
     desc = client.describe_collection(collection_name)
@@ -89,7 +100,7 @@ def display_collection(client: MilvusClient, collection_name: str) -> None:
         fields_table,
         stats_panel), title=f"Collection {collection_name}")
 
-    print(panel)
+    return panel
 
 def messages_table(messages: list) -> Table:
 

@@ -151,7 +151,7 @@ def evaluate_tool_calls(
     return new_messages
 
 
-def apply_tools_step1(
+def complete_for_tool_applications(
     model_id: str,
     messages: list,
     tool_desc_list: list,
@@ -215,7 +215,7 @@ def apply_tools(
         {"role": "user", "content": message},
     ]
 
-    response = apply_tools_step1(
+    response = complete_for_tool_applications(
         model_id,
         messages,
         tool_desc_list,
