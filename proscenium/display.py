@@ -10,8 +10,9 @@ from rich.console import Group
 from pymilvus import MilvusClient
 
 def header() -> Text:
-    text = Text("""[bold]Proscenium[/bold] :performing_arts:
-[bold]The AI Alliance[/bold]""")
+    text = Text()
+    text.append("Proscenium 🎭\n", style="bold")
+    text.append("The AI Alliance\n", style="bold")
     # TODO version, timestamp, ...
     return text
 
