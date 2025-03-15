@@ -34,7 +34,8 @@ def extract_triples_from_document(
     doc: Document
     ) -> List[tuple[str, str, str]]:
 
-    config.doc_display(doc)
+    print(config.doc_as_rich(doc))
+    print()
 
     doc_triples = []
 

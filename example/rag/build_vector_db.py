@@ -11,7 +11,7 @@ from proscenium.read import load_file
 from proscenium.chunk import documents_to_chunks_by_characters
 from proscenium.vector_database import add_chunks_to_vector_db
 from proscenium.vector_database import collection_name
-from proscenium.display import collection_panel
+from proscenium.display.milvus import collection_panel
 
 import example.rag.config as config
 

@@ -50,7 +50,7 @@ from rich.text import Text
 from aisuite import Client
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
-from proscenium.display import complete_with_tools_panel
+from proscenium.display.tools import complete_with_tools_panel
 
 provider_configs = {
     # TODO expose this

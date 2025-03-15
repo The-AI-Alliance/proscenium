@@ -6,7 +6,7 @@ from rich import print
 from rich.panel import Panel
 
 from proscenium.display import header
-from proscenium.display import chunk_hits_table
+from proscenium.display.milvus import chunk_hits_table
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.vector_database import closest_chunks

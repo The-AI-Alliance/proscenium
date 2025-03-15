@@ -9,7 +9,8 @@ from proscenium.complete import complete_simple
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.know import knowledge_graph_client
-from proscenium.display import header, triples_table, pairs_table
+from proscenium.display import header
+from proscenium.display.neo4j import triples_table, pairs_table
 
 import example.graph_rag.util as util
 import example.graph_rag.config as config
