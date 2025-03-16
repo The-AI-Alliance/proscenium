@@ -2,7 +2,6 @@
 from typing import List
 
 from pathlib import Path
-from rich import print
 from rich.panel import Panel
 from rich.prompt import Prompt
 from stringcase import snakecase, lowercase
