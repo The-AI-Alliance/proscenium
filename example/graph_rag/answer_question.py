@@ -30,12 +30,14 @@ driver = knowledge_graph_client(
     config.neo4j_username,
     config.neo4j_password)
 
-print(Panel(config.question, title="Question"))
+question = config.get_user_question()
+
+print(Panel(question, title="Question"))
 
 extraction_response = complete_simple(
     config.model_id,
     util.extraction_system_prompt,
-    util.extraction_template.format(text = config.question),
+    util.extraction_template.format(text = question),
     rich_output = True)
 
 print("\nExtracting triples from extraction response")
@@ -61,7 +63,7 @@ if len(object_names) > 0:
 
     user_prompt = config.graphrag_prompt_template.format(
         case_text = doc.page_content,
-        question = config.question)
+        question = question)
 
     response = complete_simple(
         config.model_id,

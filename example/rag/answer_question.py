@@ -1,6 +1,4 @@
 
-query = "What did Hermes say to Prometheus about giving fire to humans?"
-
 import os
 from rich import print
 from rich.panel import Panel
@@ -18,6 +16,8 @@ import example.rag.config as config
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 print(header())
+
+query = config.get_user_question()
 
 print(Panel(query, title="User"))
 
