@@ -6,6 +6,7 @@ from neo4j import Driver
 import csv
 
 from rich import print
+from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress
 
@@ -171,6 +172,36 @@ def load_entity_graph(
                     progress.update(task_load, advance=1)
 
             driver.close()
+
+def show_entity_graph(driver: Driver):
+
+    with driver.session() as session:
+
+        result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel") # all relationships
+        relations = [record["rel"] for record in result]
+        unique_relations = list(set(relations))
+        table = Table(title="Relationship Types", show_lines=False)
+        table.add_column("Relationship Type", justify="left", style="blue")
+        for r in unique_relations:
+            table.add_row(r)
+        print(table)
+
+        result = session.run("MATCH (n) RETURN n.name AS name") # all nodes
+        table = Table(title="Nodes", show_lines=False)
+        table.add_column("Node Name", justify="left", style="green")
+        for record in result:
+            table.add_row(record['name'])
+        print(table)
+
+        for r in unique_relations:
+            cypher = f"MATCH (s)-[:{r}]->(o) RETURN s.name, o.name"
+            result = session.run(cypher)
+            table = Table(title=f"Relation: {r}", show_lines=False)
+            table.add_column("Subject Name", justify="left", style="blue")
+            table.add_column("Object Name", justify="left", style="purple")
+            for record in result:
+                table.add_row(record['s.name'], record['o.name'])
+            print(table)
 
 def load_entity_resolver(
     driver: Driver,

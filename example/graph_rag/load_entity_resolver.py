@@ -1,8 +1,6 @@
 
 from rich import print
 
-from langchain.docstore.document import Document
-
 from proscenium.display import header
 from proscenium.vector_database import create_vector_db
 from proscenium.vector_database import embedding_function
@@ -26,3 +24,6 @@ driver = knowledge_graph_client(
     config.neo4j_password)
 
 util.load_entity_resolver(driver, vector_db_client, embedding_fn, collection_name)
+
+driver.close()
+vector_db_client.close()

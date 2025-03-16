@@ -32,3 +32,6 @@ if answer:
     print(Panel(answer, title="Answer"))
 else:
     print("No objects found for entity role pairs")
+
+driver.close()
+vector_db_client.close()

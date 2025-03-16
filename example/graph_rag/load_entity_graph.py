@@ -15,3 +15,5 @@ driver = knowledge_graph_client(
     config.neo4j_password)
 
 util.load_entity_graph(config.entity_csv_file)
+
+driver.close()
