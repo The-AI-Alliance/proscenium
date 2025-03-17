@@ -27,11 +27,27 @@ driver = knowledge_graph_client(
     config.neo4j_password)
 
 question = config.get_user_question()
-answer = util.answer_question(question, driver, vector_db_client, embedding_fn)
+
+answer = util.answer_question(
+    question,
+    config.hf_dataset_id,
+    config.hf_dataset_column,
+    config.num_docs,
+    config.doc_as_object,
+    config.model_id,
+    config.extraction_template,
+    config.system_prompt,
+    config.graphrag_prompt_template,
+    driver,
+    vector_db_client,
+    embedding_fn,
+    config.matching_objects_query,
+    config.predicates)
+
 if answer:
     print(Panel(answer, title="Answer"))
 else:
-    print("No objects found for entity role pairs")
+    print("No answer")
 
 driver.close()
 vector_db_client.close()

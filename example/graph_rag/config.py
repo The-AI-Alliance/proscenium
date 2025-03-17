@@ -7,6 +7,9 @@ from rich.prompt import Prompt
 from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
+from proscenium.parse import PartialFormatter
+from proscenium.parse import raw_extraction_template
+
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"
 num_docs = 4
@@ -55,13 +58,19 @@ predicates = {
     "Precedent Cited": "Previous case law referred to in the case.",
 }
 
+partial_formatter = PartialFormatter()
+
+extraction_template = partial_formatter.format(
+    raw_extraction_template,
+    predicates = "\n".join([f"{k}: {v}" for k, v in predicates.items()]))
+
 entity_csv_file = Path("entities.csv")
 
 neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
 neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
 
-def add_triple(tx, entity, role, case):
+def add_triple(tx, entity: str, role: str, case: str) -> None:
     query = (
         "MERGE (e:Entity {name: $entity}) "
         "MERGE (c:Case {name: $case}) "
