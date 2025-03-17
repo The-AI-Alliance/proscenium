@@ -4,19 +4,18 @@ from rich import print
 from proscenium.know import knowledge_graph_client
 from proscenium.display import header
 
-import example.graph_rag.config as config
-import example.graph_rag.util as util
+import example.graph_rag as graph_rag
 
 print(header())
 
 driver = knowledge_graph_client(
-    config.neo4j_uri,
-    config.neo4j_username,
-    config.neo4j_password)
+    graph_rag.config.neo4j_uri,
+    graph_rag.config.neo4j_username,
+    graph_rag.config.neo4j_password)
 
-util.load_entity_graph(
+graph_rag.load_entity_graph(
     driver,
-    config.entity_csv_file,
-    config.add_triple)
+    graph_rag.config.entity_csv_file,
+    graph_rag.config.add_triple)
 
 driver.close()

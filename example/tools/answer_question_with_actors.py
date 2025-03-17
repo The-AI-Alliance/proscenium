@@ -8,9 +8,9 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
-import example.tools.util as util
+import example.tools as tools
 
-abacus_actor_class = util.tool_applier_actor_class(
+abacus_actor_class = tools.tool_applier_actor_class(
     tools = [Addition, Subtraction, Multiplication, Division],
     system_message = "Perform any referenced arithmetic.",
     model_id = "ollama:llama3.2",

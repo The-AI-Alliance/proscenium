@@ -10,7 +10,7 @@ from gofannon.basic_math.division import Division
 from proscenium.display import header
 from proscenium.invoke import process_tools
 
-import example.tools.util as util
+import example.tools as tools
 
 tools = [Addition, Subtraction, Multiplication, Division]
 
@@ -25,7 +25,7 @@ question = Prompt.ask(
     default = "What is 33312-457? And what is 3+3?"
     )
 
-answer = util.apply_tools(
+answer = tools.apply_tools(
     model_id = "ollama:llama3.2",
     # model_id = "ollama:granite3.2",
     # model_id = "openai:gpt-4o",
