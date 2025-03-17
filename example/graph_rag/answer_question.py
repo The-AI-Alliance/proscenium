@@ -1,15 +1,16 @@
 
 import logging
-import sys
 from rich import print
 from rich.panel import Panel
 
-from proscenium.parse import get_triples_from_extract
-from proscenium.complete import complete_simple
 from proscenium.vector_database import embedding_function
 from proscenium.vector_database import vector_db
 from proscenium.know import knowledge_graph_client
+<<<<<<< HEAD
+from proscenium.display import header
+=======
 from proscenium.display import header, triples_table, pairs_table
+>>>>>>> main
 
 import example.graph_rag.util as util
 import example.graph_rag.config as config
@@ -29,10 +30,25 @@ driver = knowledge_graph_client(
     config.neo4j_username,
     config.neo4j_password)
 
-print(Panel(config.question, title="Question"))
+question = config.get_user_question()
 
-extraction_response = complete_simple(
+answer = util.answer_question(
+    question,
+    config.hf_dataset_id,
+    config.hf_dataset_column,
+    config.num_docs,
+    config.doc_as_object,
     config.model_id,
+<<<<<<< HEAD
+    config.extraction_template,
+    config.system_prompt,
+    config.graphrag_prompt_template,
+    driver,
+    vector_db_client,
+    embedding_fn,
+    config.matching_objects_query,
+    config.predicates)
+=======
     util.extraction_system_prompt,
     util.extraction_template.format(text = config.question),
     rich_output = True)
@@ -69,8 +85,12 @@ if len(object_names) > 0:
         rich_output = True)
 
     print(Panel(response, title="Answer"))
+>>>>>>> main
 
+if answer:
+    print(Panel(answer, title="Answer"))
 else:
+    print("No answer")
 
-    print("No objects found for entity role pairs")
-    sys.exit(1)
+driver.close()
+vector_db_client.close()

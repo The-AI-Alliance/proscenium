@@ -2,10 +2,13 @@
 from typing import List
 
 from pathlib import Path
-from rich import print
 from rich.panel import Panel
+from rich.prompt import Prompt
 from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
+
+from proscenium.parse import PartialFormatter
+from proscenium.parse import raw_extraction_template
 
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"
@@ -13,7 +16,7 @@ num_docs = 4
 # initial version looked at only: doc.metadata["id"] in ['4440632', '4441078']
 
 #model_id = "openai:gpt-4o"
-#model_id = "ollama:granite3.1-dense:2b"
+#model_id = "ollama:granite3.2"
 model_id = "ollama:llama3.2"
 
 case_template = """
@@ -33,10 +36,11 @@ Last Updated: {last_updated}, Provenance: {provenance}
 Id: {id}
 """ # leaves out head_matter
 
-def doc_display(doc: Document):
+def doc_as_rich(doc: Document):
+    
     case_str = case_template.format_map(doc.metadata)
-    print(Panel(case_str, title=doc.metadata['name_abbreviation']))
-    print()
+
+    return Panel(case_str, title=doc.metadata['name_abbreviation'])
 
 def doc_as_object(doc: Document) -> str:
     return doc.metadata['name_abbreviation']
@@ -54,13 +58,19 @@ predicates = {
     "Precedent Cited": "Previous case law referred to in the case.",
 }
 
+partial_formatter = PartialFormatter()
+
+extraction_template = partial_formatter.format(
+    raw_extraction_template,
+    predicates = "\n".join([f"{k}: {v}" for k, v in predicates.items()]))
+
 entity_csv_file = Path("entities.csv")
 
 neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
 neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
 
-def add_triple(tx, entity, role, case):
+def add_triple(tx, entity: str, role: str, case: str) -> None:
     query = (
         "MERGE (e:Entity {name: $entity}) "
         "MERGE (c:Case {name: $case}) "
@@ -92,4 +102,11 @@ Answer the question using the following text from one case:
 Question: {question}
 """
 
-question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+def get_user_question() -> str:
+
+    question = Prompt.ask(
+        f"What is your question about {hf_dataset_id}?",
+        default = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+        )
+
+    return question

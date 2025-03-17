@@ -1,17 +1,15 @@
 
 from rich import print
 
-from langchain.docstore.document import Document
-
 from proscenium.display import header
 from proscenium.vector_database import create_vector_db
-from proscenium.vector_database import add_chunks_to_vector_db
 from proscenium.vector_database import embedding_function
 from proscenium.know import knowledge_graph_client
 from proscenium.vector_database import collection_name
 from proscenium.display import collection_panel
 
 import example.graph_rag.config as config
+import example.graph_rag.util as util
 
 print(header())
 
@@ -26,12 +24,7 @@ driver = knowledge_graph_client(
     config.neo4j_username,
     config.neo4j_password)
 
-names = []
-with driver.session() as session:
-    result = session.run("MATCH (n) RETURN n.name AS name")
-    new_names = [Document(record["name"]) for record in result]
-    names.extend(new_names)
+util.load_entity_resolver(driver, vector_db_client, embedding_fn, collection_name)
 
-info = add_chunks_to_vector_db(vector_db_client, embedding_fn, names)
-print(info['insert_count'], "chunks inserted")
-print(collection_panel(vector_db_client, collection_name))
+driver.close()
+vector_db_client.close()
