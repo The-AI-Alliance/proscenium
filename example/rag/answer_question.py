@@ -23,4 +23,5 @@ vector_db_client = vector_db(config.milvus_uri)
 print("Vector db at uri", config.milvus_uri)
 
 answer = util.answer_question(query, config.model_id, vector_db_client, embedding_fn)
+
 print(Panel(answer, title="Assistant"))

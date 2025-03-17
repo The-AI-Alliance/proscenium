@@ -200,4 +200,3 @@ def complete_with_tool_results(
 
     return response.choices[0].message.content
 
-    

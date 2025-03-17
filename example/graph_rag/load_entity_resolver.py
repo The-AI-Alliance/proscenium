@@ -6,6 +6,7 @@ from proscenium.vector_database import create_vector_db
 from proscenium.vector_database import embedding_function
 from proscenium.know import knowledge_graph_client
 from proscenium.vector_database import collection_name
+from proscenium.display import collection_panel
 
 import example.graph_rag.config as config
 import example.graph_rag.util as util
