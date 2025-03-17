@@ -13,7 +13,7 @@ def messages_table(messages: list) -> Table:
             if role == 'tool':
                 content = f"""tool call id = {message['tool_call_id']}
 fn name = {message['name']}
-result = [black]{message['content']}"""
+result = {message['content']}"""
             elif role == 'assistant':
                 content = f"""{str(message)}"""
             else:
@@ -25,7 +25,7 @@ result = [black]{message['content']}"""
             if role == 'tool':
                 content = f"""tool call id = {message.tool_call_id}
 fn name = {message.name}
-result = [black]{message['content']}"""
+result = {message['content']}"""
             elif role == 'assistant':
                 content = f"""{str(message)}"""
             else:
