@@ -283,7 +283,7 @@ def answer_question(
         doc = full_doc_by_id(object_names[0], hf_dataset_id, hf_dataset_column, num_docs, doc_as_object)
 
         user_prompt = graphrag_prompt_template.format(
-            case_text = doc.page_content,
+            document_text = doc.page_content,
             question = question)
 
         response = complete_simple(
