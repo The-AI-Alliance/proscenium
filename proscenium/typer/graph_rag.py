@@ -10,11 +10,11 @@ from proscenium.vector_database import vector_db
 from proscenium.know import knowledge_graph_client
 from proscenium.vector_database import collection_name
 
-import example.graph_rag.config as config
-
-from example.graph_rag import extract_entities, \
+from proscenium.scripts.graph_rag import extract_entities, \
     load_entity_graph, show_entity_graph, load_entity_resolver, \
     answer_question
+
+import proscenium.typer.config_graph_rag as config
 
 app = typer.Typer()
 

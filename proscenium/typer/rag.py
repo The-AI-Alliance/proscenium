@@ -9,10 +9,8 @@ from proscenium.vector_database import embedding_function
 from proscenium.vector_database import create_vector_db
 from proscenium.vector_database import vector_db
 
-from example.rag import answer_question, build_vector_db as bvd
-
-import example.rag.config as config
-
+from proscenium.scripts.rag import answer_question, build_vector_db as bvd
+import proscenium.typer.config_rag as config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 

@@ -10,10 +10,9 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
-from proscenium.display import header
 from proscenium.invoke import process_tools
 
-from example.tools import apply_tools, tool_applier_actor_class
+from proscenium.scripts.tools import apply_tools, tool_applier_actor_class
 
 app = typer.Typer()
 
@@ -22,7 +21,7 @@ model_id = "ollama:llama3.2"
 # model_id = "openai:gpt-4o"
 
 @app.command()
-def abacus():
+def ask():
 
     tools = [Addition, Subtraction, Multiplication, Division]
 
@@ -32,7 +31,7 @@ def abacus():
     question = Prompt.ask(
         f"What is your arithmetic question?",
         default = "What is 33312-457? And what is 3+3?"
-        )
+    )
 
     answer = apply_tools(
         model_id = model_id,
@@ -47,7 +46,7 @@ def abacus():
 
 
 @app.command()
-def abacus_actor():
+def ask_actor():
 
     abacus_actor_class = tool_applier_actor_class(
         tools = [Addition, Subtraction, Multiplication, Division],

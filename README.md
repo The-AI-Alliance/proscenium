@@ -1,4 +1,4 @@
-# Proscenium: Framing Agents as Actors
+# Proscenium: Framing Agents
 
 Proscenium establishes a modular analysis of AI "Agents".
 It is composed of several well-defined subsystems.
@@ -14,42 +14,43 @@ A few of the initial goals of this project include:
 ## Subsystems
 
 ```text
-+------------------------------------------------------------------------------+
-|                                     Scripts                                  |
-+------------------------------------------------------------------------------+
-|                                     Actors                                   |
-+------------+--+------------+--+--------------+--+-------+--+-------+--+------+
-|   Invoke   |  |  Complete  |  |   Remember   |  | Chunk |  | Parse |  | Load |
-+------------+  +------------+  +--------------+  +-------+  +-------+  +------+
-| APIs,      |  |  Inference |  | DB, RAM, ... |  | ...   |  | ...   |  | ...  |
-| Libraries, |  |  Providers |  +--------------+  +-------+  +-------+  +------+
-| ...        |  +------------+
-+------------+  |    LLMs    |
-                +------------+
+      +------------------------------------------------------------------------------+
+      |                                    Scripts                                   |
+      +------------------------------------------------------------------------------+
+      |                              Async IO & Actors (Aspirationally)              |
+      +------------+--+------------+--+--------------+--+-------+--+-------+--+------+
+VERBS |   Invoke   |  |  Complete  |  |   Remember   |  | Chunk |  | Parse |  | Load |
+      +------------+  +------------+  +--------------+  +-------+  +-------+  +------+
+      | APIs,      |  |  Inference |  | DB, RAM, ... |  | ...   |  | ...   |  | ...  |
+      | Libraries, |  |  Providers |  +--------------+  +-------+  +-------+  +------+
+      | ...        |  +------------+
+      +------------+  |    LLMs    |
+                      +------------+
 ```
 
 ## Methodology
 
-The purpose of this repository is to show several examples of these sub-systems
-working together in a way that mimics patterns highlighted in modern agentic frameworks.
+These subsystems of Prosenium can be composed to mimic
+patterns highlighted in modern agentic frameworks.
 
 The include
 
-- [Tool use](./example/tools/)
-- [RAG](./example/rag/)
-- [GraphRAG](./example/graph_rag/)
+- [Tool use](./proscenium/scripts/tools/)
+- [RAG](./proscenium/scripts/rag/)
+- [GraphRAG](./proscenium/scripts/graph_rag/)
 - Reflection (coming soon)
 
 Subsystem implementations used in these demos:
 
+- Complete (Inference)
+  - [AI Suite](https://github.com/andrewyng/aisuite)
+- Invoke (Functions)
+  - [Gofannon](https://github.com/The-AI-Alliance/gofannon)
+- Remember
+  - RAM: local module [`proscenium.remember`](./proscenium/remember.py)
+
 - Actors
   - [Thespian](https://thespianpy.com/)
-- Inference
-  - [AI Suite](https://github.com/andrewyng/aisuite)
-- Functions
-  - [Gofannon](https://github.com/The-AI-Alliance/gofannon)
-- Memory
-  - RAM: local module [`proscenium.memory`](proscenium/memory.py)
 
 ## Setup
 
@@ -64,7 +65,7 @@ python -m venv venv
 
 python -m pip install .
 
-python -m example.rag.build_vector_db
+python -m proscenium.cli --help
 ```
 
 or
@@ -76,9 +77,17 @@ cd proscenium
 
 docker compose -f .devcontainer/docker-compose.yml up
 
-docker exec -it devcontainer-devcontainer-1 sh -c "cd workspaces/proscenium && python -m example.rag.build_vector_db"
+docker exec -it devcontainer-devcontainer-1 sh -c "cd workspaces/proscenium && python -m proscenium.cli --help"
 ```
 
 or
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+
+## Command Line Interface
+
+Proscenium uses [Typer](https://github.com/fastapi/typer) to provide
+a command-line interface to some example applications built with
+Proscenium scripts and sub-systems.
+
+See the [CLI](./CLI.md) documentation.
