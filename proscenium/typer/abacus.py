@@ -10,7 +10,7 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
-from proscenium.invoke import process_tools
+from proscenium.verbs.invoke import process_tools
 
 from proscenium.scripts.tools import apply_tools, tool_applier_actor_class
 
