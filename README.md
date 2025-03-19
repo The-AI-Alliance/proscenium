@@ -39,7 +39,9 @@ The include
 - [RAG](./proscenium/scripts/rag.py)
 - [GraphRAG](./proscenium/scripts/graph_rag.py)
 
-Subsystem implementations used in these demos:
+## Implementations
+
+Verbs/Subsystem are currently implemented by:
 
 - Complete (Inference)
   - [AI Suite](https://github.com/andrewyng/aisuite)
@@ -48,8 +50,7 @@ Subsystem implementations used in these demos:
 - Remember
   - RAM: local module [`proscenium.remember`](./proscenium/verbs/remember.py)
 
-- Actors
-  - [Thespian](https://thespianpy.com/)
+There is an example of using [Thespian](https://thespianpy.com/) actors.
 
 ## Setup
 
