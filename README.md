@@ -35,10 +35,9 @@ patterns highlighted in modern agentic frameworks.
 
 The include
 
-- [Tool use](./proscenium/scripts/tools/)
-- [RAG](./proscenium/scripts/rag/)
-- [GraphRAG](./proscenium/scripts/graph_rag/)
-- Reflection (coming soon)
+- [Tool use](./proscenium/scripts/tools.py)
+- [RAG](./proscenium/scripts/rag.py)
+- [GraphRAG](./proscenium/scripts/graph_rag.py)
 
 Subsystem implementations used in these demos:
 
@@ -47,7 +46,7 @@ Subsystem implementations used in these demos:
 - Invoke (Functions)
   - [Gofannon](https://github.com/The-AI-Alliance/gofannon)
 - Remember
-  - RAM: local module [`proscenium.remember`](./proscenium/remember.py)
+  - RAM: local module [`proscenium.remember`](./proscenium/verbs/remember.py)
 
 - Actors
   - [Thespian](https://thespianpy.com/)
