@@ -2,7 +2,7 @@ import typer
 
 import logging
 from rich import print
-from proscenium.display import header
+from proscenium.verbs.display import header
 
 from proscenium.typer.abacus import app as abacus_app
 from proscenium.typer.rag import app as rag_app

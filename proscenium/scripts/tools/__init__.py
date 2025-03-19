@@ -8,8 +8,8 @@ from thespian.actors import Actor
 
 from gofannon.base import BaseTool
 
-from proscenium.complete import complete_for_tool_applications, evaluate_tool_calls, complete_with_tool_results
-from proscenium.invoke import process_tools
+from proscenium.verbs.complete import complete_for_tool_applications, evaluate_tool_calls, complete_with_tool_results
+from proscenium.verbs.invoke import process_tools
 
 def tool_applier_actor_class(
     tools: List[BaseTool],

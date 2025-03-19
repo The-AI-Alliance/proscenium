@@ -7,8 +7,8 @@ from rich.prompt import Prompt
 from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
-from proscenium.parse import PartialFormatter
-from proscenium.parse import raw_extraction_template
+from proscenium.verbs.parse import PartialFormatter
+from proscenium.verbs.parse import raw_extraction_template
 
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"

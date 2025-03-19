@@ -16,15 +16,15 @@ from rich.progress import Progress
 from pymilvus import MilvusClient
 from pymilvus import model
 
-from proscenium.parse import get_triples_from_extract
-from proscenium.parse import get_triples_from_extract
-from proscenium.chunk import documents_to_chunks_by_tokens
-from proscenium.complete import complete_simple
-from proscenium.read import load_hugging_face_dataset
-from proscenium.vector_database import closest_chunks
-from proscenium.vector_database import add_chunks_to_vector_db
-from proscenium.display.neo4j import triples_table, pairs_table
-from proscenium.display.milvus import collection_panel
+from proscenium.verbs.parse import get_triples_from_extract
+from proscenium.verbs.parse import get_triples_from_extract
+from proscenium.verbs.chunk import documents_to_chunks_by_tokens
+from proscenium.verbs.complete import complete_simple
+from proscenium.verbs.read import load_hugging_face_dataset
+from proscenium.verbs.vector_database import closest_chunks
+from proscenium.verbs.vector_database import add_chunks_to_vector_db
+from proscenium.verbs.display.neo4j import triples_table, pairs_table
+from proscenium.verbs.display.milvus import collection_panel
 
 extraction_system_prompt = "You are an entity extractor"
 

@@ -7,14 +7,14 @@ from rich.panel import Panel
 from pymilvus import MilvusClient
 from pymilvus import model
 
-from proscenium.complete import complete_simple
-from proscenium.display.milvus import chunk_hits_table
-from proscenium.vector_database import closest_chunks
-from proscenium.read import load_file
-from proscenium.chunk import documents_to_chunks_by_characters
-from proscenium.vector_database import add_chunks_to_vector_db
-from proscenium.vector_database import collection_name
-from proscenium.display.milvus import collection_panel
+from proscenium.verbs.complete import complete_simple
+from proscenium.verbs.display.milvus import chunk_hits_table
+from proscenium.verbs.vector_database import closest_chunks
+from proscenium.verbs.read import load_file
+from proscenium.verbs.chunk import documents_to_chunks_by_characters
+from proscenium.verbs.vector_database import add_chunks_to_vector_db
+from proscenium.verbs.vector_database import collection_name
+from proscenium.verbs.display.milvus import collection_panel
 
 def build_vector_db(
     data_file: str,

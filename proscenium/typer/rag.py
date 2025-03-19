@@ -4,10 +4,10 @@ from rich import print
 from rich.panel import Panel
 import asyncio
 
-from proscenium.read import url_to_file
-from proscenium.vector_database import embedding_function
-from proscenium.vector_database import create_vector_db
-from proscenium.vector_database import vector_db
+from proscenium.verbs.read import url_to_file
+from proscenium.verbs.vector_database import embedding_function
+from proscenium.verbs.vector_database import create_vector_db
+from proscenium.verbs.vector_database import vector_db
 
 from proscenium.scripts.rag import answer_question, build_vector_db as bvd
 import proscenium.typer.config_rag as config

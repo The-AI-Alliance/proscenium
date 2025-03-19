@@ -3,12 +3,12 @@ import typer
 from rich import print
 from rich.panel import Panel
 
-from proscenium.know import knowledge_graph_client
-from proscenium.vector_database import create_vector_db
-from proscenium.vector_database import embedding_function
-from proscenium.vector_database import vector_db
-from proscenium.know import knowledge_graph_client
-from proscenium.vector_database import collection_name
+from proscenium.verbs.know import knowledge_graph_client
+from proscenium.verbs.vector_database import create_vector_db
+from proscenium.verbs.vector_database import embedding_function
+from proscenium.verbs.vector_database import vector_db
+from proscenium.verbs.know import knowledge_graph_client
+from proscenium.verbs.vector_database import collection_name
 
 from proscenium.scripts.graph_rag import extract_entities, \
     load_entity_graph, show_entity_graph, load_entity_resolver, \
