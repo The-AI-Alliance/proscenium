@@ -10,14 +10,14 @@ from langchain_core.documents.base import Document
 from proscenium.verbs.parse import PartialFormatter
 from proscenium.verbs.parse import raw_extraction_template
 
+from proscenium.typer.config import default_model_id
+
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"
 num_docs = 4
 # initial version looked at only: doc.metadata["id"] in ['4440632', '4441078']
 
-#model_id = "openai:gpt-4o"
-#model_id = "ollama:granite3.2"
-model_id = "ollama:llama3.2"
+model_id = default_model_id
 
 case_template = """
 [u]{name}[/u]

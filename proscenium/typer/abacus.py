@@ -10,15 +10,13 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
+from proscenium.typer.config import default_model_id
 from proscenium.verbs.invoke import process_tools
-
 from proscenium.scripts.tools import apply_tools, tool_applier_actor_class
 
-app = typer.Typer()
+model_id = default_model_id
 
-model_id = "ollama:llama3.2"
-# model_id = "ollama:granite3.2"
-# model_id = "openai:gpt-4o"
+app = typer.Typer()
 
 @app.command()
 def ask():
