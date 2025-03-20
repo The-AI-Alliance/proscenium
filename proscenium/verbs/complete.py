@@ -195,7 +195,6 @@ def complete_with_tool_results(
     response = client.chat.completions.create(
         model = model_id,
         messages = messages,
-        tools = tool_desc_list
     )
 
     return response.choices[0].message.content
