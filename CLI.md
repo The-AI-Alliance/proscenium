@@ -13,11 +13,11 @@ The "abacus" app example below uses arithmetic operators as provided by
 
 ### Without Actors
 
-`python -m proscenium.cli abacus ask`
+`python -m proscenium.cli abacus ask` [stdout](./output/abacus/ask.out)
 
 ### With Actors
 
-`python -m proscenium.cli abacus-actor ask`
+`python -m proscenium.cli abacus-actor ask` [stdout](./output/abacus/ask-actor.out)
 
 ## RAG
 
@@ -27,11 +27,11 @@ python -m proscenium.cli rag --help
 
 ### Build vector database
 
-`python -m proscenium.cli rag build-vector-db`
+`python -m proscenium.cli rag build-vector-db` [stdout](./output/rag/build-vector-db.out)
 
 ### Ask Question
 
-`python -m proscenium.cli rag ask`
+`python -m proscenium.cli rag ask` [stdout](./output/rag/ask.out)
 
 ## GraphRAG
 

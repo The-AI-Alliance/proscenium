@@ -7,6 +7,7 @@ from rich.prompt import Prompt
 from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
+from proscenium.typer.config import default_model_id
 from proscenium.verbs.parse import PartialFormatter
 from proscenium.verbs.parse import raw_extraction_template
 
