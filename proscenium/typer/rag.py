@@ -10,7 +10,7 @@ from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import vector_db
 
 from proscenium.scripts.rag import answer_question, build_vector_db as bvd
-import proscenium.typer.config_rag as config
+from proscenium.typer import rag_config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -19,16 +19,16 @@ app = typer.Typer()
 @app.command()
 def build_vector_db():
 
-    asyncio.run(url_to_file(config.url, config.data_file))
-    print("Data file to chunk:", config.data_file)
+    asyncio.run(url_to_file(rag_config.url, rag_config.data_file))
+    print("Data file to chunk:", rag_config.data_file)
 
-    embedding_fn = embedding_function(config.embedding_model_id)
-    print("Embedding model", config.embedding_model_id)
+    embedding_fn = embedding_function(rag_config.embedding_model_id)
+    print("Embedding model", rag_config.embedding_model_id)
 
-    vector_db_client = create_vector_db(config.milvus_uri, embedding_fn, overwrite=True)
-    print("Vector db at uri", config.milvus_uri)
+    vector_db_client = create_vector_db(rag_config.milvus_uri, embedding_fn, overwrite=True)
+    print("Vector db at uri", rag_config.milvus_uri)
 
-    bvd(config.data_file, vector_db_client, embedding_fn)
+    bvd(rag_config.data_file, vector_db_client, embedding_fn)
 
     vector_db_client.close()
 
@@ -36,14 +36,14 @@ def build_vector_db():
 @app.command()
 def ask():
 
-    query = config.get_user_question()
+    query = rag_config.get_user_question()
 
-    embedding_fn = embedding_function(config.embedding_model_id)
-    print("Embedding model:", config.embedding_model_id)
+    embedding_fn = embedding_function(rag_config.embedding_model_id)
+    print("Embedding model:", rag_config.embedding_model_id)
 
-    vector_db_client = vector_db(config.milvus_uri)
-    print("Vector db at uri", config.milvus_uri)
+    vector_db_client = vector_db(rag_config.milvus_uri)
+    print("Vector db at uri", rag_config.milvus_uri)
 
-    answer = answer_question(query, config.model_id, vector_db_client, embedding_fn)
+    answer = answer_question(query, rag_config.model_id, vector_db_client, embedding_fn)
 
     print(Panel(answer, title="Assistant"))

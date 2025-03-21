@@ -14,7 +14,7 @@ from proscenium.scripts.graph_rag import extract_entities, \
     load_entity_graph, show_entity_graph, load_entity_resolver, \
     answer_question
 
-import proscenium.typer.config_graph_rag as config
+from proscenium.typer import graph_rag_config
 
 app = typer.Typer()
 
@@ -22,29 +22,29 @@ app = typer.Typer()
 def extract():
 
     extract_entities(
-        config.hf_dataset_id,
-        config.hf_dataset_column,
-        config.num_docs,
-        config.entity_csv_file,
-        config.model_id,
-        config.extraction_template,
-        config.doc_as_rich,
-        config.doc_as_object,
-        config.doc_direct_triples,
-        config.predicates)
+        graph_rag_config.hf_dataset_id,
+        graph_rag_config.hf_dataset_column,
+        graph_rag_config.num_docs,
+        graph_rag_config.entity_csv_file,
+        graph_rag_config.model_id,
+        graph_rag_config.extraction_template,
+        graph_rag_config.doc_as_rich,
+        graph_rag_config.doc_as_object,
+        graph_rag_config.doc_direct_triples,
+        graph_rag_config.predicates)
 
 @app.command()
 def load_graph():
 
     driver = knowledge_graph_client(
-        config.neo4j_uri,
-        config.neo4j_username,
-        config.neo4j_password)
+        graph_rag_config.neo4j_uri,
+        graph_rag_config.neo4j_username,
+        graph_rag_config.neo4j_password)
 
     load_entity_graph(
         driver,
-        config.entity_csv_file,
-        config.add_triple)
+        graph_rag_config.entity_csv_file,
+        graph_rag_config.add_triple)
 
     driver.close()
 
@@ -52,9 +52,9 @@ def load_graph():
 def show_graph():
 
     driver = knowledge_graph_client(
-        config.neo4j_uri,
-        config.neo4j_username,
-        config.neo4j_password)
+        graph_rag_config.neo4j_uri,
+        graph_rag_config.neo4j_username,
+        graph_rag_config.neo4j_password)
 
     show_entity_graph(driver)
 
@@ -62,16 +62,16 @@ def show_graph():
 
 @app.command()
 def load_resolver():
-    embedding_fn = embedding_function(config.embedding_model_id)
-    print("Embedding model", config.embedding_model_id)
+    embedding_fn = embedding_function(graph_rag_config.embedding_model_id)
+    print("Embedding model", graph_rag_config.embedding_model_id)
 
-    vector_db_client = create_vector_db(config.milvus_uri, embedding_fn, overwrite=True)
-    print("Vector db stored at", config.milvus_uri)
+    vector_db_client = create_vector_db(graph_rag_config.milvus_uri, embedding_fn, overwrite=True)
+    print("Vector db stored at", graph_rag_config.milvus_uri)
 
     driver = knowledge_graph_client(
-        config.neo4j_uri,
-        config.neo4j_username,
-        config.neo4j_password)
+        graph_rag_config.neo4j_uri,
+        graph_rag_config.neo4j_username,
+        graph_rag_config.neo4j_password)
 
     load_entity_resolver(driver, vector_db_client, embedding_fn, collection_name)
 
@@ -82,33 +82,33 @@ def load_resolver():
 @app.command()
 def ask():
 
-    embedding_fn = embedding_function(config.embedding_model_id)
-    vector_db_client = vector_db(config.milvus_uri)
-    print("Connected to vector db stored at", config.milvus_uri, "with embedding model", config.embedding_model_id)
+    embedding_fn = embedding_function(graph_rag_config.embedding_model_id)
+    vector_db_client = vector_db(graph_rag_config.milvus_uri)
+    print("Connected to vector db stored at", graph_rag_config.milvus_uri, "with embedding model", graph_rag_config.embedding_model_id)
     print("\n")
 
     driver = knowledge_graph_client(
-        config.neo4j_uri,
-        config.neo4j_username,
-        config.neo4j_password)
+        graph_rag_config.neo4j_uri,
+        graph_rag_config.neo4j_username,
+        graph_rag_config.neo4j_password)
 
-    question = config.get_user_question()
+    question = graph_rag_config.get_user_question()
 
     answer = answer_question(
         question,
-        config.hf_dataset_id,
-        config.hf_dataset_column,
-        config.num_docs,
-        config.doc_as_object,
-        config.model_id,
-        config.extraction_template,
-        config.system_prompt,
-        config.graphrag_prompt_template,
+        graph_rag_config.hf_dataset_id,
+        graph_rag_config.hf_dataset_column,
+        graph_rag_config.num_docs,
+        graph_rag_config.doc_as_object,
+        graph_rag_config.model_id,
+        graph_rag_config.extraction_template,
+        graph_rag_config.system_prompt,
+        graph_rag_config.graphrag_prompt_template,
         driver,
         vector_db_client,
         embedding_fn,
-        config.matching_objects_query,
-        config.predicates)
+        graph_rag_config.matching_objects_query,
+        graph_rag_config.predicates)
 
     if answer:
         print(Panel(answer, title="Answer"))
