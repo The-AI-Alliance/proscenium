@@ -63,8 +63,9 @@ def complete_simple(
     model_id: str,
     system_prompt: str,
     user_prompt: str,
-    temperature: float = 0.75,
-    rich_output: bool = False) -> str:
+    **kwargs) -> str:
+
+    rich_output = kwargs.pop("rich_output", False)
 
     messages=[
         {"role": "system", "content": system_prompt},
@@ -73,9 +74,11 @@ def complete_simple(
 
     if rich_output:
 
+        kwargs_text = "\n".join([str(k)+": "+str(v) for k,v in kwargs.items()])
+
         params_text = Text(f"""
-    model_id: {model_id}
-    temperature: {temperature}
+model_id: {model_id}
+{kwargs_text}
     """)
 
         messages_table = Table(title="Messages", show_lines=True)
@@ -90,7 +93,7 @@ def complete_simple(
     response = client.chat.completions.create(
         model=model_id,
         messages=messages,
-        temperature=temperature,
+        **kwargs
     )
     response = response.choices[0].message.content
 

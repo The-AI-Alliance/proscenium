@@ -251,7 +251,7 @@ def answer_question(
     hf_dataset_column: str,
     num_docs: int,
     doc_as_object: Callable[[Document], str],
-    model_id: str,
+    generation_model_id: str,
     extraction_template: str,
     system_prompt: str,
     graphrag_prompt_template: str,
@@ -259,6 +259,7 @@ def answer_question(
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     matching_objects_query: Callable[[List[tuple[str, str]]], str],
+    extraction_model_id: str,
     extraction_model: BaseModel,
     get_triples_from_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]]
     ) -> str:
@@ -266,7 +267,7 @@ def answer_question(
     print(Panel(question, title="Question"))
 
     extract = complete_simple(
-        model_id,
+        extraction_model_id,
         extraction_system_prompt,
         extraction_template.format(text = question),
         response_format = {
@@ -301,7 +302,7 @@ def answer_question(
             question = question)
 
         response = complete_simple(
-            model_id,
+            generation_model_id,
             system_prompt,
             user_prompt,
             rich_output = True)

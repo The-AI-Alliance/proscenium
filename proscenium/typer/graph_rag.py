@@ -25,7 +25,7 @@ def extract():
         graph_rag_config.hf_dataset_column,
         graph_rag_config.num_docs,
         graph_rag_config.entity_csv_file,
-        graph_rag_config.model_id,
+        graph_rag_config.extraction_model_id,
         graph_rag_config.extraction_template,
         graph_rag_config.doc_as_rich,
         graph_rag_config.doc_as_object,
@@ -100,7 +100,7 @@ def ask():
         graph_rag_config.hf_dataset_column,
         graph_rag_config.num_docs,
         graph_rag_config.doc_as_object,
-        graph_rag_config.model_id,
+        graph_rag_config.generation_model_id,
         graph_rag_config.extraction_template,
         graph_rag_config.system_prompt,
         graph_rag_config.graphrag_prompt_template,
@@ -108,6 +108,7 @@ def ask():
         vector_db_client,
         embedding_fn,
         graph_rag_config.matching_objects_query,
+        graph_rag_config.extraction_model_id,
         graph_rag_config.extraction_model,
         graph_rag_config.get_triples_from_extract)
 

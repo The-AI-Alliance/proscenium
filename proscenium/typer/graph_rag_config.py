@@ -55,16 +55,10 @@ def doc_as_rich(doc: Document):
     return Panel(case_str, title=doc.metadata['name_abbreviation'])
 
 ###################################
-# Extraction and generation model
-###################################
-
-# TODO make the two uses independent
-
-model_id = default_model_id
-
-###################################
 # Extraction
 ###################################
+
+extraction_model_id = default_model_id
 
 class LegalOpinionExtractions(BaseModel):
     """
@@ -102,8 +96,6 @@ def get_triples_from_extract(
 
     leo_json = json.loads(leo_str)
     leo = LegalOpinionExtractions(**leo_json)
-
-#    leo = LegalOpinionExtractions.__pydantic_model__.parse_raw(extract)
 
     triples = []
     for judge in leo.judges:
@@ -167,6 +159,8 @@ def matching_objects_query(
 ###################################
 # Response Generation
 ####################################
+
+generation_model_id = default_model_id
 
 system_prompt = "You are a helpful law librarian"
 
