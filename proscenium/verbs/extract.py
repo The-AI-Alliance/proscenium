@@ -1,8 +1,4 @@
 
-import logging
-
-from typing import List, Dict
-
 from string import Formatter
 
 class PartialFormatter(Formatter):
@@ -11,6 +7,8 @@ class PartialFormatter(Formatter):
             return super().get_value(key, args, kwargs)
         except KeyError:
             return "{" + key + "}"
+
+partial_formatter = PartialFormatter()
 
 raw_extraction_template = """\
 Below is a description of a data class for storing information extracted from text:

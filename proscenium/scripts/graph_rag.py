@@ -252,32 +252,32 @@ def answer_question(
     num_docs: int,
     doc_as_object: Callable[[Document], str],
     generation_model_id: str,
-    extraction_template: str,
     system_prompt: str,
     graphrag_prompt_template: str,
     driver: Driver,
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    query_extraction_template: str,
+    query_extraction_model_id: str,
+    query_extraction_data_model: BaseModel,
+    get_triples_from_query_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]],
     matching_objects_query: Callable[[List[tuple[str, str]]], str],
-    extraction_model_id: str,
-    extraction_model: BaseModel,
-    get_triples_from_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]]
     ) -> str:
 
     print(Panel(question, title="Question"))
 
     extract = complete_simple(
-        extraction_model_id,
+        query_extraction_model_id,
         extraction_system_prompt,
-        extraction_template.format(text = question),
+        query_extraction_template.format(text = question),
         response_format = {
             "type": "json_object",
-            "schema": extraction_model.model_json_schema(),
+            "schema": query_extraction_data_model.model_json_schema(),
         },
         rich_output = True)
 
     print("\nExtracting triples from extraction response")
-    question_entity_triples = get_triples_from_extract(extract, "")
+    question_entity_triples = get_triples_from_query_extract(extract, "")
     print("\n")
     if len(question_entity_triples) == 0:
         print("No triples extracted from question")

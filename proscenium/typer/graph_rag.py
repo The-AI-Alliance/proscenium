@@ -101,16 +101,17 @@ def ask():
         graph_rag_config.num_docs,
         graph_rag_config.doc_as_object,
         graph_rag_config.generation_model_id,
-        graph_rag_config.extraction_template,
         graph_rag_config.system_prompt,
         graph_rag_config.graphrag_prompt_template,
         driver,
         vector_db_client,
         embedding_fn,
+        graph_rag_config.query_extraction_template,
+        graph_rag_config.query_extraction_model_id,
+        graph_rag_config.query_extraction_data_model,
+        graph_rag_config.get_triples_from_query_extract,
         graph_rag_config.matching_objects_query,
-        graph_rag_config.extraction_model_id,
-        graph_rag_config.extraction_model,
-        graph_rag_config.get_triples_from_extract)
+        )
 
     if answer:
         print(Panel(answer, title="Answer"))

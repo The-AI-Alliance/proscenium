@@ -13,7 +13,7 @@ from langchain_core.documents.base import Document
 from pydantic import BaseModel, Field
 
 from proscenium.typer.config import default_model_id
-from proscenium.verbs.extract import PartialFormatter
+from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import raw_extraction_template
 
 from proscenium.typer.config import default_model_id
@@ -58,16 +58,16 @@ def doc_as_rich(doc: Document):
 # Extraction
 ###################################
 
-extraction_model_id = default_model_id
+chunk_extraction_model_id = default_model_id
 
-class LegalOpinionExtractions(BaseModel):
+class LegalOpinionChunkExtractions(BaseModel):
     """
-    The extracted judges and legal citations from a legal opinion.
+    The extracted judges and legal citations from a legal opinion chunk.
     """
     judges: list[str] = Field(description = "A list of the judges mentioned in the text. For example: `Judge John Doe`")
     legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
-extraction_model = LegalOpinionExtractions
+chunk_extraction_data_model = LegalOpinionChunkExtractions
 
 def doc_as_object(doc: Document) -> str:
     return doc.metadata['name_abbreviation']
@@ -80,28 +80,26 @@ def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
 # is not well captured in many of these documents;
 # we will be extracting it from the case law text.
 
-partial_formatter = PartialFormatter()
-
-extraction_template = partial_formatter.format(
+chunk_extraction_template = partial_formatter.format(
     raw_extraction_template,
-    extraction_description = LegalOpinionExtractions.__doc__
+    extraction_description = LegalOpinionChunkExtractions.__doc__
     )
 
-def get_triples_from_extract(
-    leo_str: str,
+def get_triples_from_chunk_extract(
+    loce_str: str,
     object: str,
     ) -> List[tuple[str, str, str]]:
 
-    logging.info("get_triples_from_extract: leo_str = <<<%s>>>", leo_str)
+    logging.info("get_triples_from_extract: leo_str = <<<%s>>>", loce_str)
 
-    leo_json = json.loads(leo_str)
-    leo = LegalOpinionExtractions(**leo_json)
+    loce_json = json.loads(loce_str)
+    loce = LegalOpinionChunkExtractions(**loce_json)
 
     triples = []
-    for judge in leo.judges:
+    for judge in loce.judges:
         triple = (judge.strip(), 'Judge', object)
         triples.append(triple)
-    for citation in leo.legal_citations:
+    for citation in loce.legal_citations:
         triple = (citation.strip(), 'LegalCitation', object)
         triples.append(triple)
     return triples
@@ -134,7 +132,7 @@ embedding_model_id = "all-MiniLM-L6-v2"
 milvus_uri = "file:/grag-milvus.db"
 
 ###################################
-# Query Processing
+# Query Handling
 ###################################
 
 def get_user_question() -> str:
@@ -145,6 +143,46 @@ def get_user_question() -> str:
         )
 
     return question
+
+
+query_extraction_model_id = default_model_id
+
+class QueryExtractions(BaseModel):
+    """
+    The extracted judges and legal citations from user query.
+    """
+    judges: list[str] = Field(description = "A list of the judges mentioned in the query. For example: `Judge John Doe`")
+    legal_citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
+
+query_extraction_data_model = QueryExtractions
+
+def query_direct_triples(query: str) -> list[tuple[str, str, str]]:
+    return []
+
+query_extraction_template = partial_formatter.format(
+    raw_extraction_template,
+    extraction_description = QueryExtractions.__doc__
+    )
+
+def get_triples_from_query_extract(
+    qe_str: str,
+    object: str,
+    ) -> List[tuple[str, str, str]]:
+
+    logging.info("get_triples_from_query_extract: qe_str = <<<%s>>>", qe_str)
+
+    qe_json = json.loads(qe_str)
+    qe = QueryExtractions(**qe_json)
+
+    triples = []
+    for judge in qe.judges:
+        triple = (judge.strip(), 'Judge', object)
+        triples.append(triple)
+    for citation in qe.legal_citations:
+        triple = (citation.strip(), 'LegalCitation', object)
+        triples.append(triple)
+    return triples
+
 
 def matching_objects_query(
     subject_predicate_constraints: List[tuple[str, str]]) -> str:
