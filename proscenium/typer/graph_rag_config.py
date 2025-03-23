@@ -90,19 +90,22 @@ def get_triples_from_chunk_extract(
     object: str,
     ) -> List[tuple[str, str, str]]:
 
-    logging.info("get_triples_from_extract: leo_str = <<<%s>>>", loce_str)
-
-    loce_json = json.loads(loce_str)
-    loce = LegalOpinionChunkExtractions(**loce_json)
+    logging.info("get_triples_from_chunk_extract: leo_str = <<<%s>>>", loce_str)
 
     triples = []
-    for judge in loce.judges:
-        triple = (judge.strip(), 'Judge', object)
-        triples.append(triple)
-    for citation in loce.legal_citations:
-        triple = (citation.strip(), 'LegalCitation', object)
-        triples.append(triple)
-    return triples
+    try:
+        loce_json = json.loads(loce_str)
+        loce = LegalOpinionChunkExtractions(**loce_json)
+        for judge in loce.judges:
+            triple = (judge.strip(), 'Judge', object)
+            triples.append(triple)
+        for citation in loce.legal_citations:
+            triple = (citation.strip(), 'LegalCitation', object)
+            triples.append(triple)
+    except Exception as e:
+        logging.error("get_triples_from_chunk_extract: Exception: %s", e)
+    finally:
+        return triples
 
 
 ###################################
@@ -171,17 +174,20 @@ def get_triples_from_query_extract(
 
     logging.info("get_triples_from_query_extract: qe_str = <<<%s>>>", qe_str)
 
-    qe_json = json.loads(qe_str)
-    qe = QueryExtractions(**qe_json)
-
     triples = []
-    for judge in qe.judges:
-        triple = (judge.strip(), 'Judge', object)
-        triples.append(triple)
-    for citation in qe.legal_citations:
-        triple = (citation.strip(), 'LegalCitation', object)
-        triples.append(triple)
-    return triples
+    try:
+        qe_json = json.loads(qe_str)
+        qe = QueryExtractions(**qe_json)
+        for judge in qe.judges:
+            triple = (judge.strip(), 'Judge', object)
+            triples.append(triple)
+        for citation in qe.legal_citations:
+            triple = (citation.strip(), 'LegalCitation', object)
+            triples.append(triple)
+    except Exception as e:
+        logging.error("get_triples_from_query_extract: Exception: %s", e)
+    finally:
+        return triples
 
 
 def matching_objects_query(
