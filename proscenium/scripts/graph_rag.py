@@ -13,11 +13,10 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress
 
+from pydantic import BaseModel
 from pymilvus import MilvusClient
 from pymilvus import model
 
-from proscenium.verbs.parse import get_triples_from_extract
-from proscenium.verbs.parse import get_triples_from_extract
 from proscenium.verbs.chunk import documents_to_chunks_by_tokens
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.read import load_hugging_face_dataset
@@ -35,7 +34,8 @@ def extract_triples_from_document(
     doc_as_rich: Callable[[Document], Panel],
     doc_as_object: Callable[[Document], str],
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
-    predicates: Dict[str, str]
+    extraction_model: BaseModel,
+    get_triples_from_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]],
     ) -> List[tuple[str, str, str]]:
 
     print(doc_as_rich(doc))
@@ -55,9 +55,13 @@ def extract_triples_from_document(
             model_id,
             extraction_system_prompt,
             extraction_template.format(text = chunk.page_content),
+            response_format = {
+                "type": "json_object",
+                "schema": extraction_model.model_json_schema(),
+            },
             rich_output = True)
 
-        new_triples = get_triples_from_extract(extract, object, predicates)
+        new_triples = get_triples_from_extract(extract, object)
 
         print("Found", len(new_triples), "triples in chunk", i+1, "of", len(chunks))
 
@@ -134,7 +138,9 @@ def extract_entities(
     doc_as_rich: Callable[[Document], Panel],
     doc_as_object: Callable[[Document], str],
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
-    predicates: Dict[str, str]) -> None:
+    extraction_model: BaseModel,
+    get_triples_from_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]]
+    ) -> None:
 
     docs = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
 
@@ -160,7 +166,9 @@ def extract_entities(
                     doc_as_rich,
                     doc_as_object,
                     doc_direct_triples,
-                    predicates)
+                    extraction_model,
+                    get_triples_from_extract)
+
                 writer.writerows(doc_triples)
                 progress.update(task_extract, advance=1)
 
@@ -251,18 +259,24 @@ def answer_question(
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     matching_objects_query: Callable[[List[tuple[str, str]]], str],
-    predicates: Dict[str, str]) -> str:
+    extraction_model: BaseModel,
+    get_triples_from_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]]
+    ) -> str:
 
     print(Panel(question, title="Question"))
 
-    extraction_response = complete_simple(
+    extract = complete_simple(
         model_id,
         extraction_system_prompt,
         extraction_template.format(text = question),
+        response_format = {
+            "type": "json_object",
+            "schema": extraction_model.model_json_schema(),
+        },
         rich_output = True)
 
     print("\nExtracting triples from extraction response")
-    question_entity_triples = get_triples_from_extract(extraction_response, "", predicates)
+    question_entity_triples = get_triples_from_extract(extract, "")
     print("\n")
     if len(question_entity_triples) == 0:
         print("No triples extracted from question")

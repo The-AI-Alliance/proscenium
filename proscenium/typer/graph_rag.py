@@ -3,7 +3,6 @@ import typer
 from rich import print
 from rich.panel import Panel
 
-from proscenium.verbs.know import knowledge_graph_client
 from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
@@ -31,7 +30,8 @@ def extract():
         graph_rag_config.doc_as_rich,
         graph_rag_config.doc_as_object,
         graph_rag_config.doc_direct_triples,
-        graph_rag_config.predicates)
+        graph_rag_config.extraction_model,
+        graph_rag_config.get_triples_from_extract)
 
 @app.command()
 def load_graph():
@@ -108,7 +108,8 @@ def ask():
         vector_db_client,
         embedding_fn,
         graph_rag_config.matching_objects_query,
-        graph_rag_config.predicates)
+        graph_rag_config.extraction_model,
+        graph_rag_config.get_triples_from_extract)
 
     if answer:
         print(Panel(answer, title="Answer"))
