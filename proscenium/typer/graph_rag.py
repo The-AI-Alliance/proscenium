@@ -26,7 +26,6 @@ def extract():
         graph_rag_config.chunk_extraction_model_id,
         graph_rag_config.chunk_extraction_template,
         graph_rag_config.doc_as_rich,
-        graph_rag_config.doc_as_object,
         graph_rag_config.doc_direct_triples,
         graph_rag_config.chunk_extraction_data_model,
         graph_rag_config.get_triples_from_chunk_extract)

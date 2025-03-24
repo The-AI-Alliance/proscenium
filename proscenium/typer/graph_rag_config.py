@@ -111,13 +111,13 @@ chunk_extraction_data_model = LegalOpinionChunkExtractions
 
 def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
 
-    object: str = doc_as_object(doc)
+    obj: str = doc_as_object(doc)
 
     triples = []
 
     subject = doc.metadata["court"]
     relation = RELATION_COURT
-    triples.append((subject, relation, object))
+    triples.append((subject, relation, obj))
 
     citations: List[str] = get_citations(doc.page_content)
 
@@ -126,7 +126,7 @@ def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
         # TODO there are several fields in citation object that should be
         # stored in the graph
         subject: str = citation.matched_text()
-        triples.append((subject, relation, object))
+        triples.append((subject, relation, obj))
 
     return triples
 
@@ -137,20 +137,22 @@ chunk_extraction_template = partial_formatter.format(
 
 def get_triples_from_chunk_extract(
     loce_str: str,
-    object: str,
+    doc: Document,
     ) -> List[tuple[str, str, str]]:
 
-    logging.info("get_triples_from_chunk_extract: leo_str = <<<%s>>>", loce_str)
+    logging.info("get_triples_from_chunk_extract: loce_str = <<<%s>>>", loce_str)
+
+    obj: str = doc_as_object(doc)
 
     triples = []
     try:
         loce_json = json.loads(loce_str)
         loce = LegalOpinionChunkExtractions(**loce_json)
         for judge in loce.judges:
-            triple = (judge.strip(), RELATION_JUDGE, object)
+            triple = (judge.strip(), RELATION_JUDGE, obj)
             triples.append(triple)
         #for citation in loce.legal_citations:
-        #    triple = (citation.strip(), RELATION_LEGAL_CITATION, object)
+        #    triple = (citation.strip(), RELATION_LEGAL_CITATION, obj)
         #    triples.append(triple)
     except Exception as e:
         logging.error("get_triples_from_chunk_extract: Exception: %s", e)
