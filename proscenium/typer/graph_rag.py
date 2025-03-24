@@ -21,9 +21,7 @@ app = typer.Typer()
 def extract():
 
     extract_entities(
-        graph_rag_config.hf_dataset_id,
-        graph_rag_config.hf_dataset_column,
-        graph_rag_config.num_docs,
+        graph_rag_config.retrieve_documents,
         graph_rag_config.entity_csv_file,
         graph_rag_config.chunk_extraction_model_id,
         graph_rag_config.chunk_extraction_template,
@@ -96,10 +94,7 @@ def ask():
 
     answer = answer_question(
         question,
-        graph_rag_config.hf_dataset_id,
-        graph_rag_config.hf_dataset_column,
-        graph_rag_config.num_docs,
-        graph_rag_config.doc_as_object,
+        graph_rag_config.retrieve_document,
         graph_rag_config.generation_model_id,
         graph_rag_config.system_prompt,
         graph_rag_config.graphrag_prompt_template,
