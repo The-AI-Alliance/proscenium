@@ -1,5 +1,5 @@
 
-from typing import List
+from typing import List, Optional
 
 import logging
 import json
@@ -13,6 +13,7 @@ from langchain_core.documents.base import Document
 from pydantic import BaseModel, Field
 
 from proscenium.typer.config import default_model_id
+from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import raw_extraction_template
 
@@ -27,13 +28,39 @@ RELATION_LEGAL_CITATION = "LegalCitation"
 RELATION_COURT = "Court"
 
 ###################################
-# Input data
+# Retrieve Documens
 ###################################
 
 hf_dataset_id = "free-law/nh"
 hf_dataset_column = "text"
 num_docs = 4
-# initial version looked at only: doc.metadata["id"] in ['4440632', '4441078']
+
+# Note: early version looked at only: doc.metadata["id"] in ['4440632', '4441078']
+
+def retrieve_documents() -> List[Document]:
+
+    docs = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
+
+    old_len = len(docs)
+    docs = docs[:num_docs]
+    logging.info("using the first", num_docs, "documents of", old_len, "from HF dataset", hf_dataset_id)
+
+    return docs
+
+def doc_as_object(doc: Document) -> str:
+    return doc.metadata['name_abbreviation']
+
+# TODO index the docs after the first `retrieve_documents` call,
+# so that `retrieve_document` is efficient
+
+def retrieve_document(id: str) -> Optional[Document]:
+
+    docs = retrieve_documents()
+    for doc in docs:
+        if doc_as_object(doc) == id:
+            return doc
+
+    return None
 
 ###################################
 # Data display
@@ -81,9 +108,6 @@ class LegalOpinionChunkExtractions(BaseModel):
     # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
 chunk_extraction_data_model = LegalOpinionChunkExtractions
-
-def doc_as_object(doc: Document) -> str:
-    return doc.metadata['name_abbreviation']
 
 def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
 

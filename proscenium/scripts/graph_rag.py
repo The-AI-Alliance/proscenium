@@ -1,5 +1,6 @@
 
 from typing import List
+from typing import Optional
 from typing import Callable
 from typing import Any
 
@@ -19,7 +20,6 @@ from pymilvus import model
 
 from proscenium.verbs.chunk import documents_to_chunks_by_tokens
 from proscenium.verbs.complete import complete_simple
-from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.vector_database import closest_chunks
 from proscenium.verbs.vector_database import add_chunks_to_vector_db
 from proscenium.verbs.display.neo4j import triples_table, pairs_table
@@ -69,29 +69,6 @@ def extract_triples_from_document(
 
     return doc_triples
 
-def full_doc_by_id(
-        name: str,
-        hf_dataset_id: str,
-        hf_dataset_column: str,
-        num_docs: int,
-        doc_as_object: Callable[[Document], str]) -> Document:
-
-    documents = load_hugging_face_dataset(
-        hf_dataset_id,
-        page_content_column = hf_dataset_column)
-
-    print("Searching the first", num_docs,
-        " documents of", len(documents),
-        "in", hf_dataset_id, "column", hf_dataset_column)
-
-    documents = documents[:num_docs]
-
-    # TODO build this earlier and persist in graph
-    doc_object_to_index = {
-        doc_as_object(doc): i for i, doc in enumerate(documents)}
-
-    return documents[doc_object_to_index[name]]
-
 def query_for_objects(
     driver: Driver,
     subject_predicate_constraints: List[tuple[str, str]],
@@ -129,9 +106,7 @@ def find_matching_objects(
     return subject_predicate_pairs
 
 def extract_entities(
-    hf_dataset_id: str,
-    hf_dataset_column: str,
-    num_docs: int,
+    retrieve_documents: Callable[[], List[Document]],
     entity_csv: str,
     model_id: str,
     extraction_template: str,
@@ -142,11 +117,7 @@ def extract_entities(
     get_triples_from_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]]
     ) -> None:
 
-    docs = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
-
-    old_len = len(docs)
-    docs = docs[:num_docs]
-    print("using the first", num_docs, "documents of", old_len, "from HF dataset", hf_dataset_id)
+    docs = retrieve_documents()
 
     with Progress() as progress:
 
@@ -248,10 +219,7 @@ def load_entity_resolver(
 
 def answer_question(
     question: str,
-    hf_dataset_id: str,
-    hf_dataset_column: str,
-    num_docs: int,
-    doc_as_object: Callable[[Document], str],
+    retrieve_document: Callable[[str], Optional[Document]],
     generation_model_id: str,
     system_prompt: str,
     graphrag_prompt_template: str,
@@ -296,19 +264,26 @@ def answer_question(
 
     if len(object_names) > 0:
 
-        doc = full_doc_by_id(object_names[0], hf_dataset_id, hf_dataset_column, num_docs, doc_as_object)
+        doc = retrieve_document(object_names[0])
 
-        user_prompt = graphrag_prompt_template.format(
-            document_text = doc.page_content,
-            question = question)
+        if doc:
 
-        response = complete_simple(
-            generation_model_id,
-            system_prompt,
-            user_prompt,
-            rich_output = True)
+            user_prompt = graphrag_prompt_template.format(
+                document_text = doc.page_content,
+                question = question)
 
-        return response
+            response = complete_simple(
+                generation_model_id,
+                system_prompt,
+                user_prompt,
+                rich_output = True)
+
+            return response
+
+        else:
+
+            print("No document matching", object_names[0])
+            return None
 
     else:
 
