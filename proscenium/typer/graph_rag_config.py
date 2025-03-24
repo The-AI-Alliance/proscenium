@@ -19,6 +19,14 @@ from proscenium.verbs.extract import raw_extraction_template
 from proscenium.typer.config import default_model_id
 
 ###################################
+# Knowledge Graph Schema
+###################################
+
+RELATION_JUDGE = "Judge"
+RELATION_LEGAL_CITATION = "LegalCitation"
+RELATION_COURT = "Court"
+
+###################################
 # Input data
 ###################################
 
@@ -55,17 +63,22 @@ def doc_as_rich(doc: Document):
     return Panel(case_str, title=doc.metadata['name_abbreviation'])
 
 ###################################
-# Extraction
+# Chunk Extraction
 ###################################
+
+# `judge` is not well captured in many of these documents,
+# so we will extract it from the text
+
+from eyecite import get_citations
 
 chunk_extraction_model_id = default_model_id
 
 class LegalOpinionChunkExtractions(BaseModel):
     """
-    The extracted judges and legal citations from a legal opinion chunk.
+    The extracted judges from a chunk of a legal opinion.
     """
     judges: list[str] = Field(description = "A list of the judges mentioned in the text. For example: `Judge John Doe`")
-    legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
+    # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
 chunk_extraction_data_model = LegalOpinionChunkExtractions
 
@@ -73,12 +86,25 @@ def doc_as_object(doc: Document) -> str:
     return doc.metadata['name_abbreviation']
 
 def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
-    object: str = doc_as_object(doc)
-    return [(doc.metadata["court"], 'Court', object)]
 
-# For the purpose of this recipe, note that the `judge`
-# is not well captured in many of these documents;
-# we will be extracting it from the case law text.
+    object: str = doc_as_object(doc)
+
+    triples = []
+
+    subject = doc.metadata["court"]
+    relation = RELATION_COURT
+    triples.append((subject, relation, object))
+
+    citations: List[str] = get_citations(doc.page_content)
+
+    relation = RELATION_LEGAL_CITATION
+    for citation in citations:
+        # TODO there are several fields in citation object that should be
+        # stored in the graph
+        subject: str = citation.matched_text()
+        triples.append((subject, relation, object))
+
+    return triples
 
 chunk_extraction_template = partial_formatter.format(
     raw_extraction_template,
@@ -97,11 +123,11 @@ def get_triples_from_chunk_extract(
         loce_json = json.loads(loce_str)
         loce = LegalOpinionChunkExtractions(**loce_json)
         for judge in loce.judges:
-            triple = (judge.strip(), 'Judge', object)
+            triple = (judge.strip(), RELATION_JUDGE, object)
             triples.append(triple)
-        for citation in loce.legal_citations:
-            triple = (citation.strip(), 'LegalCitation', object)
-            triples.append(triple)
+        #for citation in loce.legal_citations:
+        #    triple = (citation.strip(), RELATION_LEGAL_CITATION, object)
+        #    triples.append(triple)
     except Exception as e:
         logging.error("get_triples_from_chunk_extract: Exception: %s", e)
     finally:
@@ -135,7 +161,7 @@ embedding_model_id = "all-MiniLM-L6-v2"
 milvus_uri = "file:/grag-milvus.db"
 
 ###################################
-# Query Handling
+# Querying
 ###################################
 
 def get_user_question() -> str:
@@ -147,20 +173,32 @@ def get_user_question() -> str:
 
     return question
 
+###################################
+# Query Extraction
+###################################
 
 query_extraction_model_id = default_model_id
 
 class QueryExtractions(BaseModel):
     """
-    The extracted judges and legal citations from user query.
+    The extracted judges from the user query.
     """
     judges: list[str] = Field(description = "A list of the judges mentioned in the query. For example: `Judge John Doe`")
-    legal_citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
+    # legal_citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
 
 query_extraction_data_model = QueryExtractions
 
 def query_direct_triples(query: str) -> list[tuple[str, str, str]]:
-    return []
+
+    object = ""
+
+    triples = []
+    relation = RELATION_LEGAL_CITATION
+    for citation in get_citations(query):
+        subject = citation.strip()
+        triples.append((subject, relation, object))
+
+    return triples
 
 query_extraction_template = partial_formatter.format(
     raw_extraction_template,
@@ -178,17 +216,25 @@ def get_triples_from_query_extract(
     try:
         qe_json = json.loads(qe_str)
         qe = QueryExtractions(**qe_json)
+
+        relation = RELATION_JUDGE
         for judge in qe.judges:
-            triple = (judge.strip(), 'Judge', object)
-            triples.append(triple)
-        for citation in qe.legal_citations:
-            triple = (citation.strip(), 'LegalCitation', object)
-            triples.append(triple)
+            subject = judge.strip()
+            triples.append((subject, relation, object))
+
+        #relation = RELATION_LEGAL_CITATION
+        #for citation in qe.legal_citations:
+        #    subject = citation.strip()
+        #    triples.append((subject, relation, object))
+
     except Exception as e:
         logging.error("get_triples_from_query_extract: Exception: %s", e)
     finally:
         return triples
 
+###################################
+# Query Search
+###################################
 
 def matching_objects_query(
     subject_predicate_constraints: List[tuple[str, str]]) -> str:

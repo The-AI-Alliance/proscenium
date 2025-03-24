@@ -1,9 +1,9 @@
 
 from typing import List
-from typing import Dict
 from typing import Callable
 from typing import Any
 
+import time
 from langchain_core.documents.base import Document
 from neo4j import Driver
 import csv
@@ -171,6 +171,7 @@ def extract_entities(
 
                 writer.writerows(doc_triples)
                 progress.update(task_extract, advance=1)
+                time.sleep(1) # TODO remove this hard-coded rate limiter
 
         print("Wrote entity triples to", entity_csv)
 
