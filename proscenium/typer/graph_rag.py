@@ -22,11 +22,11 @@ def extract():
 
     extract_entities(
         graph_rag_config.retrieve_documents,
+        graph_rag_config.doc_as_rich,
         graph_rag_config.entity_csv_file,
+        graph_rag_config.doc_direct_triples,
         graph_rag_config.chunk_extraction_model_id,
         graph_rag_config.chunk_extraction_template,
-        graph_rag_config.doc_as_rich,
-        graph_rag_config.doc_direct_triples,
         graph_rag_config.chunk_extraction_data_model,
         graph_rag_config.get_triples_from_chunk_extract)
 

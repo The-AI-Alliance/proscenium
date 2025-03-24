@@ -29,7 +29,7 @@ extraction_system_prompt = "You are an entity extractor"
 
 def extract_triples_from_document(
     doc: Document,
-    model_id: str,
+    chunk_extraction_model_id: str,
     extraction_template: str,
     doc_as_rich: Callable[[Document], Panel],
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
@@ -49,7 +49,7 @@ def extract_triples_from_document(
     for i, chunk in enumerate(chunks):
 
         extract = complete_simple(
-            model_id,
+            chunk_extraction_model_id,
             extraction_system_prompt,
             extraction_template.format(text = chunk.page_content),
             response_format = {
@@ -104,11 +104,11 @@ def find_matching_objects(
 
 def extract_entities(
     retrieve_documents: Callable[[], List[Document]],
-    entity_csv: str,
-    model_id: str,
-    extraction_template: str,
     doc_as_rich: Callable[[Document], Panel],
+    entity_csv: str,
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
+    chunk_extraction_model_id: str,
+    extraction_template: str,
     extraction_model: BaseModel,
     get_triples_from_chunk_extract: Callable[[BaseModel, Document], List[tuple[str, str, str]]]
     ) -> None:
@@ -128,7 +128,7 @@ def extract_entities(
 
                 doc_triples = extract_triples_from_document(
                     doc,
-                    model_id,
+                    chunk_extraction_model_id,
                     extraction_template,
                     doc_as_rich,
                     doc_direct_triples,
