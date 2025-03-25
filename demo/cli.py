@@ -11,7 +11,7 @@ from demo.typer.legal import app as legal_app
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
 
-app = typer.Typer()
+app = typer.Typer(help="CLI Demo of Proscenium")
 
 app.add_typer(literature_app, name="literature")
 app.add_typer(legal_app, name="legal")

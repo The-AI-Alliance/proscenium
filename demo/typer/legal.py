@@ -15,7 +15,9 @@ from proscenium.scripts.graph_rag import extract_entities, \
 
 import demo.domains.legal as legal_config
 
-app = typer.Typer()
+app = typer.Typer(help="""
+Graph extraction and question answering with GraphRAG on caselaw.
+""")
 
 @app.command()
 def extract():

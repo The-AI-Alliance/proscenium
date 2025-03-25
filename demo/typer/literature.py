@@ -14,7 +14,7 @@ import demo.domains.literature as literature_config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-app = typer.Typer()
+app = typer.Typer(help="""Question answering using RAG on a text from the Gutenberg Project.""")
 
 @app.command(help=f"Build a vector database from chunks of {literature_config.url}.")
 def prepare():

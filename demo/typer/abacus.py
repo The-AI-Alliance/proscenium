@@ -16,7 +16,7 @@ from proscenium.scripts.tools import apply_tools, tool_applier_actor_class
 
 model_id = default_model_id
 
-app = typer.Typer()
+app = typer.Typer(help="""Arithmetic question answering.""")
 
 @app.command(help="Ask a natural langauge arithmetic question.")
 def ask():
