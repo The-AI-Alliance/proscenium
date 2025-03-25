@@ -10,7 +10,7 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
-from proscenium.typer.config import default_model_id
+from demo.typer.config import default_model_id
 from proscenium.verbs.invoke import process_tools
 from proscenium.scripts.tools import apply_tools, tool_applier_actor_class
 
@@ -18,11 +18,11 @@ model_id = default_model_id
 
 app = typer.Typer()
 
-@app.command()
+@app.command(help="Ask a natural langauge arithmetic question.")
 def ask():
 
     tools = [Addition, Subtraction, Multiplication, Division]
-
+ 
     tool_map, tool_desc_list = process_tools(tools)
 
     # try "What is your favorite color?"
@@ -33,7 +33,10 @@ def ask():
 
     answer = apply_tools(
         model_id = model_id,
-        system_message = "Perform any referenced arithmetic.",
+        system_message = """"
+Use the tools specified in this request to perform the arithmeticin the user's question.
+Do not use any other tools.
+""",
         message = question,
         tool_desc_list = tool_desc_list,
         tool_map = tool_map,

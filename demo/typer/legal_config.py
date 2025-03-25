@@ -12,12 +12,13 @@ from langchain_core.documents.base import Document
 
 from pydantic import BaseModel, Field
 
-from proscenium.typer.config import default_model_id
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import raw_extraction_template
+from proscenium.verbs.complete import complete_simple
+from proscenium.scripts.graph_rag import extraction_system_prompt
 
-from proscenium.typer.config import default_model_id
+from demo.typer.config import default_model_id
 
 ###################################
 # Knowledge Graph Schema
@@ -98,7 +99,7 @@ def doc_as_rich(doc: Document):
 
 from eyecite import get_citations
 
-chunk_extraction_model_id = default_model_id
+default_chunk_extraction_model_id = default_model_id
 
 class LegalOpinionChunkExtractions(BaseModel):
     """
@@ -111,13 +112,13 @@ chunk_extraction_data_model = LegalOpinionChunkExtractions
 
 def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
 
-    object: str = doc_as_object(doc)
+    obj: str = doc_as_object(doc)
 
     triples = []
 
     subject = doc.metadata["court"]
     relation = RELATION_COURT
-    triples.append((subject, relation, object))
+    triples.append((subject, relation, obj))
 
     citations: List[str] = get_citations(doc.page_content)
 
@@ -126,7 +127,7 @@ def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
         # TODO there are several fields in citation object that should be
         # stored in the graph
         subject: str = citation.matched_text()
-        triples.append((subject, relation, object))
+        triples.append((subject, relation, obj))
 
     return triples
 
@@ -135,22 +136,35 @@ chunk_extraction_template = partial_formatter.format(
     extraction_description = LegalOpinionChunkExtractions.__doc__
     )
 
-def get_triples_from_chunk_extract(
-    loce_str: str,
-    object: str,
+def get_triples_from_chunk(
+    chunk_extraction_model_id: str,
+    chunk: Document,
+    doc: Document,
     ) -> List[tuple[str, str, str]]:
 
-    logging.info("get_triples_from_chunk_extract: leo_str = <<<%s>>>", loce_str)
+    obj: str = doc_as_object(doc)
+
+    loce_str = complete_simple(
+        chunk_extraction_model_id,
+        extraction_system_prompt,
+        chunk_extraction_template.format(text = chunk.page_content),
+        response_format = {
+            "type": "json_object",
+            "schema": LegalOpinionChunkExtractions.model_json_schema(),
+        },
+        rich_output = True)
+
+    logging.info("get_triples_from_chunk_extract: loce_str = <<<%s>>>", loce_str)
 
     triples = []
     try:
-        loce_json = json.loads(loce_str)
-        loce = LegalOpinionChunkExtractions(**loce_json)
+        loce_py = json.loads(loce_str)
+        loce = LegalOpinionChunkExtractions(**loce_py)
         for judge in loce.judges:
-            triple = (judge.strip(), RELATION_JUDGE, object)
+            triple = (judge.strip(), RELATION_JUDGE, obj)
             triples.append(triple)
         #for citation in loce.legal_citations:
-        #    triple = (citation.strip(), RELATION_LEGAL_CITATION, object)
+        #    triple = (citation.strip(), RELATION_LEGAL_CITATION, obj)
         #    triples.append(triple)
     except Exception as e:
         logging.error("get_triples_from_chunk_extract: Exception: %s", e)
@@ -274,7 +288,7 @@ def matching_objects_query(
 # Response Generation
 ####################################
 
-generation_model_id = default_model_id
+default_generation_model_id = default_model_id
 
 system_prompt = "You are a helpful law librarian"
 

@@ -62,7 +62,7 @@ def apply_tools(
 
     tool_call_message = response.choices[0].message
 
-    if tool_call_message.tool_calls is None:
+    if tool_call_message.tool_calls is None or len(tool_call_message.tool_calls) == 0:
 
         if rich_output:
             print(Panel(Text(str(tool_call_message.content)), title="Tool Application Response"))

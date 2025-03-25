@@ -2,7 +2,7 @@
 from pathlib import Path
 from rich.prompt import Prompt
 
-from proscenium.typer.config import default_model_id
+from demo.typer.config import default_model_id
 
 milvus_uri = "file:/milvus.db"
 #milvus_uri = "http://localhost:19530"
