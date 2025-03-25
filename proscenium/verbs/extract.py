@@ -15,10 +15,8 @@ Below is a description of a data class for storing information extracted from te
 
 {extraction_description}
 
-Given this data class, you will be asked to extract entities belonging to these categories from a text passage.
-Consider only the list of entity categories above; do not extract any additional entities.
-
-Find the entities in the following text, and list them in the specified JSON response format.  Only answer in JSON.:
+Find the information in the following text, and provide them in the specified JSON response format.
+Only answer in JSON.:
 
 {text}
 """

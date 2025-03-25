@@ -29,12 +29,10 @@ extraction_system_prompt = "You are an entity extractor"
 
 def extract_triples_from_document(
     doc: Document,
-    chunk_extraction_model_id: str,
-    extraction_template: str,
     doc_as_rich: Callable[[Document], Panel],
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
-    extraction_model: BaseModel,
-    get_triples_from_extract: Callable[[BaseModel, Document], List[tuple[str, str, str]]],
+    chunk_extraction_model_id: str,
+    get_triples_from_chunk: Callable[[str, Document, Document], List[tuple[str, str, str]]],
     ) -> List[tuple[str, str, str]]:
 
     print(doc_as_rich(doc))
@@ -48,17 +46,7 @@ def extract_triples_from_document(
     chunks = documents_to_chunks_by_tokens([doc], chunk_size=1000, chunk_overlap=0)
     for i, chunk in enumerate(chunks):
 
-        extract = complete_simple(
-            chunk_extraction_model_id,
-            extraction_system_prompt,
-            extraction_template.format(text = chunk.page_content),
-            response_format = {
-                "type": "json_object",
-                "schema": extraction_model.model_json_schema(),
-            },
-            rich_output = True)
-
-        new_triples = get_triples_from_extract(extract, doc)
+        new_triples = get_triples_from_chunk(chunk_extraction_model_id, chunk, doc)
 
         print("Found", len(new_triples), "triples in chunk", i+1, "of", len(chunks))
 
@@ -108,9 +96,7 @@ def extract_entities(
     entity_csv: str,
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
     chunk_extraction_model_id: str,
-    extraction_template: str,
-    extraction_model: BaseModel,
-    get_triples_from_chunk_extract: Callable[[BaseModel, Document], List[tuple[str, str, str]]]
+    get_triples_from_chunk: Callable[[Document, Document], List[tuple[str, str, str]]]
     ) -> None:
 
     docs = retrieve_documents()
@@ -128,12 +114,10 @@ def extract_entities(
 
                 doc_triples = extract_triples_from_document(
                     doc,
-                    chunk_extraction_model_id,
-                    extraction_template,
                     doc_as_rich,
                     doc_direct_triples,
-                    extraction_model,
-                    get_triples_from_chunk_extract)
+                    chunk_extraction_model_id,
+                    get_triples_from_chunk)
 
                 writer.writerows(doc_triples)
                 progress.update(task_extract, advance=1)

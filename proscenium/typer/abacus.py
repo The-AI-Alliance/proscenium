@@ -18,11 +18,11 @@ model_id = default_model_id
 
 app = typer.Typer()
 
-@app.command()
+@app.command(help="Ask a natural langauge arithmetic question.")
 def ask():
 
     tools = [Addition, Subtraction, Multiplication, Division]
-
+ 
     tool_map, tool_desc_list = process_tools(tools)
 
     # try "What is your favorite color?"
@@ -33,7 +33,10 @@ def ask():
 
     answer = apply_tools(
         model_id = model_id,
-        system_message = "Perform any referenced arithmetic.",
+        system_message = """"
+Use the tools specified in this request to perform the arithmeticin the user's question.
+Do not use any other tools.
+""",
         message = question,
         tool_desc_list = tool_desc_list,
         tool_map = tool_map,

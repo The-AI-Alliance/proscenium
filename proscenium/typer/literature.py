@@ -16,8 +16,8 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 app = typer.Typer()
 
-@app.command()
-def build_vector_db():
+@app.command(help=f"Build a vector database from chunks of {literature_config.url}.")
+def prepare():
 
     asyncio.run(url_to_file(literature_config.url, literature_config.data_file))
     print("Data file to chunk:", literature_config.data_file)
@@ -33,7 +33,9 @@ def build_vector_db():
     vector_db_client.close()
 
 
-@app.command()
+@app.command(help="""
+Ask a question about literature using the RAG pattern with the chunks prepared in the previous step.
+""")
 def ask():
 
     query = literature_config.get_user_question()
