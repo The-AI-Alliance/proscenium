@@ -18,7 +18,7 @@ from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.scripts.graph_rag import extraction_system_prompt
 
-from demo.typer.config import default_model_id
+from demo.config import default_model_id
 
 ###################################
 # Knowledge Graph Schema

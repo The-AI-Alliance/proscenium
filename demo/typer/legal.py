@@ -13,7 +13,7 @@ from proscenium.scripts.graph_rag import extract_entities, \
     load_entity_graph, show_entity_graph, load_entity_resolver, \
     answer_question
 
-from demo.typer import legal_config
+import demo.domains.legal as legal_config
 
 app = typer.Typer()
 

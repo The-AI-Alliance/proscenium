@@ -10,7 +10,7 @@ from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import vector_db
 
 from proscenium.scripts.rag import answer_question, build_vector_db as bvd
-from demo.typer import literature_config
+import demo.domains.literature as literature_config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
