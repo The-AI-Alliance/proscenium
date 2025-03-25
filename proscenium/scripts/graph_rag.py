@@ -31,7 +31,7 @@ def extract_triples_from_document(
     doc_as_rich: Callable[[Document], Panel],
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
     chunk_extraction_model_id: str,
-    get_triples_from_chunk: Callable[[str, Document, Document], List[tuple[str, str, str]]],
+    triples_from_chunk: Callable[[str, Document, Document], List[tuple[str, str, str]]],
     ) -> List[tuple[str, str, str]]:
 
     print(doc_as_rich(doc))
@@ -45,7 +45,7 @@ def extract_triples_from_document(
     chunks = documents_to_chunks_by_tokens([doc], chunk_size=1000, chunk_overlap=0)
     for i, chunk in enumerate(chunks):
 
-        new_triples = get_triples_from_chunk(chunk_extraction_model_id, chunk, doc)
+        new_triples = triples_from_chunk(chunk_extraction_model_id, chunk, doc)
 
         print("Found", len(new_triples), "triples in chunk", i+1, "of", len(chunks))
 
@@ -95,7 +95,7 @@ def extract_entities(
     entity_csv: str,
     doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
     chunk_extraction_model_id: str,
-    get_triples_from_chunk: Callable[[Document, Document], List[tuple[str, str, str]]]
+    triples_from_chunk: Callable[[Document, Document], List[tuple[str, str, str]]]
     ) -> None:
 
     docs = retrieve_documents()
@@ -116,7 +116,7 @@ def extract_entities(
                     doc_as_rich,
                     doc_direct_triples,
                     chunk_extraction_model_id,
-                    get_triples_from_chunk)
+                    triples_from_chunk)
 
                 writer.writerows(doc_triples)
                 progress.update(task_extract, advance=1)
@@ -202,13 +202,13 @@ def answer_question(
     embedding_model_id: str,
     driver: Driver,
     generation_model_id: str,
-    get_triples_from_query: Callable[[str, str, str], List[tuple[str, str, str]]],
+    triples_from_query: Callable[[str, str, str], List[tuple[str, str, str]]],
     generation_prompts: Callable[[str, List[tuple[str, str, str]], Driver], str],
     ) -> str:
 
     print(Panel(question, title="Question"))
 
-    question_entity_triples = get_triples_from_query(question, "", query_extraction_model_id)
+    question_entity_triples = triples_from_query(question, "", query_extraction_model_id)
     print("\n")
     if len(question_entity_triples) == 0:
         print("No triples extracted from question")

@@ -136,7 +136,7 @@ chunk_extraction_template = partial_formatter.format(
     extraction_description = LegalOpinionChunkExtractions.__doc__
     )
 
-def get_triples_from_chunk(
+def triples_from_chunk(
     chunk_extraction_model_id: str,
     chunk: Document,
     doc: Document,
@@ -154,7 +154,7 @@ def get_triples_from_chunk(
         },
         rich_output = True)
 
-    logging.info("get_triples_from_chunk_extract: loce_str = <<<%s>>>", loce_str)
+    logging.info("triples_from_chunk_extract: loce_str = <<<%s>>>", loce_str)
 
     triples = []
     try:
@@ -167,7 +167,7 @@ def get_triples_from_chunk(
         #    triple = (citation.strip(), RELATION_LEGAL_CITATION, obj)
         #    triples.append(triple)
     except Exception as e:
-        logging.error("get_triples_from_chunk_extract: Exception: %s", e)
+        logging.error("triples_from_chunk_extract: Exception: %s", e)
     finally:
         return triples
 
@@ -191,10 +191,10 @@ def add_triple(tx, entity: str, role: str, case: str) -> None:
     tx.run(query, entity=entity, case=case)
 
 ###################################
-# get_user_question
+# user_question
 ###################################
 
-def get_user_question() -> str:
+def user_question() -> str:
 
     question = Prompt.ask(
         f"What is your question about {hf_dataset_id}?",
@@ -204,7 +204,7 @@ def get_user_question() -> str:
     return question
 
 ###################################
-# get_triples_from_query
+# triples_from_query
 ###################################
 
 default_query_extraction_model_id = default_model_id
@@ -233,7 +233,7 @@ query_extraction_template = partial_formatter.format(
     extraction_description = QueryExtractions.__doc__
     )
 
-def get_triples_from_query(
+def triples_from_query(
     query: str,
     obj_str: str,
     model_id: str
@@ -251,7 +251,7 @@ def get_triples_from_query(
 
     print("\nExtracting triples from extraction response")
 
-    logging.info("get_triples_from_query: extract = <<<%s>>>", extract)
+    logging.info("triples_from_query: extract = <<<%s>>>", extract)
 
     triples = []
     try:
@@ -269,7 +269,7 @@ def get_triples_from_query(
         #    triples.append((subject, relation, obj_str))
 
     except Exception as e:
-        logging.error("get_triples_from_query_extract: Exception: %s", e)
+        logging.error("triples_from_query_extract: Exception: %s", e)
     finally:
         return triples
 

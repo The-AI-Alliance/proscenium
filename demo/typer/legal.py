@@ -26,7 +26,7 @@ def extract():
         legal_config.entity_csv_file,
         legal_config.doc_direct_triples,
         legal_config.default_chunk_extraction_model_id,
-        legal_config.get_triples_from_chunk)
+        legal_config.triples_from_chunk)
 
 @app.command()
 def load_graph():
@@ -86,7 +86,7 @@ def ask():
         legal_config.neo4j_username,
         legal_config.neo4j_password)
 
-    question = legal_config.get_user_question()
+    question = legal_config.user_question()
 
     answer = answer_question(
         question,
@@ -95,7 +95,7 @@ def ask():
         legal_config.embedding_model_id,
         driver,
         legal_config.default_generation_model_id,
-        legal_config.get_triples_from_query,
+        legal_config.triples_from_query,
         legal_config.generation_prompts,
         )
 

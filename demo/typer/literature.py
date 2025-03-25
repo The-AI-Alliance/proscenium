@@ -38,7 +38,7 @@ Ask a question about literature using the RAG pattern with the chunks prepared i
 """)
 def ask():
 
-    query = literature_config.get_user_question()
+    query = literature_config.user_question()
 
     embedding_fn = embedding_function(literature_config.embedding_model_id)
     print("Embedding model:", literature_config.embedding_model_id)

@@ -14,7 +14,7 @@ model_id = default_model_id
 url = 'https://www.gutenberg.org/cache/epub/8714/pg8714.txt'
 data_file = Path("four_plays_of_aeschylus.txt")
 
-def get_user_question() -> str:
+def user_question() -> str:
 
     question = Prompt.ask(
         f"What is your question about The Four Plays of Aeschylus?",
