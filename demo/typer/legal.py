@@ -79,6 +79,7 @@ def load_resolver():
 @app.command()
 def ask():
 
+    embedding_fn = embedding_function(legal_config.embedding_model_id)
     vector_db_client = vector_db(legal_config.milvus_uri)
     print("Connected to vector db stored at", legal_config.milvus_uri, "with embedding model", legal_config.embedding_model_id)
     print("\n")
