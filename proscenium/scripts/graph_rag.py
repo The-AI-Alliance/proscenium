@@ -203,7 +203,7 @@ def answer_question(
     driver: Driver,
     generation_model_id: str,
     get_triples_from_query: Callable[[str, str, str], List[tuple[str, str, str]]],
-    form_generation_prompt: Callable[[str, List[tuple[str, str, str]], Driver], str],
+    generation_prompts: Callable[[str, List[tuple[str, str, str]], Driver], str],
     ) -> str:
 
     print(Panel(question, title="Question"))
@@ -221,7 +221,7 @@ def answer_question(
     print("\n")
     pairs_table(subject_predicate_pairs, "Subject Predicate Constraints")
 
-    prompts = form_generation_prompt(question, subject_predicate_pairs, driver)
+    prompts = generation_prompts(question, subject_predicate_pairs, driver)
 
     if prompts is None:
 

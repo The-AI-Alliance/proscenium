@@ -274,7 +274,7 @@ def get_triples_from_query(
         return triples
 
 ###################################
-# form_generation_prompts
+# generation_prompts
 ###################################
 
 embedding_model_id = "all-MiniLM-L6-v2"
@@ -303,7 +303,7 @@ Answer the question using the following text from one case:
 Question: {question}
 """
 
-def form_generation_prompts(
+def generation_prompts(
     query: str,
     subject_predicate_pairs: List[tuple[str, str]],
     driver: Driver) -> tuple[str, str]:

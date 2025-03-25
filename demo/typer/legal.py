@@ -96,7 +96,7 @@ def ask():
         driver,
         legal_config.default_generation_model_id,
         legal_config.get_triples_from_query,
-        legal_config.form_generation_prompts,
+        legal_config.generation_prompts,
         )
 
     if answer:
