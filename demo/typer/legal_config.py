@@ -12,15 +12,13 @@ from langchain_core.documents.base import Document
 
 from pydantic import BaseModel, Field
 
-from proscenium.typer.config import default_model_id
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
-
 from proscenium.scripts.graph_rag import extraction_system_prompt
 
-from proscenium.typer.config import default_model_id
+from demo.typer.config import default_model_id
 
 ###################################
 # Knowledge Graph Schema

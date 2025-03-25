@@ -4,9 +4,9 @@ import logging
 from rich import print
 from proscenium.verbs.display import header
 
-from proscenium.typer.abacus import app as abacus_app
-from proscenium.typer.literature import app as literature_app
-from proscenium.typer.legal import app as legal_app
+from demo.typer.abacus import app as abacus_app
+from demo.typer.literature import app as literature_app
+from demo.typer.legal import app as legal_app
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.WARNING)
