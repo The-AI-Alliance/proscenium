@@ -1,8 +1,0 @@
-Proscenium 🎭
-The AI Alliance
-
-Embedding model all-MiniLM-L6-v2
-Deleted existing vector db file grag-milvus.db
-Vector db stored at file:/grag-milvus.db
-59 chunks inserted
-Collection row count: 59
