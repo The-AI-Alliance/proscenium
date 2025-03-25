@@ -4,8 +4,8 @@ from rich import print
 from rich.panel import Panel
 
 from proscenium.verbs.vector_database import create_vector_db
-from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
+from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.know import knowledge_graph_client
 from proscenium.verbs.vector_database import collection_name
 
@@ -77,7 +77,6 @@ def load_resolver():
 @app.command()
 def ask():
 
-    embedding_fn = embedding_function(legal_config.embedding_model_id)
     vector_db_client = vector_db(legal_config.milvus_uri)
     print("Connected to vector db stored at", legal_config.milvus_uri, "with embedding model", legal_config.embedding_model_id)
     print("\n")
@@ -91,18 +90,13 @@ def ask():
 
     answer = answer_question(
         question,
-        legal_config.retrieve_document,
-        legal_config.default_generation_model_id,
-        legal_config.system_prompt,
-        legal_config.graphrag_prompt_template,
-        driver,
+        legal_config.default_query_extraction_model_id,
         vector_db_client,
-        embedding_fn,
-        legal_config.query_extraction_template,
-        legal_config.query_extraction_model_id,
-        legal_config.query_extraction_data_model,
-        legal_config.get_triples_from_query_extract,
-        legal_config.matching_objects_query,
+        legal_config.embedding_model_id,
+        driver,
+        legal_config.default_generation_model_id,
+        legal_config.get_triples_from_query,
+        legal_config.form_generation_prompts,
         )
 
     if answer:

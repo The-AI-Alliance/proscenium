@@ -1,6 +1,5 @@
 
 from typing import List
-from typing import Optional
 from typing import Callable
 from typing import Any
 
@@ -14,12 +13,12 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress
 
-from pydantic import BaseModel
 from pymilvus import MilvusClient
 from pymilvus import model
 
 from proscenium.verbs.chunk import documents_to_chunks_by_tokens
 from proscenium.verbs.complete import complete_simple
+from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import closest_chunks
 from proscenium.verbs.vector_database import add_chunks_to_vector_db
 from proscenium.verbs.display.neo4j import triples_table, pairs_table
@@ -198,34 +197,18 @@ def load_entity_resolver(
 
 def answer_question(
     question: str,
-    retrieve_document: Callable[[str], Optional[Document]],
-    generation_model_id: str,
-    system_prompt: str,
-    graphrag_prompt_template: str,
-    driver: Driver,
-    vector_db_client: MilvusClient,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-    query_extraction_template: str,
     query_extraction_model_id: str,
-    query_extraction_data_model: BaseModel,
-    get_triples_from_query_extract: Callable[[BaseModel, str], List[tuple[str, str, str]]],
-    matching_objects_query: Callable[[List[tuple[str, str]]], str],
+    vector_db_client: MilvusClient,
+    embedding_model_id: str,
+    driver: Driver,
+    generation_model_id: str,
+    get_triples_from_query: Callable[[str, str, str], List[tuple[str, str, str]]],
+    form_generation_prompt: Callable[[str, List[tuple[str, str, str]], Driver], str],
     ) -> str:
 
     print(Panel(question, title="Question"))
 
-    extract = complete_simple(
-        query_extraction_model_id,
-        extraction_system_prompt,
-        query_extraction_template.format(text = question),
-        response_format = {
-            "type": "json_object",
-            "schema": query_extraction_data_model.model_json_schema(),
-        },
-        rich_output = True)
-
-    print("\nExtracting triples from extraction response")
-    question_entity_triples = get_triples_from_query_extract(extract, "")
+    question_entity_triples = get_triples_from_query(question, "", query_extraction_model_id)
     print("\n")
     if len(question_entity_triples) == 0:
         print("No triples extracted from question")
@@ -233,38 +216,25 @@ def answer_question(
     print(triples_table(question_entity_triples, "Query Triples"))
 
     print("Finding entity matches for triples")
+    embedding_fn = embedding_function(embedding_model_id)
     subject_predicate_pairs = find_matching_objects(vector_db_client, embedding_fn, question_entity_triples)
     print("\n")
     pairs_table(subject_predicate_pairs, "Subject Predicate Constraints")
 
-    print("Querying for objects that match those constraints")
-    object_names = query_for_objects(driver, subject_predicate_pairs, matching_objects_query)
-    print("Objects with names:", object_names, "are matches for", subject_predicate_pairs)
+    prompts = form_generation_prompt(question, subject_predicate_pairs, driver)
 
-    if len(object_names) > 0:
+    if prompts is None:
 
-        doc = retrieve_document(object_names[0])
-
-        if doc:
-
-            user_prompt = graphrag_prompt_template.format(
-                document_text = doc.page_content,
-                question = question)
-
-            response = complete_simple(
-                generation_model_id,
-                system_prompt,
-                user_prompt,
-                rich_output = True)
-
-            return response
-
-        else:
-
-            print("No document matching", object_names[0])
-            return None
-
+        return None
+    
     else:
 
-        print("No objects found for entity role pairs")
-        return None
+        system_prompt, user_prompt = prompts
+
+        response = complete_simple(
+            generation_model_id,
+            system_prompt,
+            user_prompt,
+            rich_output = True)
+
+        return response

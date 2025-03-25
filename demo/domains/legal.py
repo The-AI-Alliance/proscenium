@@ -4,6 +4,7 @@ from typing import List, Optional
 import logging
 import json
 
+from neo4j import Driver
 from pathlib import Path
 from rich.panel import Panel
 from rich.prompt import Prompt
@@ -17,6 +18,7 @@ from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.scripts.graph_rag import extraction_system_prompt
+from proscenium.scripts.graph_rag import query_for_objects
 
 from demo.config import default_model_id
 
@@ -108,8 +110,6 @@ class LegalOpinionChunkExtractions(BaseModel):
     judges: list[str] = Field(description = "A list of the judges mentioned in the text. For example: `Judge John Doe`")
     # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
-chunk_extraction_data_model = LegalOpinionChunkExtractions
-
 def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
 
     obj: str = doc_as_object(doc)
@@ -191,15 +191,7 @@ def add_triple(tx, entity: str, role: str, case: str) -> None:
     tx.run(query, entity=entity, case=case)
 
 ###################################
-# Entity Resolution
-###################################
-
-embedding_model_id = "all-MiniLM-L6-v2"
-
-milvus_uri = "file:/grag-milvus.db"
-
-###################################
-# Querying
+# get_user_question
 ###################################
 
 def get_user_question() -> str:
@@ -212,10 +204,10 @@ def get_user_question() -> str:
     return question
 
 ###################################
-# Query Extraction
+# get_triples_from_query
 ###################################
 
-query_extraction_model_id = default_model_id
+default_query_extraction_model_id = default_model_id
 
 class QueryExtractions(BaseModel):
     """
@@ -223,8 +215,6 @@ class QueryExtractions(BaseModel):
     """
     judges: list[str] = Field(description = "A list of the judges mentioned in the query. For example: `Judge John Doe`")
     # legal_citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
-
-query_extraction_data_model = QueryExtractions
 
 def query_direct_triples(query: str) -> list[tuple[str, str, str]]:
 
@@ -243,27 +233,40 @@ query_extraction_template = partial_formatter.format(
     extraction_description = QueryExtractions.__doc__
     )
 
-def get_triples_from_query_extract(
-    qe_str: str,
-    object: str,
+def get_triples_from_query(
+    query: str,
+    obj_str: str,
+    model_id: str
     ) -> List[tuple[str, str, str]]:
 
-    logging.info("get_triples_from_query_extract: qe_str = <<<%s>>>", qe_str)
+    extract = complete_simple(
+        model_id,
+        extraction_system_prompt,
+        query_extraction_template.format(text = query),
+        response_format = {
+            "type": "json_object",
+            "schema": QueryExtractions.model_json_schema(),
+        },
+        rich_output = True)
+
+    print("\nExtracting triples from extraction response")
+
+    logging.info("get_triples_from_query: extract = <<<%s>>>", extract)
 
     triples = []
     try:
-        qe_json = json.loads(qe_str)
+        qe_json = json.loads(extract)
         qe = QueryExtractions(**qe_json)
 
         relation = RELATION_JUDGE
         for judge in qe.judges:
             subject = judge.strip()
-            triples.append((subject, relation, object))
+            triples.append((subject, relation, obj_str))
 
         #relation = RELATION_LEGAL_CITATION
         #for citation in qe.legal_citations:
         #    subject = citation.strip()
-        #    triples.append((subject, relation, object))
+        #    triples.append((subject, relation, obj_str))
 
     except Exception as e:
         logging.error("get_triples_from_query_extract: Exception: %s", e)
@@ -271,8 +274,12 @@ def get_triples_from_query_extract(
         return triples
 
 ###################################
-# Query Search
+# form_generation_prompts
 ###################################
+
+embedding_model_id = "all-MiniLM-L6-v2"
+
+milvus_uri = "file:/grag-milvus.db"
 
 def matching_objects_query(
     subject_predicate_constraints: List[tuple[str, str]]) -> str:
@@ -284,13 +291,9 @@ def matching_objects_query(
 
     return query
 
-###################################
-# Response Generation
-####################################
-
 default_generation_model_id = default_model_id
 
-system_prompt = "You are a helpful law librarian"
+generation_system_prompt = "You are a helpful law librarian"
 
 graphrag_prompt_template = """
 Answer the question using the following text from one case:
@@ -299,3 +302,35 @@ Answer the question using the following text from one case:
 
 Question: {question}
 """
+
+def form_generation_prompts(
+    query: str,
+    subject_predicate_pairs: List[tuple[str, str]],
+    driver: Driver) -> tuple[str, str]:
+
+    print("Querying for objects that match those constraints")
+    object_names = query_for_objects(driver, subject_predicate_pairs, matching_objects_query)
+    print("Objects with names:", object_names, "are matches for", subject_predicate_pairs)
+
+    if len(object_names) > 0:
+
+        doc = retrieve_document(object_names[0])
+
+        if doc:
+
+            user_prompt = graphrag_prompt_template.format(
+                document_text = doc.page_content,
+                question = query)
+
+            return generation_system_prompt, user_prompt
+
+        else:
+
+            print("No document matching", object_names[0])
+            return None
+
+    else:
+
+        print("No objects found for entity role pairs")
+        return None
+
