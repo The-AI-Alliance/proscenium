@@ -10,13 +10,14 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
-from demo.typer.config import default_model_id
+from demo.config import default_model_id
+
 from proscenium.verbs.invoke import process_tools
 from proscenium.scripts.tools import apply_tools, tool_applier_actor_class
 
 model_id = default_model_id
 
-app = typer.Typer()
+app = typer.Typer(help="""Arithmetic question answering.""")
 
 @app.command(help="Ask a natural langauge arithmetic question.")
 def ask():

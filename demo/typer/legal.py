@@ -4,8 +4,8 @@ from rich import print
 from rich.panel import Panel
 
 from proscenium.verbs.vector_database import create_vector_db
-from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
+from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.know import knowledge_graph_client
 from proscenium.verbs.vector_database import collection_name
 
@@ -13,9 +13,11 @@ from proscenium.scripts.graph_rag import extract_entities, \
     load_entity_graph, show_entity_graph, load_entity_resolver, \
     answer_question
 
-from demo.typer import legal_config
+import demo.domains.legal as legal_config
 
-app = typer.Typer()
+app = typer.Typer(help="""
+Graph extraction and question answering with GraphRAG on caselaw.
+""")
 
 @app.command()
 def extract():
@@ -26,7 +28,7 @@ def extract():
         legal_config.entity_csv_file,
         legal_config.doc_direct_triples,
         legal_config.default_chunk_extraction_model_id,
-        legal_config.get_triples_from_chunk)
+        legal_config.triples_from_chunk)
 
 @app.command()
 def load_graph():
@@ -87,22 +89,17 @@ def ask():
         legal_config.neo4j_username,
         legal_config.neo4j_password)
 
-    question = legal_config.get_user_question()
+    question = legal_config.user_question()
 
     answer = answer_question(
         question,
-        legal_config.retrieve_document,
-        legal_config.default_generation_model_id,
-        legal_config.system_prompt,
-        legal_config.graphrag_prompt_template,
-        driver,
+        legal_config.default_query_extraction_model_id,
         vector_db_client,
-        embedding_fn,
-        legal_config.query_extraction_template,
-        legal_config.query_extraction_model_id,
-        legal_config.query_extraction_data_model,
-        legal_config.get_triples_from_query_extract,
-        legal_config.matching_objects_query,
+        legal_config.embedding_model_id,
+        driver,
+        legal_config.default_generation_model_id,
+        legal_config.triples_from_query,
+        legal_config.generation_prompts,
         )
 
     if answer:

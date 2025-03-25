@@ -10,11 +10,11 @@ from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import vector_db
 
 from proscenium.scripts.rag import answer_question, build_vector_db as bvd
-from demo.typer import literature_config
+import demo.domains.literature as literature_config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-app = typer.Typer()
+app = typer.Typer(help="""Question answering using RAG on a text from the Gutenberg Project.""")
 
 @app.command(help=f"Build a vector database from chunks of {literature_config.url}.")
 def prepare():
@@ -38,7 +38,7 @@ Ask a question about literature using the RAG pattern with the chunks prepared i
 """)
 def ask():
 
-    query = literature_config.get_user_question()
+    query = literature_config.user_question()
 
     embedding_fn = embedding_function(literature_config.embedding_model_id)
     print("Embedding model:", literature_config.embedding_model_id)
