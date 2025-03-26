@@ -1,10 +1,8 @@
-
 from typing import List
 from rich.table import Table
 
-def triples_table(
-    triples: List[tuple[str, str, str]],
-    title: str) -> Table:
+
+def triples_table(triples: List[tuple[str, str, str]], title: str) -> Table:
 
     table = Table(title=title, show_lines=False)
     table.add_column("Subject", justify="left", style="blue")
@@ -15,9 +13,8 @@ def triples_table(
 
     return table
 
-def pairs_table(
-    subject_predicate_pairs: List[tuple[str, str]],
-    title: str) -> Table:
+
+def pairs_table(subject_predicate_pairs: List[tuple[str, str]], title: str) -> Table:
 
     table = Table(title=title, show_lines=False)
     table.add_column("Subject", justify="left", style="blue")

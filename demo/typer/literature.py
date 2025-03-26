@@ -14,7 +14,10 @@ import demo.domains.literature as literature_config
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-app = typer.Typer(help="""Question answering using RAG on a text from the Gutenberg Project.""")
+app = typer.Typer(
+    help="""Question answering using RAG on a text from the Gutenberg Project."""
+)
+
 
 @app.command(help=f"Build a vector database from chunks of {literature_config.url}.")
 def prepare():
@@ -25,7 +28,9 @@ def prepare():
     embedding_fn = embedding_function(literature_config.embedding_model_id)
     print("Embedding model", literature_config.embedding_model_id)
 
-    vector_db_client = create_vector_db(literature_config.milvus_uri, embedding_fn, overwrite=True)
+    vector_db_client = create_vector_db(
+        literature_config.milvus_uri, embedding_fn, overwrite=True
+    )
     print("Vector db at uri", literature_config.milvus_uri)
 
     bvd(literature_config.data_file, vector_db_client, embedding_fn)
@@ -33,9 +38,11 @@ def prepare():
     vector_db_client.close()
 
 
-@app.command(help="""
+@app.command(
+    help="""
 Ask a question about literature using the RAG pattern with the chunks prepared in the previous step.
-""")
+"""
+)
 def ask():
 
     query = literature_config.user_question()
@@ -46,6 +53,8 @@ def ask():
     vector_db_client = vector_db(literature_config.milvus_uri)
     print("Vector db at uri", literature_config.milvus_uri)
 
-    answer = answer_question(query, literature_config.model_id, vector_db_client, embedding_fn)
+    answer = answer_question(
+        query, literature_config.model_id, vector_db_client, embedding_fn
+    )
 
     print(Panel(answer, title="Assistant"))

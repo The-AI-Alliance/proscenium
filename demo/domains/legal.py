@@ -1,4 +1,3 @@
-
 from typing import List, Optional
 
 import logging
@@ -40,21 +39,34 @@ num_docs = 4
 
 # Note: early version looked at only: doc.metadata["id"] in ['4440632', '4441078']
 
+
 def retrieve_documents() -> List[Document]:
 
-    docs = load_hugging_face_dataset(hf_dataset_id, page_content_column=hf_dataset_column)
+    docs = load_hugging_face_dataset(
+        hf_dataset_id, page_content_column=hf_dataset_column
+    )
 
     old_len = len(docs)
     docs = docs[:num_docs]
-    logging.info("using the first", num_docs, "documents of", old_len, "from HF dataset", hf_dataset_id)
+    logging.info(
+        "using the first",
+        num_docs,
+        "documents of",
+        old_len,
+        "from HF dataset",
+        hf_dataset_id,
+    )
 
     return docs
 
+
 def doc_as_object(doc: Document) -> str:
-    return doc.metadata['name_abbreviation']
+    return doc.metadata["name_abbreviation"]
+
 
 # TODO index the docs after the first `retrieve_documents` call,
 # so that `retrieve_document` is efficient
+
 
 def retrieve_document(id: str) -> Optional[Document]:
 
@@ -64,6 +76,7 @@ def retrieve_document(id: str) -> Optional[Document]:
             return doc
 
     return None
+
 
 ###################################
 # Data display
@@ -84,13 +97,15 @@ Parties: {parties}
 Word Count: {word_count}, Character Count: {char_count}
 Last Updated: {last_updated}, Provenance: {provenance}
 Id: {id}
-""" # leaves out head_matter
+"""  # leaves out head_matter
+
 
 def doc_as_rich(doc: Document):
-    
+
     case_str = case_template.format_map(doc.metadata)
 
-    return Panel(case_str, title=doc.metadata['name_abbreviation'])
+    return Panel(case_str, title=doc.metadata["name_abbreviation"])
+
 
 ###################################
 # Chunk Extraction
@@ -103,12 +118,17 @@ from eyecite import get_citations
 
 default_chunk_extraction_model_id = default_model_id
 
+
 class LegalOpinionChunkExtractions(BaseModel):
     """
     The extracted judges from a chunk of a legal opinion.
     """
-    judges: list[str] = Field(description = "A list of the judges mentioned in the text. For example: `Judge John Doe`")
+
+    judges: list[str] = Field(
+        description="A list of the judges mentioned in the text. For example: `Judge John Doe`"
+    )
     # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
+
 
 def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
 
@@ -131,28 +151,30 @@ def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
 
     return triples
 
+
 chunk_extraction_template = partial_formatter.format(
-    raw_extraction_template,
-    extraction_description = LegalOpinionChunkExtractions.__doc__
-    )
+    raw_extraction_template, extraction_description=LegalOpinionChunkExtractions.__doc__
+)
+
 
 def triples_from_chunk(
     chunk_extraction_model_id: str,
     chunk: Document,
     doc: Document,
-    ) -> List[tuple[str, str, str]]:
+) -> List[tuple[str, str, str]]:
 
     obj: str = doc_as_object(doc)
 
     loce_str = complete_simple(
         chunk_extraction_model_id,
         extraction_system_prompt,
-        chunk_extraction_template.format(text = chunk.page_content),
-        response_format = {
+        chunk_extraction_template.format(text=chunk.page_content),
+        response_format={
             "type": "json_object",
             "schema": LegalOpinionChunkExtractions.model_json_schema(),
         },
-        rich_output = True)
+        rich_output=True,
+    )
 
     logging.info("triples_from_chunk_extract: loce_str = <<<%s>>>", loce_str)
 
@@ -163,7 +185,7 @@ def triples_from_chunk(
         for judge in loce.judges:
             triple = (judge.strip(), RELATION_JUDGE, obj)
             triples.append(triple)
-        #for citation in loce.legal_citations:
+        # for citation in loce.legal_citations:
         #    triple = (citation.strip(), RELATION_LEGAL_CITATION, obj)
         #    triples.append(triple)
     except Exception as e:
@@ -178,30 +200,34 @@ def triples_from_chunk(
 
 entity_csv_file = Path("entities.csv")
 
-neo4j_uri = "bolt://localhost:7687" # os.environ["NEO4J_URI"]
-neo4j_username = "neo4j" # os.environ["NEO4J_USERNAME"]
-neo4j_password = "password" # os.environ["NEO4J_PASSWORD"]
+neo4j_uri = "bolt://localhost:7687"  # os.environ["NEO4J_URI"]
+neo4j_username = "neo4j"  # os.environ["NEO4J_USERNAME"]
+neo4j_password = "password"  # os.environ["NEO4J_PASSWORD"]
+
 
 def add_triple(tx, entity: str, role: str, case: str) -> None:
     query = (
         "MERGE (e:Entity {name: $entity}) "
         "MERGE (c:Case {name: $case}) "
         "MERGE (e)-[r:%s]->(c)"
-    ) % snakecase(lowercase(role.replace('/', '_')))
+    ) % snakecase(lowercase(role.replace("/", "_")))
     tx.run(query, entity=entity, case=case)
+
 
 ###################################
 # user_question
 ###################################
 
+
 def user_question() -> str:
 
     question = Prompt.ask(
         f"What is your question about {hf_dataset_id}?",
-        default = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
-        )
+        default="How has Judge Kenison used Ballou v. Ballou to rule on cases?",
+    )
 
     return question
+
 
 ###################################
 # triples_from_query
@@ -209,12 +235,17 @@ def user_question() -> str:
 
 default_query_extraction_model_id = default_model_id
 
+
 class QueryExtractions(BaseModel):
     """
     The extracted judges from the user query.
     """
-    judges: list[str] = Field(description = "A list of the judges mentioned in the query. For example: `Judge John Doe`")
+
+    judges: list[str] = Field(
+        description="A list of the judges mentioned in the query. For example: `Judge John Doe`"
+    )
     # legal_citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
+
 
 def query_direct_triples(query: str) -> list[tuple[str, str, str]]:
 
@@ -228,26 +259,26 @@ def query_direct_triples(query: str) -> list[tuple[str, str, str]]:
 
     return triples
 
+
 query_extraction_template = partial_formatter.format(
-    raw_extraction_template,
-    extraction_description = QueryExtractions.__doc__
-    )
+    raw_extraction_template, extraction_description=QueryExtractions.__doc__
+)
+
 
 def triples_from_query(
-    query: str,
-    obj_str: str,
-    model_id: str
-    ) -> List[tuple[str, str, str]]:
+    query: str, obj_str: str, model_id: str
+) -> List[tuple[str, str, str]]:
 
     extract = complete_simple(
         model_id,
         extraction_system_prompt,
-        query_extraction_template.format(text = query),
-        response_format = {
+        query_extraction_template.format(text=query),
+        response_format={
             "type": "json_object",
             "schema": QueryExtractions.model_json_schema(),
         },
-        rich_output = True)
+        rich_output=True,
+    )
 
     print("\nExtracting triples from extraction response")
 
@@ -263,8 +294,8 @@ def triples_from_query(
             subject = judge.strip()
             triples.append((subject, relation, obj_str))
 
-        #relation = RELATION_LEGAL_CITATION
-        #for citation in qe.legal_citations:
+        # relation = RELATION_LEGAL_CITATION
+        # for citation in qe.legal_citations:
         #    subject = citation.strip()
         #    triples.append((subject, relation, obj_str))
 
@@ -272,6 +303,7 @@ def triples_from_query(
         logging.error("triples_from_query_extract: Exception: %s", e)
     finally:
         return triples
+
 
 ###################################
 # generation_prompts
@@ -281,15 +313,18 @@ embedding_model_id = "all-MiniLM-L6-v2"
 
 milvus_uri = "file:/grag-milvus.db"
 
-def matching_objects_query(
-    subject_predicate_constraints: List[tuple[str, str]]) -> str:
+
+def matching_objects_query(subject_predicate_constraints: List[tuple[str, str]]) -> str:
     query = ""
     for i, (subject, predicate) in enumerate(subject_predicate_constraints):
-        predicate_lc = snakecase(lowercase(predicate.replace('/', '_')))
-        query += f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
+        predicate_lc = snakecase(lowercase(predicate.replace("/", "_")))
+        query += (
+            f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
+        )
     query += "RETURN c.name AS name"
 
     return query
+
 
 default_generation_model_id = default_model_id
 
@@ -303,14 +338,18 @@ Answer the question using the following text from one case:
 Question: {question}
 """
 
+
 def generation_prompts(
-    query: str,
-    subject_predicate_pairs: List[tuple[str, str]],
-    driver: Driver) -> tuple[str, str]:
+    query: str, subject_predicate_pairs: List[tuple[str, str]], driver: Driver
+) -> tuple[str, str]:
 
     print("Querying for objects that match those constraints")
-    object_names = query_for_objects(driver, subject_predicate_pairs, matching_objects_query)
-    print("Objects with names:", object_names, "are matches for", subject_predicate_pairs)
+    object_names = query_for_objects(
+        driver, subject_predicate_pairs, matching_objects_query
+    )
+    print(
+        "Objects with names:", object_names, "are matches for", subject_predicate_pairs
+    )
 
     if len(object_names) > 0:
 
@@ -319,8 +358,8 @@ def generation_prompts(
         if doc:
 
             user_prompt = graphrag_prompt_template.format(
-                document_text = doc.page_content,
-                question = query)
+                document_text=doc.page_content, question=query
+            )
 
             return generation_system_prompt, user_prompt
 
@@ -333,4 +372,3 @@ def generation_prompts(
 
         print("No objects found for entity role pairs")
         return None
-
