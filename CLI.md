@@ -1,23 +1,76 @@
 # Command Line Interface Demo of Proscenium
 
+Proscenium uses [Typer](https://github.com/fastapi/typer) to provide
+a command-line interface to some example applications built with
+Proscenium scripts and sub-systems.
+
+## Setup
+
+```bash
+git clone git@github.com:The-AI-Alliance/proscenium.git
+
+cd proscenium
+
+python -m venv venv
+
+. venv/bin/activate
+
+python -m pip install .
+```
+
 ## Help
 
 ```bash
 python -m demo.cli --help
 ```
 
+```text
+Proscenium 🎭
+The AI Alliance
+
+                                                                                
+ Usage: python -m demo.cli [OPTIONS] COMMAND [ARGS]...                          
+                                                                                
+ CLI Demo of Proscenium                                                         
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --install-completion          Install completion for the current shell.      │
+│ --show-completion             Show completion for the current shell, to copy │
+│                               it or customize the installation.              │
+│ --help                        Show this message and exit.                    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ literature   Question answering using RAG on a text from the Gutenberg       │
+│              Project.                                                        │
+│ legal        Graph extraction and question answering with GraphRAG on        │
+│              caselaw.                                                        │
+│ abacus       Arithmetic question answering.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
 ## Abacus (Tool Use)
 
-The "Abacus" app example below uses arithmetic operators as provided by
-[Gofannon](https://github.com/The-AI-Alliance/gofannon)
+```bash
+python -m demo.cli abacus --help
+```
 
-### Without Actors
+```text
+Proscenium 🎭
+The AI Alliance
 
-`python -m demo.cli abacus ask` [stdout](./output/abacus/ask.out)
-
-### With Actors
-
-`python -m demo.cli abacus-actor ask` [stdout](./output/abacus/ask-actor.out)
+                                                                                
+ Usage: python -m demo.cli abacus [OPTIONS] COMMAND [ARGS]...                   
+                                                                                
+ Arithmetic question answering.                                                 
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ ask         Ask a natural langauge arithmetic question.                      │
+│ ask-actor                                                                    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
 
 ## Literature (RAG)
 
@@ -25,13 +78,25 @@ The "Abacus" app example below uses arithmetic operators as provided by
 python -m demo.cli literature --help
 ```
 
-### Build vector database
+```text
+Proscenium 🎭
+The AI Alliance
 
-`python -m demo.cli literature build-vector-db` [stdout](./output/literature/build-vector-db.out)
-
-### Ask Question
-
-`python -m demo.cli literature ask` [stdout](./output/literature/ask.out)
+                                                                                
+ Usage: python -m demo.cli literature [OPTIONS] COMMAND [ARGS]...               
+                                                                                
+ Question answering using RAG on a text from the Gutenberg Project.             
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ prepare   Build a vector database from chunks of                             │
+│           https://www.gutenberg.org/cache/epub/8714/pg8714.txt.              │
+│ ask       Ask a question about literature using the RAG pattern with the     │
+│           chunks prepared in the previous step.                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
 
 ## Legal (GraphRAG)
 
@@ -39,29 +104,26 @@ python -m demo.cli literature --help
 python -m demo.cli legal --help
 ```
 
-### Entity Extraction
+```text
+Proscenium 🎭
+The AI Alliance
 
-`python -m demo.cli legal extract` [stdout](./output/legal/extract_entities.out)
-
-[entities.csv](./output/legal/entities.csv) is an older copy that is upstream of the calls here
-
-[entities-new.csv](./output/legal/entities.csv) is a new version run with the config on 3/11/25
-
-### Load Graph
-
-`python -m demo.cli legal load-graph` [stdout](./output/legal/load_entity_graph.out)
-
-### Show Graph
-
-`python -m demo.cli legal show-graph` [stdout](./output/legal/show-graph.out)
-
-### Load Resolver
-
-`python -m demo.cli legal load-resolver` [stdout](./output/legal/load_entity_resolver.out)
-
-### Ask Question
-
-`python -m demo.cli legal ask` [stdout](./output/legal/answer_question.out)
+                                                                                
+ Usage: python -m demo.cli legal [OPTIONS] COMMAND [ARGS]...                    
+                                                                                
+ Graph extraction and question answering with GraphRAG on caselaw.              
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ extract                                                                      │
+│ load-graph                                                                   │
+│ show-graph                                                                   │
+│ load-resolver                                                                │
+│ ask                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
 
 ### History
 
