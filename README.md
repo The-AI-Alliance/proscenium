@@ -1,4 +1,4 @@
-# Proscenium: Framing Agents
+# Proscenium: Framing AI
 
 Proscenium is a small library of composable glue that allows for
 succinct construction of compound AI systems.  It is not (yet?) intended for production use.
