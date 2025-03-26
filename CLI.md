@@ -1,5 +1,23 @@
 # Command Line Interface Demo of Proscenium
 
+Proscenium uses [Typer](https://github.com/fastapi/typer) to provide
+a command-line interface to some example applications built with
+Proscenium scripts and sub-systems.
+
+## Setup
+
+```bash
+git clone git@github.com:The-AI-Alliance/proscenium.git
+
+cd proscenium
+
+python -m venv venv
+
+. venv/bin/activate
+
+python -m pip install .
+```
+
 ## Help
 
 ```bash
