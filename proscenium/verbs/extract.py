@@ -1,5 +1,5 @@
-
 from string import Formatter
+
 
 class PartialFormatter(Formatter):
     def get_value(self, key, args, kwargs):
@@ -7,6 +7,7 @@ class PartialFormatter(Formatter):
             return super().get_value(key, args, kwargs)
         except KeyError:
             return "{" + key + "}"
+
 
 partial_formatter = PartialFormatter()
 

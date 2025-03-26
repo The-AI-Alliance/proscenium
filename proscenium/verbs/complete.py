@@ -1,4 +1,3 @@
-
 """
 This module uses the [`aisuite`](https://github.com/andrewyng/aisuite) library
 to interact with various LLM inference providers.
@@ -59,27 +58,28 @@ provider_configs = {
 
 client = Client(provider_configs=provider_configs)
 
+
 def complete_simple(
-    model_id: str,
-    system_prompt: str,
-    user_prompt: str,
-    **kwargs) -> str:
+    model_id: str, system_prompt: str, user_prompt: str, **kwargs
+) -> str:
 
     rich_output = kwargs.pop("rich_output", False)
 
-    messages=[
+    messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ]
 
     if rich_output:
 
-        kwargs_text = "\n".join([str(k)+": "+str(v) for k,v in kwargs.items()])
+        kwargs_text = "\n".join([str(k) + ": " + str(v) for k, v in kwargs.items()])
 
-        params_text = Text(f"""
+        params_text = Text(
+            f"""
 model_id: {model_id}
 {kwargs_text}
-    """)
+    """
+        )
 
         messages_table = Table(title="Messages", show_lines=True)
         messages_table.add_column("Role", justify="left", style="blue")
@@ -87,13 +87,13 @@ model_id: {model_id}
         for message in messages:
             messages_table.add_row(message["role"], message["content"])
 
-        call_panel = Panel(Group(params_text, messages_table), title="complete_simple call")
+        call_panel = Panel(
+            Group(params_text, messages_table), title="complete_simple call"
+        )
         print(call_panel)
 
     response = client.chat.completions.create(
-        model=model_id,
-        messages=messages,
-        **kwargs
+        model=model_id, messages=messages, **kwargs
     )
     response = response.choices[0].message.content
 
@@ -102,10 +102,10 @@ model_id: {model_id}
 
     return response
 
+
 def evaluate_tool_call(
-    tool_map: dict,
-    tool_call: ChatCompletionMessageToolCall,
-    rich_output: bool = False) -> Any:
+    tool_map: dict, tool_call: ChatCompletionMessageToolCall, rich_output: bool = False
+) -> Any:
 
     function_name = tool_call.function.name
     # TODO validate the arguments?
@@ -121,21 +121,22 @@ def evaluate_tool_call(
 
     return function_response
 
+
 def tool_response_message(
-        tool_call: ChatCompletionMessageToolCall,
-        tool_result: Any) -> dict:
+    tool_call: ChatCompletionMessageToolCall, tool_result: Any
+) -> dict:
 
     return {
         "role": "tool",
         "tool_call_id": tool_call.id,
         "name": tool_call.function.name,
-        "content": json.dumps(tool_result)
+        "content": json.dumps(tool_result),
     }
 
+
 def evaluate_tool_calls(
-    tool_call_message,
-    tool_map: dict,
-    rich_output: bool = False) -> list[dict]:
+    tool_call_message, tool_map: dict, rich_output: bool = False
+) -> list[dict]:
 
     tool_call: ChatCompletionMessageToolCall
 
@@ -159,19 +160,24 @@ def complete_for_tool_applications(
     messages: list,
     tool_desc_list: list,
     temperature: float,
-    rich_output: bool = False):
+    rich_output: bool = False,
+):
 
     if rich_output:
         panel = complete_with_tools_panel(
             "complete for tool applications",
-            model_id, tool_desc_list, messages, temperature)
+            model_id,
+            tool_desc_list,
+            messages,
+            temperature,
+        )
         print(panel)
 
     response = client.chat.completions.create(
-        model = model_id,
-        messages = messages,
-        temperature = temperature,
-        tools = tool_desc_list, # tool_choice="auto",
+        model=model_id,
+        messages=messages,
+        temperature=temperature,
+        tools=tool_desc_list,  # tool_choice="auto",
     )
 
     return response
@@ -184,7 +190,8 @@ def complete_with_tool_results(
     tool_evaluation_messages: list[dict],
     tool_desc_list: list,
     temperature: float,
-    rich_output: bool = False):
+    rich_output: bool = False,
+):
 
     messages.append(tool_call_message)
     messages.extend(tool_evaluation_messages)
@@ -192,13 +199,16 @@ def complete_with_tool_results(
     if rich_output:
         panel = complete_with_tools_panel(
             "complete call with tool results",
-            model_id, tool_desc_list, messages, temperature)
+            model_id,
+            tool_desc_list,
+            messages,
+            temperature,
+        )
         print(panel)
 
     response = client.chat.completions.create(
-        model = model_id,
-        messages = messages,
+        model=model_id,
+        messages=messages,
     )
 
     return response.choices[0].message.content
-

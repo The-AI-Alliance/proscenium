@@ -1,4 +1,3 @@
-
 import logging
 import os
 from typing import List
@@ -14,23 +13,27 @@ logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 
 # Each text chunk inherits the metadata from the document.
 
-def documents_to_chunks_by_characters(
-    documents: Iterable[Document],
-    chunk_size: int = 1000,
-    chunk_overlap: int = 0) -> List[Document]:
 
-    text_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+def documents_to_chunks_by_characters(
+    documents: Iterable[Document], chunk_size: int = 1000, chunk_overlap: int = 0
+) -> List[Document]:
+
+    text_splitter = CharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
 
     chunks = text_splitter.split_documents(documents)
 
     return chunks
 
-def documents_to_chunks_by_tokens(
-    documents: Iterable[Document],
-    chunk_size: int = 1000,
-    chunk_overlap: int = 0) -> List[Document]:
 
-    text_splitter = TokenTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+def documents_to_chunks_by_tokens(
+    documents: Iterable[Document], chunk_size: int = 1000, chunk_overlap: int = 0
+) -> List[Document]:
+
+    text_splitter = TokenTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
 
     chunks = text_splitter.split_documents(documents)
 
