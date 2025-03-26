@@ -1,5 +1,5 @@
-
 from rich.text import Text
+
 
 def header() -> Text:
     text = Text()

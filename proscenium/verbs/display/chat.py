@@ -1,5 +1,5 @@
-
 from rich.table import Table
+
 
 def messages_table(messages: list) -> Table:
 
@@ -10,23 +10,23 @@ def messages_table(messages: list) -> Table:
         if type(message) is dict:
             role = message["role"]
             content = ""
-            if role == 'tool':
+            if role == "tool":
                 content = f"""tool call id = {message['tool_call_id']}
 fn name = {message['name']}
 result = {message['content']}"""
-            elif role == 'assistant':
+            elif role == "assistant":
                 content = f"""{str(message)}"""
             else:
-                content = message['content']
+                content = message["content"]
             table.add_row(role, content)
         else:
             role = message.role
             content = ""
-            if role == 'tool':
+            if role == "tool":
                 content = f"""tool call id = {message.tool_call_id}
 fn name = {message.name}
 result = {message['content']}"""
-            elif role == 'assistant':
+            elif role == "assistant":
                 content = f"""{str(message)}"""
             else:
                 content = message.content
