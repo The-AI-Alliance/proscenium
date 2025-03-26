@@ -1,7 +1,7 @@
 from rich import print
-from proscenium.display import print_header
+from proscenium.verbs.display import header
 
 
 def test_header():
-    print_header()
+    print(header())
     assert True, "Printed header"
