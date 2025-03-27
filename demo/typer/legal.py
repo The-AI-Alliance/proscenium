@@ -25,7 +25,9 @@ Graph extraction and question answering with GraphRAG on caselaw.
 )
 
 
-@app.command()
+@app.command(
+    help=f"Extract entities from {legal_config.hf_dataset_id} and write to {legal_config.entity_csv_file}."
+)
 def extract():
 
     extract_entities(
@@ -38,7 +40,9 @@ def extract():
     )
 
 
-@app.command()
+@app.command(
+    help=f"Load the entity graph from {legal_config.entity_csv_file} and load into graph db."
+)
 def load_graph():
 
     driver = knowledge_graph_client(
@@ -50,7 +54,7 @@ def load_graph():
     driver.close()
 
 
-@app.command()
+@app.command(help="Show the entity graph stored in the graph db.")
 def show_graph():
 
     driver = knowledge_graph_client(
@@ -62,7 +66,7 @@ def show_graph():
     driver.close()
 
 
-@app.command()
+@app.command(help="Load the vector db used for entity resolution.")
 def load_resolver():
     embedding_fn = embedding_function(legal_config.embedding_model_id)
     print("Embedding model", legal_config.embedding_model_id)
@@ -82,10 +86,11 @@ def load_resolver():
     vector_db_client.close()
 
 
-@app.command()
+@app.command(
+    help="Ask a legal question using the resources established in the previous steps."
+)
 def ask():
 
-    embedding_fn = embedding_function(legal_config.embedding_model_id)
     vector_db_client = vector_db(legal_config.milvus_uri)
     print(
         "Connected to vector db stored at",
