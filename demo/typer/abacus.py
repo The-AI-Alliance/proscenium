@@ -47,7 +47,9 @@ Do not use any other tools.
     print(Panel(answer, title="Answer"))
 
 
-@app.command()
+@app.command(
+    help="Ask a natural langauge arithmetic question. (Implemented with actors.)"
+)
 def ask_actor():
 
     abacus_actor_class = tool_applier_actor_class(
