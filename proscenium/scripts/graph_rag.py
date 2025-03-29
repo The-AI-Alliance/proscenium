@@ -2,10 +2,11 @@ from typing import List
 from typing import Callable
 from typing import Any
 
+from pydantic import BaseModel
 import time
 from langchain_core.documents.base import Document
 from neo4j import Driver
-import csv
+import json
 
 from rich import print
 from rich.table import Table
@@ -17,41 +18,36 @@ from pymilvus import model
 
 from proscenium.verbs.chunk import documents_to_chunks_by_tokens
 from proscenium.verbs.complete import complete_simple
-from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import closest_chunks
 from proscenium.verbs.vector_database import add_chunks_to_vector_db
-from proscenium.verbs.display.neo4j import triples_table, pairs_table
 from proscenium.verbs.display.milvus import collection_panel
 
 extraction_system_prompt = "You are an entity extractor"
 
 
-def extract_triples_from_document(
+def extract_from_document_chunks(
     doc: Document,
     doc_as_rich: Callable[[Document], Panel],
-    doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
     chunk_extraction_model_id: str,
-    triples_from_chunk: Callable[[str, Document, Document], List[tuple[str, str, str]]],
-) -> List[tuple[str, str, str]]:
+    chunk_extract: Callable[[str, Document, Document], BaseModel],
+) -> List[BaseModel]:
 
     print(doc_as_rich(doc))
     print()
 
-    doc_triples = []
-
-    direct_triples = doc_direct_triples(doc)
-    doc_triples.extend(direct_triples)
+    extract_models = []
 
     chunks = documents_to_chunks_by_tokens([doc], chunk_size=1000, chunk_overlap=0)
     for i, chunk in enumerate(chunks):
 
-        new_triples = triples_from_chunk(chunk_extraction_model_id, chunk, doc)
+        ce = chunk_extract(chunk_extraction_model_id, chunk, doc)
 
-        print("Found", len(new_triples), "triples in chunk", i + 1, "of", len(chunks))
+        print("Extract model in chunk", i + 1, "of", len(chunks))
+        print(Panel(ce))
 
-        doc_triples.extend(new_triples)
+        extract_models.append(ce)
 
-    return doc_triples
+    return extract_models
 
 
 def query_for_objects(
@@ -80,7 +76,7 @@ def find_matching_objects(
     subject_predicate_pairs = []
     for triple in question_triples:
         print("Finding entity matches for", triple[0], "(", triple[1], ")")
-        subject, predicate, object = triple
+        subject, predicate, obj = triple
         # TODO apply distance threshold
         hits = closest_chunks(vector_db_client, embedding_fn, subject, k=5)
         for match in [head["entity"]["text"] for head in hits[:1]]:
@@ -94,10 +90,10 @@ def find_matching_objects(
 def extract_entities(
     retrieve_documents: Callable[[], List[Document]],
     doc_as_rich: Callable[[Document], Panel],
-    entity_csv: str,
-    doc_direct_triples: Callable[[Document], list[tuple[str, str, str]]],
+    entity_jsonl_file: str,
     chunk_extraction_model_id: str,
-    triples_from_chunk: Callable[[Document, Document], List[tuple[str, str, str]]],
+    chunk_extract: Callable[[str, Document, Document], BaseModel],
+    doc_enrichments: Callable[[Document, list[BaseModel]], dict],
 ) -> None:
 
     docs = retrieve_documents()
@@ -108,53 +104,54 @@ def extract_entities(
             "[green]Extracting entities...", total=len(docs)
         )
 
-        with open(entity_csv, "wt") as f:
-
-            writer = csv.writer(f, delimiter=",", quotechar='"')
-            writer.writerow(["subject", "predicate", "object"])  # header
+        with open(entity_jsonl_file, "wt") as f:
 
             for doc in docs:
 
-                doc_triples = extract_triples_from_document(
+                chunk_extract_models = extract_from_document_chunks(
                     doc,
                     doc_as_rich,
-                    doc_direct_triples,
                     chunk_extraction_model_id,
-                    triples_from_chunk,
+                    chunk_extract,
                 )
 
-                writer.writerows(doc_triples)
+                enrichments = doc_enrichments(doc, chunk_extract_models)
+                extract_json = json.dumps(enrichments, ensure_ascii=False)
+                f.write(extract_json + "\n")
+
                 progress.update(task_extract, advance=1)
                 time.sleep(1)  # TODO remove this hard-coded rate limiter
 
-        print("Wrote entity triples to", entity_csv)
+        print("Wrote entity triples to", entity_jsonl_file)
 
 
 def load_entity_graph(
-    driver: Driver, entity_csv: str, add_triple: Callable[[Any, str, str, str], None]
+    driver: Driver,
+    entity_jsonl_file: str,
+    add_row_to_graph: Callable[[Any, str, str, str], None],
 ) -> None:
 
-    print("Parsing triples from", entity_csv)
+    print("Parsing triples from", entity_jsonl_file)
 
-    with open(entity_csv) as f:
-        reader = csv.reader(f, delimiter=",", quotechar='"')
-        next(reader, None)  # skip header row
-        triples = [row for row in reader]
+    rows = []
+    with open(entity_jsonl_file, "r") as f:
+        for line in f:
+            rows.append(json.loads(line))
 
-        with Progress() as progress:
+    with Progress() as progress:
 
-            task_load = progress.add_task(
-                f"[green]Loading {len(triples)} triples into graph...",
-                total=len(triples),
-            )
+        task_load = progress.add_task(
+            f"[green]Loading {len(rows)} triples into graph...",
+            total=len(rows),
+        )
 
-            with driver.session() as session:
-                session.run("MATCH (n) DETACH DELETE n")  # empty graph
-                for subject, predicate, object in triples:
-                    session.execute_write(add_triple, subject, predicate, object)
-                    progress.update(task_load, advance=1)
+        with driver.session() as session:
+            session.run("MATCH (n) DETACH DELETE n")  # empty graph
+            for row in rows:
+                session.execute_write(add_row_to_graph, row)
+                progress.update(task_load, advance=1)
 
-            driver.close()
+        driver.close()
 
 
 def show_entity_graph(driver: Driver):
@@ -215,30 +212,33 @@ def answer_question(
     embedding_model_id: str,
     driver: Driver,
     generation_model_id: str,
-    triples_from_query: Callable[[str, str, str], List[tuple[str, str, str]]],
-    generation_prompts: Callable[[str, List[tuple[str, str, str]], Driver], str],
+    query_extract: Callable[
+        [str, str], BaseModel
+    ],  # (query_str, query_extraction_model_id) -> QueryExtractions
+    extract_to_context: Callable[
+        [BaseModel, str, Driver, MilvusClient], BaseModel
+    ],  # (QueryExtractions, query_str, Driver, MilvusClient) -> Context
+    context_to_prompts: Callable[
+        [BaseModel], tuple[str, str]
+    ],  # Context -> (system_prompt, user_prompt)
 ) -> str:
 
     print(Panel(question, title="Question"))
 
-    question_entity_triples = triples_from_query(
-        question, "", query_extraction_model_id
-    )
-    print("\n")
-    if len(question_entity_triples) == 0:
-        print("No triples extracted from question")
+    print("Extracting information from the question")
+    extract = query_extract(question, query_extraction_model_id)
+    if extract is None:
+        print("Unable to extract information from that question")
         return None
-    print(triples_table(question_entity_triples, "Query Triples"))
+    print("Extract:", extract)
 
-    print("Finding entity matches for triples")
-    embedding_fn = embedding_function(embedding_model_id)
-    subject_predicate_pairs = find_matching_objects(
-        vector_db_client, embedding_fn, question_entity_triples
+    print("Forming context from the extracted information")
+    context = extract_to_context(
+        extract, question, driver, vector_db_client, embedding_model_id
     )
-    print("\n")
-    pairs_table(subject_predicate_pairs, "Subject Predicate Constraints")
+    print("Context:", context)
 
-    prompts = generation_prompts(question, subject_predicate_pairs, driver)
+    prompts = context_to_prompts(context, generation_model_id)
 
     if prompts is None:
 

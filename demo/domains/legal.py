@@ -11,13 +11,13 @@ from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
 from pydantic import BaseModel, Field
+from pymilvus import MilvusClient
 
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.scripts.graph_rag import extraction_system_prompt
-from proscenium.scripts.graph_rag import query_for_objects
 
 from demo.config import default_model_id
 
@@ -28,6 +28,9 @@ from demo.config import default_model_id
 RELATION_JUDGE = "Judge"
 RELATION_LEGAL_CITATION = "LegalCitation"
 RELATION_COURT = "Court"
+
+NODE_CASE = "Case"
+NODE_ENTITY = "Entity"
 
 ###################################
 # Retrieve Documens
@@ -57,25 +60,30 @@ def retrieve_documents() -> List[Document]:
         hf_dataset_id,
     )
 
+    for doc, i in enumerate(docs):
+        doc.metadata["dataset_index"] = i
+
     return docs
 
 
-def doc_as_object(doc: Document) -> str:
-    return doc.metadata["name_abbreviation"]
+def retrieve_document(id: str, driver: Driver) -> Optional[Document]:
 
+    docs = load_hugging_face_dataset(
+        hf_dataset_id, page_content_column=hf_dataset_column
+    )
 
-# TODO index the docs after the first `retrieve_documents` call,
-# so that `retrieve_document` is efficient
+    with driver.session() as session:
+        result = session.run("MATCH (n) RETURN n.dataset_index AS dataset_index")
+        if len(result) == 0:
+            logging.warning("No node n found in the graph")
+            return None
 
+        index = int(result[0]["dataset_index"])
 
-def retrieve_document(id: str) -> Optional[Document]:
-
-    docs = retrieve_documents()
-    for doc in docs:
-        if doc_as_object(doc) == id:
-            return doc
-
-    return None
+        if 0 <= index < len(docs):
+            return docs[index]
+        else:
+            return None
 
 
 ###################################
@@ -130,26 +138,24 @@ class LegalOpinionChunkExtractions(BaseModel):
     # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
 
-def doc_direct_triples(doc: Document) -> list[tuple[str, str, str]]:
-
-    obj: str = doc_as_object(doc)
-
-    triples = []
-
-    subject = doc.metadata["court"]
-    relation = RELATION_COURT
-    triples.append((subject, relation, obj))
+def doc_enrichments(
+    doc: Document, chunk_extracts: list[LegalOpinionChunkExtractions]
+) -> list[dict]:
 
     citations: List[str] = get_citations(doc.page_content)
 
-    relation = RELATION_LEGAL_CITATION
-    for citation in citations:
-        # TODO there are several fields in citation object that should be
-        # stored in the graph
-        subject: str = citation.matched_text()
-        triples.append((subject, relation, obj))
+    # merge informaiion from all chunks
+    judges = []
+    for chunk_extract in chunk_extracts:
+        judges.extend(chunk_extract.judges)
 
-    return triples
+    return {
+        "name": doc.metadata["name_abbreviation"],
+        "dataset_index": doc.metadata["dataset_index"],
+        "court": doc.metadata["court"],
+        "citations": [c.matched_text() for c in citations],
+        "judges": judges,
+    }
 
 
 chunk_extraction_template = partial_formatter.format(
@@ -157,15 +163,13 @@ chunk_extraction_template = partial_formatter.format(
 )
 
 
-def triples_from_chunk(
+def chunk_extract(
     chunk_extraction_model_id: str,
     chunk: Document,
     doc: Document,
-) -> List[tuple[str, str, str]]:
+) -> LegalOpinionChunkExtractions:
 
-    obj: str = doc_as_object(doc)
-
-    loce_str = complete_simple(
+    extract_str = complete_simple(
         chunk_extraction_model_id,
         extraction_system_prompt,
         chunk_extraction_template.format(text=chunk.page_content),
@@ -176,42 +180,52 @@ def triples_from_chunk(
         rich_output=True,
     )
 
-    logging.info("triples_from_chunk_extract: loce_str = <<<%s>>>", loce_str)
+    logging.info("chunk_extract: extract_str = <<<%s>>>", extract_str)
 
-    triples = []
     try:
-        loce_py = json.loads(loce_str)
-        loce = LegalOpinionChunkExtractions(**loce_py)
-        for judge in loce.judges:
-            triple = (judge.strip(), RELATION_JUDGE, obj)
-            triples.append(triple)
-        # for citation in loce.legal_citations:
-        #    triple = (citation.strip(), RELATION_LEGAL_CITATION, obj)
-        #    triples.append(triple)
+        extract_dict = json.loads(extract_str)
+        return LegalOpinionChunkExtractions(**extract_dict)
     except Exception as e:
-        logging.error("triples_from_chunk_extract: Exception: %s", e)
-    finally:
-        return triples
+        logging.error("chunk_extract: Exception: %s", e)
+
+    return None
 
 
 ###################################
 # Knowledge Graph
 ###################################
 
-entity_csv_file = Path("entities.csv")
+entity_jsonl_file = Path("entities.jsonl")
 
 neo4j_uri = "bolt://localhost:7687"  # os.environ["NEO4J_URI"]
 neo4j_username = "neo4j"  # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password"  # os.environ["NEO4J_PASSWORD"]
 
 
-def add_triple(tx, entity: str, role: str, case: str) -> None:
-    query = (
-        "MERGE (e:Entity {name: $entity}) "
-        "MERGE (c:Case {name: $case}) "
-        "MERGE (e)-[r:%s]->(c)"
-    ) % snakecase(lowercase(role.replace("/", "_")))
-    tx.run(query, entity=entity, case=case)
+def doc_enrichments_to_graph(tx, doc_enrichments: dict) -> None:
+
+    case_name = doc_enrichments["name"]
+    dataset_index = doc_enrichments["dataset_index"]
+
+    triples = []
+    triples.append((doc_enrichments["court"], RELATION_COURT, case_name))
+    for judge in doc_enrichments["judges"]:
+        triples.append((judge, RELATION_JUDGE, case_name))
+    for citation in doc_enrichments["citations"]:
+        triples.append((citation, RELATION_LEGAL_CITATION, case_name))
+
+    for subject, predicate, object in triples:
+        query = (
+            "MERGE (e:Entity {name: $entity}) "
+            "MERGE (c:Case {name: $case, dataset_index: $dataset_index}) "
+            "MERGE (e)-[r:%s]->(c)"
+        ) % snakecase(lowercase(predicate))
+        tx.run(
+            query,
+            entity=subject,
+            case=case_name,
+            dataset_index=dataset_index,
+        )
 
 
 ###################################
@@ -230,7 +244,7 @@ def user_question() -> str:
 
 
 ###################################
-# triples_from_query
+# query_extract
 ###################################
 
 default_query_extraction_model_id = default_model_id
@@ -247,30 +261,15 @@ class QueryExtractions(BaseModel):
     # legal_citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
 
 
-def query_direct_triples(query: str) -> list[tuple[str, str, str]]:
-
-    object = ""
-
-    triples = []
-    relation = RELATION_LEGAL_CITATION
-    for citation in get_citations(query):
-        subject = citation.strip()
-        triples.append((subject, relation, object))
-
-    return triples
-
-
 query_extraction_template = partial_formatter.format(
     raw_extraction_template, extraction_description=QueryExtractions.__doc__
 )
 
 
-def triples_from_query(
-    query: str, obj_str: str, model_id: str
-) -> List[tuple[str, str, str]]:
+def query_extract(query: str, query_extraction_model_id: str) -> QueryExtractions:
 
     extract = complete_simple(
-        model_id,
+        query_extraction_model_id,
         extraction_system_prompt,
         query_extraction_template.format(text=query),
         response_format={
@@ -280,41 +279,54 @@ def triples_from_query(
         rich_output=True,
     )
 
-    print("\nExtracting triples from extraction response")
+    logging.info("query_extract: extract = <<<%s>>>", extract)
 
-    logging.info("triples_from_query: extract = <<<%s>>>", extract)
-
-    triples = []
     try:
+
         qe_json = json.loads(extract)
-        qe = QueryExtractions(**qe_json)
 
-        relation = RELATION_JUDGE
-        for judge in qe.judges:
-            subject = judge.strip()
-            triples.append((subject, relation, obj_str))
-
-        # relation = RELATION_LEGAL_CITATION
-        # for citation in qe.legal_citations:
-        #    subject = citation.strip()
-        #    triples.append((subject, relation, obj_str))
+        return QueryExtractions(**qe_json)
 
     except Exception as e:
-        logging.error("triples_from_query_extract: Exception: %s", e)
+
+        logging.error("query_extract: Exception: %s", e)
+
     finally:
-        return triples
+        return None
 
 
 ###################################
-# generation_prompts
+# extract_to_context
 ###################################
+
+
+class LegalQueryContext(BaseModel):
+    """
+    Context for generating answer in response to legal question.
+    """
+
+    doc: str = Field(
+        description="The retrieved document text that is relevant to the question."
+    )
+    query: str = Field(description="The original question asked by the user.")
+    # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
+
 
 embedding_model_id = "all-MiniLM-L6-v2"
 
 milvus_uri = "file:/grag-milvus.db"
 
 
-def matching_objects_query(subject_predicate_constraints: List[tuple[str, str]]) -> str:
+def extract_to_context(
+    qe: QueryExtractions, query: str, driver: Driver, vector_db_client: MilvusClient
+) -> LegalQueryContext:
+
+    subject_predicate_constraints = []
+    for judge in qe.judges:
+        subject_predicate_constraints.append((judge, RELATION_JUDGE))
+    for citation in get_citations(query):
+        subject_predicate_constraints.append((citation, RELATION_LEGAL_CITATION))
+
     query = ""
     for i, (subject, predicate) in enumerate(subject_predicate_constraints):
         predicate_lc = snakecase(lowercase(predicate.replace("/", "_")))
@@ -323,10 +335,26 @@ def matching_objects_query(subject_predicate_constraints: List[tuple[str, str]])
         )
     query += "RETURN c.name AS name"
 
-    return query
+    object_names = []
+    with driver.session() as session:
+        result = session.run(query)
+        object_names.extend([record["name"] for record in result])
+
+    print("Objects with names:", object_names, "are matches")
+
+    doc = retrieve_document(object_names[0])
+
+    context = LegalQueryContext(
+        doc=doc.page_content,
+        query=query,
+    )
+
+    return context
 
 
-default_generation_model_id = default_model_id
+###################################
+# context_to_prompts
+###################################
 
 generation_system_prompt = "You are a helpful law librarian"
 
@@ -339,36 +367,17 @@ Question: {question}
 """
 
 
-def generation_prompts(
-    query: str, subject_predicate_pairs: List[tuple[str, str]], driver: Driver
-) -> tuple[str, str]:
+def context_to_prompts(context: LegalQueryContext) -> tuple[str, str]:
 
-    print("Querying for objects that match those constraints")
-    object_names = query_for_objects(
-        driver, subject_predicate_pairs, matching_objects_query
-    )
-    print(
-        "Objects with names:", object_names, "are matches for", subject_predicate_pairs
+    user_prompt = graphrag_prompt_template.format(
+        document_text=context.doc, question=context.query
     )
 
-    if len(object_names) > 0:
+    return generation_system_prompt, user_prompt
 
-        doc = retrieve_document(object_names[0])
 
-        if doc:
+###################################
+# generation
+###################################
 
-            user_prompt = graphrag_prompt_template.format(
-                document_text=doc.page_content, question=query
-            )
-
-            return generation_system_prompt, user_prompt
-
-        else:
-
-            print("No document matching", object_names[0])
-            return None
-
-    else:
-
-        print("No objects found for entity role pairs")
-        return None
+default_generation_model_id = default_model_id

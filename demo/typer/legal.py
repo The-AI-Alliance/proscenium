@@ -34,14 +34,14 @@ def extract():
         legal_config.retrieve_documents,
         legal_config.doc_as_rich,
         legal_config.entity_csv_file,
-        legal_config.doc_direct_triples,
         legal_config.default_chunk_extraction_model_id,
-        legal_config.triples_from_chunk,
+        legal_config.chunk_extract,
+        legal_config.doc_enrichments,
     )
 
 
 @app.command(
-    help=f"Load the entity graph from {legal_config.entity_csv_file} and load into graph db."
+    help=f"Load the entity graph from {legal_config.entity_jsonl_file} and load into graph db."
 )
 def load_graph():
 
@@ -49,7 +49,9 @@ def load_graph():
         legal_config.neo4j_uri, legal_config.neo4j_username, legal_config.neo4j_password
     )
 
-    load_entity_graph(driver, legal_config.entity_csv_file, legal_config.add_triple)
+    load_entity_graph(
+        driver, legal_config.entity_jsonl_file, legal_config.doc_enrichments_to_graph
+    )
 
     driver.close()
 
@@ -113,8 +115,8 @@ def ask():
         legal_config.embedding_model_id,
         driver,
         legal_config.default_generation_model_id,
-        legal_config.triples_from_query,
-        legal_config.generation_prompts,
+        legal_config.extract_to_context,
+        legal_config.context_to_prompts,
     )
 
     if answer:
