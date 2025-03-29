@@ -58,23 +58,6 @@ def extract_from_document_chunks(
     return extract_models
 
 
-def query_for_objects(
-    driver: Driver,
-    subject_predicate_constraints: List[tuple[str, str]],
-    matching_objects_query: Callable[[List[tuple[str, str]]], str],
-) -> List[str]:
-    with driver.session() as session:
-        query = matching_objects_query(subject_predicate_constraints)
-        print(Panel(query, title="Cypher Query"))
-        result = session.run(query)
-        objects = []
-        print("   Result:")
-        for record in result:
-            objects.append(record["name"])
-            print(record["name"])
-        return objects
-
-
 def chunk_extract(
     chunk_extraction_model_id: str,
     chunk_extraction_template: str,
