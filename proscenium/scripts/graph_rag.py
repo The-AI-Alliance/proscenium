@@ -127,7 +127,7 @@ def find_matching_objects(
 def enrich_documents(
     retrieve_documents: Callable[[], List[Document]],
     doc_as_rich: Callable[[Document], Panel],
-    entity_jsonl_file: str,
+    enrichments_jsonl_file: str,
     chunk_extraction_model_id: str,
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
@@ -142,7 +142,7 @@ def enrich_documents(
             "[green]Enriching documents...", total=len(docs)
         )
 
-        with open(entity_jsonl_file, "wt") as f:
+        with open(enrichments_jsonl_file, "wt") as f:
 
             for doc in docs:
 
@@ -161,20 +161,20 @@ def enrich_documents(
                 progress.update(task_enrich, advance=1)
                 time.sleep(1)  # TODO remove this hard-coded rate limiter
 
-        print("Wrote document enrichments to", entity_jsonl_file)
+        print("Wrote document enrichments to", enrichments_jsonl_file)
 
 
 def load_knowledge_graph(
     driver: Driver,
-    entity_jsonl_file: str,
+    enrichments_jsonl_file: str,
     enrichments_clazz: type[BaseModel],
     doc_enrichments_to_graph: Callable[[Any, BaseModel], None],
 ) -> None:
 
-    print("Parsing enrichments from", entity_jsonl_file)
+    print("Parsing enrichments from", enrichments_jsonl_file)
 
     enrichmentss = []
-    with open(entity_jsonl_file, "r") as f:
+    with open(enrichments_jsonl_file, "r") as f:
         for line in f:
             e = enrichments_clazz.model_construct(**json.loads(line))
             enrichmentss.append(e)
@@ -193,39 +193,6 @@ def load_knowledge_graph(
                 progress.update(task_load, advance=1)
 
         driver.close()
-
-
-def show_knowledge_graph(driver: Driver):
-
-    with driver.session() as session:
-
-        result = session.run(
-            "MATCH ()-[r]->() RETURN type(r) AS rel"
-        )  # all relationships
-        relations = [record["rel"] for record in result]
-        unique_relations = list(set(relations))
-        table = Table(title="Relationship Types", show_lines=False)
-        table.add_column("Relationship Type", justify="left", style="blue")
-        for r in unique_relations:
-            table.add_row(r)
-        print(table)
-
-        result = session.run("MATCH (n) RETURN n.name AS name")  # all nodes
-        table = Table(title="Nodes", show_lines=False)
-        table.add_column("Node Name", justify="left", style="green")
-        for record in result:
-            table.add_row(record["name"])
-        print(table)
-
-        for r in unique_relations:
-            cypher = f"MATCH (s)-[:{r}]->(o) RETURN s.name, o.name"
-            result = session.run(cypher)
-            table = Table(title=f"Relation: {r}", show_lines=False)
-            table.add_column("Subject Name", justify="left", style="blue")
-            table.add_column("Object Name", justify="left", style="purple")
-            for record in result:
-                table.add_row(record["s.name"], record["o.name"])
-            print(table)
 
 
 def load_entity_resolver(

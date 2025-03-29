@@ -12,6 +12,6 @@ python -m demo.cli legal load-resolver
 
 echo "" | python -m demo.cli legal ask
 
-rm -f entities.csv
+rm -f enrichments.csv
 
 rm -f grag-milvus.db
