@@ -163,34 +163,6 @@ chunk_extraction_template = partial_formatter.format(
 )
 
 
-def chunk_extract(
-    chunk_extraction_model_id: str,
-    chunk: Document,
-    doc: Document,
-) -> LegalOpinionChunkExtractions:
-
-    extract_str = complete_simple(
-        chunk_extraction_model_id,
-        extraction_system_prompt,
-        chunk_extraction_template.format(text=chunk.page_content),
-        response_format={
-            "type": "json_object",
-            "schema": LegalOpinionChunkExtractions.model_json_schema(),
-        },
-        rich_output=True,
-    )
-
-    logging.info("chunk_extract: extract_str = <<<%s>>>", extract_str)
-
-    try:
-        extract_dict = json.loads(extract_str)
-        return LegalOpinionChunkExtractions(**extract_dict)
-    except Exception as e:
-        logging.error("chunk_extract: Exception: %s", e)
-
-    return None
-
-
 ###################################
 # Knowledge Graph
 ###################################

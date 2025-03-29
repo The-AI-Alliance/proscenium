@@ -9,7 +9,7 @@ from proscenium.verbs.know import knowledge_graph_client
 from proscenium.verbs.vector_database import collection_name
 
 from proscenium.scripts.graph_rag import (
-    extract_entities,
+    enrich_documents,
     load_entity_graph,
     show_entity_graph,
     load_entity_resolver,
@@ -26,22 +26,23 @@ Graph extraction and question answering with GraphRAG on caselaw.
 
 
 @app.command(
-    help=f"Extract entities from {legal_config.hf_dataset_id} and write to {legal_config.entity_jsonl_file}."
+    help=f"Enrich documents from {legal_config.hf_dataset_id} and write to {legal_config.entity_jsonl_file}."
 )
-def extract():
+def enrich():
 
-    extract_entities(
+    enrich_documents(
         legal_config.retrieve_documents,
         legal_config.doc_as_rich,
         legal_config.entity_jsonl_file,
         legal_config.default_chunk_extraction_model_id,
-        legal_config.chunk_extract,
+        legal_config.chunk_extraction_template,
+        legal_config.LegalOpinionChunkExtractions,
         legal_config.doc_enrichments,
     )
 
 
 @app.command(
-    help=f"Load the entity graph from {legal_config.entity_jsonl_file} and load into graph db."
+    help=f"Load the knowledge graph from {legal_config.entity_jsonl_file} into the graph db."
 )
 def load_graph():
 
