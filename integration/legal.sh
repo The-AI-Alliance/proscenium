@@ -2,7 +2,7 @@
 
 echo "Legal Integration Test"
 
-python -m demo.cli legal extract
+python -m demo.cli legal enrich
 
 python -m demo.cli legal load-graph
 

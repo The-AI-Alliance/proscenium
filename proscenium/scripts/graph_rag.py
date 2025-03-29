@@ -2,16 +2,18 @@ from typing import List
 from typing import Callable
 from typing import Any
 
-from pydantic import BaseModel
+import logging
 import time
-from langchain_core.documents.base import Document
-from neo4j import Driver
 import json
+from pydantic import BaseModel
 
 from rich import print
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress
+
+from langchain_core.documents.base import Document
+from neo4j import Driver
 
 from pymilvus import MilvusClient
 from pymilvus import model
@@ -29,7 +31,8 @@ def extract_from_document_chunks(
     doc: Document,
     doc_as_rich: Callable[[Document], Panel],
     chunk_extraction_model_id: str,
-    chunk_extract: Callable[[str, Document, Document], BaseModel],
+    chunk_extraction_template: str,
+    chunk_extract_clazz: type[BaseModel],
 ) -> List[BaseModel]:
 
     print(doc_as_rich(doc))
@@ -40,7 +43,12 @@ def extract_from_document_chunks(
     chunks = documents_to_chunks_by_tokens([doc], chunk_size=1000, chunk_overlap=0)
     for i, chunk in enumerate(chunks):
 
-        ce = chunk_extract(chunk_extraction_model_id, chunk, doc)
+        ce = chunk_extract(
+            chunk_extraction_model_id,
+            chunk_extraction_template,
+            chunk_extract_clazz,
+            chunk,
+        )
 
         print("Extract model in chunk", i + 1, "of", len(chunks))
         print(Panel(str(ce)))
@@ -67,6 +75,35 @@ def query_for_objects(
         return objects
 
 
+def chunk_extract(
+    chunk_extraction_model_id: str,
+    chunk_extraction_template: str,
+    clazz: type[BaseModel],
+    chunk: Document,
+) -> BaseModel:
+
+    extract_str = complete_simple(
+        chunk_extraction_model_id,
+        extraction_system_prompt,
+        chunk_extraction_template.format(text=chunk.page_content),
+        response_format={
+            "type": "json_object",
+            "schema": clazz.model_json_schema(),
+        },
+        rich_output=True,
+    )
+
+    logging.info("chunk_extract: extract_str = <<<%s>>>", extract_str)
+
+    try:
+        extract_dict = json.loads(extract_str)
+        return clazz.model_construct(**extract_dict)
+    except Exception as e:
+        logging.error("chunk_extract: Exception: %s", e)
+
+    return None
+
+
 def find_matching_objects(
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
@@ -87,12 +124,13 @@ def find_matching_objects(
     return subject_predicate_pairs
 
 
-def extract_entities(
+def enrich_documents(
     retrieve_documents: Callable[[], List[Document]],
     doc_as_rich: Callable[[Document], Panel],
     entity_jsonl_file: str,
     chunk_extraction_model_id: str,
-    chunk_extract: Callable[[str, Document, Document], BaseModel],
+    chunk_extraction_template: str,
+    chunk_extract_clazz: type[BaseModel],
     doc_enrichments: Callable[[Document, list[BaseModel]], dict],
 ) -> None:
 
@@ -112,7 +150,8 @@ def extract_entities(
                     doc,
                     doc_as_rich,
                     chunk_extraction_model_id,
-                    chunk_extract,
+                    chunk_extraction_template,
+                    chunk_extract_clazz,
                 )
 
                 enrichments = doc_enrichments(doc, chunk_extract_models)
