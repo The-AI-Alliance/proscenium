@@ -6,6 +6,7 @@ import json
 from neo4j import Driver
 from pathlib import Path
 from rich.panel import Panel
+from rich.table import Table
 from rich.prompt import Prompt
 from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
@@ -184,7 +185,7 @@ chunk_extraction_template = partial_formatter.format(
 # Knowledge Graph
 ###################################
 
-entity_jsonl_file = Path("entities.jsonl")
+enrichment_jsonl_file = Path("enrichments.jsonl")
 
 neo4j_uri = "bolt://localhost:7687"  # os.environ["NEO4J_URI"]
 neo4j_username = "neo4j"  # os.environ["NEO4J_USERNAME"]
@@ -215,6 +216,39 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
             case=case_name,
             dataset_index=dataset_index,
         )
+
+
+def show_knowledge_graph(driver: Driver):
+
+    with driver.session() as session:
+
+        result = session.run(
+            "MATCH ()-[r]->() RETURN type(r) AS rel"
+        )  # all relationships
+        relations = [record["rel"] for record in result]
+        unique_relations = list(set(relations))
+        table = Table(title="Relationship Types", show_lines=False)
+        table.add_column("Relationship Type", justify="left", style="blue")
+        for r in unique_relations:
+            table.add_row(r)
+        print(table)
+
+        result = session.run("MATCH (n) RETURN n.name AS name")  # all nodes
+        table = Table(title="Nodes", show_lines=False)
+        table.add_column("Node Name", justify="left", style="green")
+        for record in result:
+            table.add_row(record["name"])
+        print(table)
+
+        for r in unique_relations:
+            cypher = f"MATCH (s)-[:{r}]->(o) RETURN s.name, o.name"
+            result = session.run(cypher)
+            table = Table(title=f"Relation: {r}", show_lines=False)
+            table.add_column("Subject Name", justify="left", style="blue")
+            table.add_column("Object Name", justify="left", style="purple")
+            for record in result:
+                table.add_row(record["s.name"], record["o.name"])
+            print(table)
 
 
 ###################################

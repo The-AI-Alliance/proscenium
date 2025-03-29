@@ -11,7 +11,6 @@ from proscenium.verbs.vector_database import collection_name
 from proscenium.scripts.graph_rag import (
     enrich_documents,
     load_knowledge_graph,
-    show_knowledge_graph,
     load_entity_resolver,
     answer_question,
 )
@@ -26,14 +25,14 @@ Graph extraction and question answering with GraphRAG on caselaw.
 
 
 @app.command(
-    help=f"Enrich documents from {legal_config.hf_dataset_id} and write to {legal_config.entity_jsonl_file}."
+    help=f"Enrich documents from {legal_config.hf_dataset_id} and write to {legal_config.enrichment_jsonl_file}."
 )
 def enrich():
 
     enrich_documents(
         legal_config.retrieve_documents,
         legal_config.doc_as_rich,
-        legal_config.entity_jsonl_file,
+        legal_config.enrichment_jsonl_file,
         legal_config.default_chunk_extraction_model_id,
         legal_config.chunk_extraction_template,
         legal_config.LegalOpinionChunkExtractions,
@@ -42,7 +41,7 @@ def enrich():
 
 
 @app.command(
-    help=f"Load the knowledge graph from {legal_config.entity_jsonl_file} into the graph db."
+    help=f"Load enrichments from {legal_config.enrichments_jsonl_file} into the knowledge graph."
 )
 def load_graph():
 
@@ -52,7 +51,7 @@ def load_graph():
 
     load_knowledge_graph(
         driver,
-        legal_config.entity_jsonl_file,
+        legal_config.enrichments_jsonl_file,
         legal_config.LegalOpinionEnrichments,
         legal_config.doc_enrichments_to_graph,
     )
@@ -60,14 +59,14 @@ def load_graph():
     driver.close()
 
 
-@app.command(help="Show the entity graph stored in the graph db.")
+@app.command(help="Show the knowledge graph as stored in the graph db.")
 def show_graph():
 
     driver = knowledge_graph_client(
         legal_config.neo4j_uri, legal_config.neo4j_username, legal_config.neo4j_password
     )
 
-    show_knowledge_graph(driver)
+    legal_config.show_knowledge_graph(driver)
 
     driver.close()
 
@@ -93,7 +92,7 @@ def load_resolver():
 
 
 @app.command(
-    help="Ask a legal question using the resources established in the previous steps."
+    help="Ask a legal question using the knowledge graph and entity resolver established in the previous steps."
 )
 def ask():
 
