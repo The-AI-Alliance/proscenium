@@ -5,6 +5,7 @@ import json
 
 from neo4j import Driver
 from pathlib import Path
+from rich import print
 from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt
@@ -16,9 +17,9 @@ from pymilvus import MilvusClient
 
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
+from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
-from proscenium.scripts.graph_rag import extraction_system_prompt
 
 from demo.config import default_model_id
 

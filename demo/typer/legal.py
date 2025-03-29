@@ -51,7 +51,7 @@ def load_graph():
 
     load_knowledge_graph(
         driver,
-        legal_config.enrichments_jsonl_file,
+        legal_config.enrichment_jsonl_file,
         legal_config.LegalOpinionEnrichments,
         legal_config.doc_enrichments_to_graph,
     )
