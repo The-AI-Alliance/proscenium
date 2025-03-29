@@ -2,13 +2,11 @@ from typing import List
 from typing import Callable
 from typing import Any
 
-import logging
 import time
 import json
 from pydantic import BaseModel
 
 from rich import print
-from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress
 
@@ -20,11 +18,10 @@ from pymilvus import model
 
 from proscenium.verbs.chunk import documents_to_chunks_by_tokens
 from proscenium.verbs.complete import complete_simple
+from proscenium.verbs.extract import extract_to_pydantic_model
 from proscenium.verbs.vector_database import closest_chunks
 from proscenium.verbs.vector_database import add_chunks_to_vector_db
 from proscenium.verbs.display.milvus import collection_panel
-
-extraction_system_prompt = "You are an entity extractor"
 
 
 def extract_from_document_chunks(
@@ -43,7 +40,7 @@ def extract_from_document_chunks(
     chunks = documents_to_chunks_by_tokens([doc], chunk_size=1000, chunk_overlap=0)
     for i, chunk in enumerate(chunks):
 
-        ce = chunk_extract(
+        ce = extract_to_pydantic_model(
             chunk_extraction_model_id,
             chunk_extraction_template,
             chunk_extract_clazz,
@@ -56,52 +53,6 @@ def extract_from_document_chunks(
         extract_models.append(ce)
 
     return extract_models
-
-
-def query_for_objects(
-    driver: Driver,
-    subject_predicate_constraints: List[tuple[str, str]],
-    matching_objects_query: Callable[[List[tuple[str, str]]], str],
-) -> List[str]:
-    with driver.session() as session:
-        query = matching_objects_query(subject_predicate_constraints)
-        print(Panel(query, title="Cypher Query"))
-        result = session.run(query)
-        objects = []
-        print("   Result:")
-        for record in result:
-            objects.append(record["name"])
-            print(record["name"])
-        return objects
-
-
-def chunk_extract(
-    chunk_extraction_model_id: str,
-    chunk_extraction_template: str,
-    clazz: type[BaseModel],
-    chunk: Document,
-) -> BaseModel:
-
-    extract_str = complete_simple(
-        chunk_extraction_model_id,
-        extraction_system_prompt,
-        chunk_extraction_template.format(text=chunk.page_content),
-        response_format={
-            "type": "json_object",
-            "schema": clazz.model_json_schema(),
-        },
-        rich_output=True,
-    )
-
-    logging.info("chunk_extract: extract_str = <<<%s>>>", extract_str)
-
-    try:
-        extract_dict = json.loads(extract_str)
-        return clazz.model_construct(**extract_dict)
-    except Exception as e:
-        logging.error("chunk_extract: Exception: %s", e)
-
-    return None
 
 
 def find_matching_objects(
