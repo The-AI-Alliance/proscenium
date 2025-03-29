@@ -41,7 +41,7 @@ def enrich():
 
 
 @app.command(
-    help=f"Load enrichments from {legal_config.enrichments_jsonl_file} into the knowledge graph."
+    help=f"Load enrichments from {legal_config.enrichment_jsonl_file} into the knowledge graph."
 )
 def load_graph():
 
