@@ -135,12 +135,27 @@ class LegalOpinionChunkExtractions(BaseModel):
     judges: list[str] = Field(
         description="A list of the judges mentioned in the text. For example: `Judge John Doe`"
     )
-    # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
+
+
+class LegalOpinionEnrichments(BaseModel):
+    """
+    Enrichments for a legal opinion document.
+    """
+
+    name: str = Field(description="opinion identifier; name abbreviation")
+    dataset_index: int = Field(description="index of the document in the dataset")
+    court: str = Field(description="name of the court")
+    judges: list[str] = Field(
+        description="A list of the judges mentioned in the text. For example: `Judge John Doe`"
+    )
+    citations: list[str] = Field(
+        description="A list of the legal citations in the text.  For example: `123 F.3d 456`"
+    )
 
 
 def doc_enrichments(
     doc: Document, chunk_extracts: list[LegalOpinionChunkExtractions]
-) -> list[dict]:
+) -> LegalOpinionEnrichments:
 
     citations: List[str] = get_citations(doc.page_content)
 
@@ -149,13 +164,15 @@ def doc_enrichments(
     for chunk_extract in chunk_extracts:
         judges.extend(chunk_extract.judges)
 
-    return {
-        "name": doc.metadata["name_abbreviation"],
-        "dataset_index": doc.metadata["dataset_index"],
-        "court": doc.metadata["court"],
-        "citations": [c.matched_text() for c in citations],
-        "judges": judges,
-    }
+    enrichments = LegalOpinionEnrichments(
+        name=doc.metadata["name_abbreviation"],
+        dataset_index=int(doc.metadata["dataset_index"]),
+        court=doc.metadata["court"],
+        citations=[c.matched_text() for c in citations],
+        judges=judges,
+    )
+
+    return enrichments
 
 
 chunk_extraction_template = partial_formatter.format(
@@ -174,16 +191,16 @@ neo4j_username = "neo4j"  # os.environ["NEO4J_USERNAME"]
 neo4j_password = "password"  # os.environ["NEO4J_PASSWORD"]
 
 
-def doc_enrichments_to_graph(tx, doc_enrichments: dict) -> None:
+def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
 
-    case_name = doc_enrichments["name"]
-    dataset_index = doc_enrichments["dataset_index"]
+    case_name = enrichments.name
+    dataset_index = enrichments.dataset_index
 
     triples = []
-    triples.append((doc_enrichments["court"], RELATION_COURT, case_name))
-    for judge in doc_enrichments["judges"]:
+    triples.append((enrichments.court, RELATION_COURT, case_name))
+    for judge in enrichments.judges:
         triples.append((judge, RELATION_JUDGE, case_name))
-    for citation in doc_enrichments["citations"]:
+    for citation in enrichments.citations:
         triples.append((citation, RELATION_LEGAL_CITATION, case_name))
 
     for subject, predicate, object in triples:
@@ -230,7 +247,7 @@ class QueryExtractions(BaseModel):
     judges: list[str] = Field(
         description="A list of the judges mentioned in the query. For example: `Judge John Doe`"
     )
-    # legal_citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
+    # citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
 
 
 query_extraction_template = partial_formatter.format(
@@ -281,7 +298,7 @@ class LegalQueryContext(BaseModel):
         description="The retrieved document text that is relevant to the question."
     )
     query: str = Field(description="The original question asked by the user.")
-    # legal_citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
+    # citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
 
 embedding_model_id = "all-MiniLM-L6-v2"

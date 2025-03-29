@@ -131,15 +131,15 @@ def enrich_documents(
     chunk_extraction_model_id: str,
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
-    doc_enrichments: Callable[[Document, list[BaseModel]], dict],
+    doc_enrichments: Callable[[Document, list[BaseModel]], BaseModel],
 ) -> None:
 
     docs = retrieve_documents()
 
     with Progress() as progress:
 
-        task_extract = progress.add_task(
-            "[green]Extracting entities...", total=len(docs)
+        task_enrich = progress.add_task(
+            "[green]Enriching documents...", total=len(docs)
         )
 
         with open(entity_jsonl_file, "wt") as f:
@@ -155,45 +155,47 @@ def enrich_documents(
                 )
 
                 enrichments = doc_enrichments(doc, chunk_extract_models)
-                extract_json = json.dumps(enrichments, ensure_ascii=False)
-                f.write(extract_json + "\n")
+                enrichments_json = enrichments.model_dump_json()
+                f.write(enrichments_json + "\n")
 
-                progress.update(task_extract, advance=1)
+                progress.update(task_enrich, advance=1)
                 time.sleep(1)  # TODO remove this hard-coded rate limiter
 
-        print("Wrote entity triples to", entity_jsonl_file)
+        print("Wrote document enrichments to", entity_jsonl_file)
 
 
-def load_entity_graph(
+def load_knowledge_graph(
     driver: Driver,
     entity_jsonl_file: str,
-    add_row_to_graph: Callable[[Any, str, str, str], None],
+    enrichments_clazz: type[BaseModel],
+    doc_enrichments_to_graph: Callable[[Any, BaseModel], None],
 ) -> None:
 
-    print("Parsing triples from", entity_jsonl_file)
+    print("Parsing enrichments from", entity_jsonl_file)
 
-    rows = []
+    enrichmentss = []
     with open(entity_jsonl_file, "r") as f:
         for line in f:
-            rows.append(json.loads(line))
+            e = enrichments_clazz.model_construct(**json.loads(line))
+            enrichmentss.append(e)
 
     with Progress() as progress:
 
         task_load = progress.add_task(
-            f"[green]Loading {len(rows)} triples into graph...",
-            total=len(rows),
+            f"[green]Loading {len(enrichmentss)} enriched documents into graph...",
+            total=len(enrichmentss),
         )
 
         with driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n")  # empty graph
-            for row in rows:
-                session.execute_write(add_row_to_graph, row)
+            for e in enrichmentss:
+                session.execute_write(doc_enrichments_to_graph, e)
                 progress.update(task_load, advance=1)
 
         driver.close()
 
 
-def show_entity_graph(driver: Driver):
+def show_knowledge_graph(driver: Driver):
 
     with driver.session() as session:
 

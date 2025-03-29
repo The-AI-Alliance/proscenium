@@ -10,8 +10,8 @@ from proscenium.verbs.vector_database import collection_name
 
 from proscenium.scripts.graph_rag import (
     enrich_documents,
-    load_entity_graph,
-    show_entity_graph,
+    load_knowledge_graph,
+    show_knowledge_graph,
     load_entity_resolver,
     answer_question,
 )
@@ -50,8 +50,11 @@ def load_graph():
         legal_config.neo4j_uri, legal_config.neo4j_username, legal_config.neo4j_password
     )
 
-    load_entity_graph(
-        driver, legal_config.entity_jsonl_file, legal_config.doc_enrichments_to_graph
+    load_knowledge_graph(
+        driver,
+        legal_config.entity_jsonl_file,
+        legal_config.LegalOpinionEnrichments,
+        legal_config.doc_enrichments_to_graph,
     )
 
     driver.close()
@@ -64,7 +67,7 @@ def show_graph():
         legal_config.neo4j_uri, legal_config.neo4j_username, legal_config.neo4j_password
     )
 
-    show_entity_graph(driver)
+    show_knowledge_graph(driver)
 
     driver.close()
 
