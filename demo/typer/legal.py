@@ -26,14 +26,14 @@ Graph extraction and question answering with GraphRAG on caselaw.
 
 
 @app.command(
-    help=f"Extract entities from {legal_config.hf_dataset_id} and write to {legal_config.entity_csv_file}."
+    help=f"Extract entities from {legal_config.hf_dataset_id} and write to {legal_config.entity_jsonl_file}."
 )
 def extract():
 
     extract_entities(
         legal_config.retrieve_documents,
         legal_config.doc_as_rich,
-        legal_config.entity_csv_file,
+        legal_config.entity_jsonl_file,
         legal_config.default_chunk_extraction_model_id,
         legal_config.chunk_extract,
         legal_config.doc_enrichments,
@@ -115,6 +115,7 @@ def ask():
         legal_config.embedding_model_id,
         driver,
         legal_config.default_generation_model_id,
+        legal_config.query_extract,
         legal_config.extract_to_context,
         legal_config.context_to_prompts,
     )

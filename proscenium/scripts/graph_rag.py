@@ -43,7 +43,7 @@ def extract_from_document_chunks(
         ce = chunk_extract(chunk_extraction_model_id, chunk, doc)
 
         print("Extract model in chunk", i + 1, "of", len(chunks))
-        print(Panel(ce))
+        print(Panel(str(ce)))
 
         extract_models.append(ce)
 

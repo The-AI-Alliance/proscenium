@@ -60,7 +60,7 @@ def retrieve_documents() -> List[Document]:
         hf_dataset_id,
     )
 
-    for doc, i in enumerate(docs):
+    for i, doc in enumerate(docs):
         doc.metadata["dataset_index"] = i
 
     return docs
