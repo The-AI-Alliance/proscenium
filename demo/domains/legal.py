@@ -13,13 +13,14 @@ from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
 from pydantic import BaseModel, Field
-from pymilvus import MilvusClient
 
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
+
+from proscenium.scripts.entity_resolver import EntityResolver
 
 from demo.config import default_model_id
 
@@ -31,11 +32,8 @@ RELATION_JUDGE = "Judge"
 RELATION_LEGAL_CITATION = "LegalCitation"
 RELATION_COURT = "Court"
 
-NODE_CASE = "Case"
-NODE_ENTITY = "Entity"
-
 ###################################
-# Retrieve Documens
+# Retrieve Documents
 ###################################
 
 hf_dataset_id = "free-law/nh"
@@ -322,6 +320,14 @@ def query_extract(query: str, query_extraction_model_id: str) -> QueryExtraction
 ###################################
 # extract_to_context
 ###################################
+
+resolvers = [
+    EntityResolver(
+        "chunks",  # TODO change
+        "MATCH (n) RETURN n.name AS name",
+        "name",
+    )
+]
 
 
 class LegalQueryContext(BaseModel):

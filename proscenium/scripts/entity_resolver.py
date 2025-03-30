@@ -15,10 +15,17 @@ from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.display.milvus import collection_panel
 
 
+class EntityResolver:
+
+    def __init__(self, collection_name: str, cypher: str, field_name: str):
+        self.collection_name = collection_name
+        self.cypher = cypher
+        self.field_name = field_name
+
+
 def load_entity_resolver(
     driver: Driver,
-    cypher: str,
-    field_name: str,
+    resolvers: list[EntityResolver],
     milvus_uri: str,
     embedding_model_id: str,
 ) -> None:
@@ -26,28 +33,28 @@ def load_entity_resolver(
     embedding_fn = embedding_function(embedding_model_id)
     print("Embedding model", embedding_model_id)
 
-    vector_db_client = create_vector_db(
-        milvus_uri, embedding_fn, collection_name, overwrite=True
-    )
-    print("Vector db stored at", milvus_uri)
+    for resolver in resolvers:
 
-    values = []
-    with driver.session() as session:
-        result = session.run(cypher)
-        new_values = [Document(record[field_name]) for record in result]
-        values.extend(new_values)
+        vector_db_client = create_vector_db(
+            milvus_uri, embedding_fn, resolver.collection_name, overwrite=True
+        )
+        print("Vector db stored at", milvus_uri)
 
-    # TODO collection_name = "resolver_" + field_name
-    collection_name = "chunks"  # TODO
-    print("Loading entity resolver into vector db", collection_name)
+        values = []
+        with driver.session() as session:
+            result = session.run(resolver.cypher)
+            new_values = [Document(record[resolver.field_name]) for record in result]
+            values.extend(new_values)
 
-    info = add_chunks_to_vector_db(
-        vector_db_client, embedding_fn, values, collection_name
-    )
-    print(info["insert_count"], "chunks inserted")
-    print(collection_panel(vector_db_client, collection_name))
+        print("Loading entity resolver into vector db", resolver.collection_name)
 
-    vector_db_client.close()
+        info = add_chunks_to_vector_db(
+            vector_db_client, embedding_fn, values, resolver.collection_name
+        )
+        print(info["insert_count"], "chunks inserted")
+        print(collection_panel(vector_db_client, resolver.collection_name))
+
+        vector_db_client.close()
 
 
 def find_matching_objects(

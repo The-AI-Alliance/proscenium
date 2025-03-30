@@ -76,8 +76,7 @@ def load_resolver():
 
     load_entity_resolver(
         driver,
-        "MATCH (n) RETURN n.name AS name",
-        "name",
+        legal_config.resolvers,
         default_milvus_uri,
         legal_config.embedding_model_id,
     )
