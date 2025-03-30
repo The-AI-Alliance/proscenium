@@ -338,12 +338,22 @@ class LegalQueryContext(BaseModel):
 
 embedding_model_id = "all-MiniLM-L6-v2"
 
-milvus_uri = "file:/grag-milvus.db"
-
 
 def extract_to_context(
-    qe: QueryExtractions, query: str, driver: Driver, vector_db_client: MilvusClient
+    qe: QueryExtractions, query: str, driver: Driver, milvus_uri: str
 ) -> LegalQueryContext:
+
+    # TODO
+    #    vector_db_client = vector_db(legal_config.milvus_uri, collection_name)
+    #    print(
+    #        "Connected to vector db stored at",
+    #        legal_config.milvus_uri,
+    #        "with embedding model",
+    #        legal_config.embedding_model_id,
+    #        "and collection name",
+    #        collection_name,
+    #    )
+    #    print("\n")
 
     subject_predicate_constraints = []
     for judge in qe.judges:
@@ -372,6 +382,7 @@ def extract_to_context(
         doc=doc.page_content,
         query=query,
     )
+    # TODO vector_db_client.close()
 
     return context
 

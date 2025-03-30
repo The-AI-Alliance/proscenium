@@ -2,9 +2,6 @@ import typer
 from rich import print
 from rich.panel import Panel
 
-from proscenium.verbs.vector_database import create_vector_db
-from proscenium.verbs.vector_database import vector_db
-from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.know import knowledge_graph_client
 
 from proscenium.scripts.document_enricher import enrich_documents
@@ -20,7 +17,7 @@ Graph extraction and question answering with GraphRAG on caselaw.
 """
 )
 
-collection_name = "chunks"
+default_milvus_uri = "file:/grag-milvus.db"
 
 
 @app.command(
@@ -72,13 +69,6 @@ def show_graph():
 
 @app.command(help="Load the vector db used for entity resolution.")
 def load_resolver():
-    embedding_fn = embedding_function(legal_config.embedding_model_id)
-    print("Embedding model", legal_config.embedding_model_id)
-
-    vector_db_client = create_vector_db(
-        legal_config.milvus_uri, embedding_fn, collection_name, overwrite=True
-    )
-    print("Vector db stored at", legal_config.milvus_uri)
 
     driver = knowledge_graph_client(
         legal_config.neo4j_uri, legal_config.neo4j_username, legal_config.neo4j_password
@@ -88,29 +78,17 @@ def load_resolver():
         driver,
         "MATCH (n) RETURN n.name AS name",
         "name",
-        vector_db_client,
-        embedding_fn,
+        default_milvus_uri,
+        legal_config.embedding_model_id,
     )
 
     driver.close()
-    vector_db_client.close()
 
 
 @app.command(
     help="Ask a legal question using the knowledge graph and entity resolver established in the previous steps."
 )
 def ask():
-
-    vector_db_client = vector_db(legal_config.milvus_uri, collection_name)
-    print(
-        "Connected to vector db stored at",
-        legal_config.milvus_uri,
-        "with embedding model",
-        legal_config.embedding_model_id,
-        "and collection name",
-        collection_name,
-    )
-    print("\n")
 
     driver = knowledge_graph_client(
         legal_config.neo4j_uri, legal_config.neo4j_username, legal_config.neo4j_password
@@ -121,8 +99,7 @@ def ask():
     answer = answer_question(
         question,
         legal_config.default_query_extraction_model_id,
-        vector_db_client,
-        legal_config.embedding_model_id,
+        default_milvus_uri,
         driver,
         legal_config.default_generation_model_id,
         legal_config.query_extract,
@@ -136,4 +113,3 @@ def ask():
         print("No answer")
 
     driver.close()
-    vector_db_client.close()

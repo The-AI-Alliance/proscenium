@@ -8,8 +8,10 @@ from neo4j import Driver
 from pymilvus import MilvusClient
 from pymilvus import model
 
+from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import closest_chunks
 from proscenium.verbs.vector_database import add_chunks_to_vector_db
+from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.display.milvus import collection_panel
 
 
@@ -17,9 +19,17 @@ def load_entity_resolver(
     driver: Driver,
     cypher: str,
     field_name: str,
-    vector_db_client: MilvusClient,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    milvus_uri: str,
+    embedding_model_id: str,
 ) -> None:
+
+    embedding_fn = embedding_function(embedding_model_id)
+    print("Embedding model", embedding_model_id)
+
+    vector_db_client = create_vector_db(
+        milvus_uri, embedding_fn, collection_name, overwrite=True
+    )
+    print("Vector db stored at", milvus_uri)
 
     values = []
     with driver.session() as session:
@@ -36,6 +46,8 @@ def load_entity_resolver(
     )
     print(info["insert_count"], "chunks inserted")
     print(collection_panel(vector_db_client, collection_name))
+
+    vector_db_client.close()
 
 
 def find_matching_objects(

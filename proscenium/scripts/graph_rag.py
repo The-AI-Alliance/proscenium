@@ -15,16 +15,15 @@ from proscenium.verbs.complete import complete_simple
 def answer_question(
     question: str,
     query_extraction_model_id: str,
-    vector_db_client: MilvusClient,
-    embedding_model_id: str,
+    milvus_uri: str,
     driver: Driver,
     generation_model_id: str,
     query_extract: Callable[
         [str, str], BaseModel
     ],  # (query_str, query_extraction_model_id) -> QueryExtractions
     extract_to_context: Callable[
-        [BaseModel, str, Driver, MilvusClient], BaseModel
-    ],  # (QueryExtractions, query_str, Driver, MilvusClient) -> Context
+        [BaseModel, str, Driver, str], BaseModel
+    ],  # (QueryExtractions, query_str, Driver, milvus_uri) -> Context
     context_to_prompts: Callable[
         [BaseModel], tuple[str, str]
     ],  # Context -> (system_prompt, user_prompt)
@@ -40,9 +39,7 @@ def answer_question(
     print("Extract:", extract)
 
     print("Forming context from the extracted information")
-    context = extract_to_context(
-        extract, question, driver, vector_db_client, embedding_model_id
-    )
+    context = extract_to_context(extract, question, driver, milvus_uri)
     print("Context:", context)
 
     prompts = context_to_prompts(context, generation_model_id)
