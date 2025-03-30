@@ -9,26 +9,6 @@ from pymilvus import model
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.display.milvus import chunk_hits_table
 from proscenium.verbs.vector_database import closest_chunks
-from proscenium.verbs.read import load_file
-from proscenium.verbs.chunk import documents_to_chunks_by_characters
-from proscenium.verbs.vector_database import add_chunks_to_vector_db
-from proscenium.verbs.vector_database import collection_name
-from proscenium.verbs.display.milvus import collection_panel
-
-
-def build_vector_db(
-    data_file: str,
-    vector_db_client: MilvusClient,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-):
-
-    documents = load_file(data_file)
-    chunks = documents_to_chunks_by_characters(documents)
-    print("Data file", data_file, "has", len(chunks), "chunks")
-
-    info = add_chunks_to_vector_db(vector_db_client, embedding_fn, chunks)
-    print(info["insert_count"], "chunks inserted")
-    print(collection_panel(vector_db_client, collection_name))
 
 
 rag_system_prompt = "Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer."
@@ -63,11 +43,12 @@ def answer_question(
     model_id: str,
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    collection_name: str,
 ) -> str:
 
     print(Panel(query, title="User"))
 
-    chunks = closest_chunks(vector_db_client, embedding_fn, query)
+    chunks = closest_chunks(vector_db_client, embedding_fn, query, collection_name)
     print("Found", len(chunks), "closest chunks")
     print(chunk_hits_table(chunks))
 

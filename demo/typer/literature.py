@@ -9,8 +9,11 @@ from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import vector_db
 
-from proscenium.scripts.rag import answer_question, build_vector_db as bvd
+from proscenium.scripts.rag import answer_question
+from proscenium.scripts.chunk_space import build_vector_db as bvd
 import demo.domains.literature as literature_config
+
+collection_name = "chunks"
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -29,7 +32,7 @@ def prepare():
     print("Embedding model", literature_config.embedding_model_id)
 
     vector_db_client = create_vector_db(
-        literature_config.milvus_uri, embedding_fn, overwrite=True
+        literature_config.milvus_uri, embedding_fn, collection_name, overwrite=True
     )
     print("Vector db at uri", literature_config.milvus_uri)
 
@@ -50,11 +53,15 @@ def ask():
     embedding_fn = embedding_function(literature_config.embedding_model_id)
     print("Embedding model:", literature_config.embedding_model_id)
 
-    vector_db_client = vector_db(literature_config.milvus_uri)
+    vector_db_client = vector_db(literature_config.milvus_uri, collection_name)
     print("Vector db at uri", literature_config.milvus_uri)
 
     answer = answer_question(
-        query, literature_config.model_id, vector_db_client, embedding_fn
+        query,
+        literature_config.model_id,
+        vector_db_client,
+        embedding_fn,
+        collection_name,
     )
 
     print(Panel(answer, title="Assistant"))

@@ -18,9 +18,6 @@ def embedding_function(
     return embedding_fn
 
 
-collection_name = "chunks"
-
-
 def schema_chunks(
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
 ) -> CollectionSchema:
@@ -48,6 +45,7 @@ from urllib.parse import urlsplit
 def create_vector_db(
     uri: str,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    collection_name: str,
     overwrite: bool = True,
 ) -> MilvusClient:
 
@@ -90,7 +88,7 @@ def create_vector_db(
     return client
 
 
-def vector_db(uri: str) -> MilvusClient:
+def vector_db(uri: str, collection_name: str) -> MilvusClient:
 
     uri_fields = urlsplit(uri)
     client = None
@@ -109,6 +107,7 @@ def add_chunks_to_vector_db(
     client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     chunks: List[Document],
+    collection_name: str,
 ) -> Dict:
 
     vectors = embedding_fn.encode_documents([chunk.page_content for chunk in chunks])
@@ -127,6 +126,7 @@ def closest_chunks(
     client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     query: str,
+    collection_name: str,
     k: int = 4,
 ) -> List[Dict]:
 
