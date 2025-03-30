@@ -24,6 +24,9 @@ from proscenium.verbs.vector_database import add_chunks_to_vector_db
 from proscenium.verbs.display.milvus import collection_panel
 
 
+# TODO move this method somewhere else
+
+
 def extract_from_document_chunks(
     doc: Document,
     doc_as_rich: Callable[[Document], Panel],
@@ -53,26 +56,6 @@ def extract_from_document_chunks(
         extract_models.append(ce)
 
     return extract_models
-
-
-def find_matching_objects(
-    vector_db_client: MilvusClient,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-    question_triples: List[tuple[str, str, str]],
-) -> List[tuple[str, str]]:
-
-    subject_predicate_pairs = []
-    for triple in question_triples:
-        print("Finding entity matches for", triple[0], "(", triple[1], ")")
-        subject, predicate, obj = triple
-        # TODO apply distance threshold
-        hits = closest_chunks(vector_db_client, embedding_fn, subject, k=5)
-        for match in [head["entity"]["text"] for head in hits[:1]]:
-            print("   match:", match)
-            subject_predicate_pairs.append((match, predicate))
-    # Note: the above block loses the tie-back link from the match to the original triple
-
-    return subject_predicate_pairs
 
 
 def enrich_documents(
@@ -162,6 +145,26 @@ def load_entity_resolver(
     info = add_chunks_to_vector_db(vector_db_client, embedding_fn, names)
     print(info["insert_count"], "chunks inserted")
     print(collection_panel(vector_db_client, collection_name))
+
+
+def find_matching_objects(
+    vector_db_client: MilvusClient,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    question_triples: List[tuple[str, str, str]],
+) -> List[tuple[str, str]]:
+
+    subject_predicate_pairs = []
+    for triple in question_triples:
+        print("Finding entity matches for", triple[0], "(", triple[1], ")")
+        subject, predicate, obj = triple
+        # TODO apply distance threshold
+        hits = closest_chunks(vector_db_client, embedding_fn, subject, k=5)
+        for match in [head["entity"]["text"] for head in hits[:1]]:
+            print("   match:", match)
+            subject_predicate_pairs.append((match, predicate))
+    # Note: the above block loses the tie-back link from the match to the original triple
+
+    return subject_predicate_pairs
 
 
 def answer_question(
