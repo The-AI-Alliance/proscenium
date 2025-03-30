@@ -6,14 +6,11 @@ from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import vector_db
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.know import knowledge_graph_client
-from proscenium.verbs.vector_database import collection_name
 
-from proscenium.scripts.graph_rag import (
-    enrich_documents,
-    load_knowledge_graph,
-    load_entity_resolver,
-    answer_question,
-)
+from proscenium.scripts.document_enricher import enrich_documents
+from proscenium.scripts.knowledge_graph import load_knowledge_graph
+from proscenium.scripts.entity_resolver import load_entity_resolver
+from proscenium.scripts.graph_rag import answer_question
 
 import demo.domains.legal as legal_config
 
@@ -22,6 +19,8 @@ app = typer.Typer(
 Graph extraction and question answering with GraphRAG on caselaw.
 """
 )
+
+collection_name = "chunks"
 
 
 @app.command(
@@ -77,7 +76,7 @@ def load_resolver():
     print("Embedding model", legal_config.embedding_model_id)
 
     vector_db_client = create_vector_db(
-        legal_config.milvus_uri, embedding_fn, overwrite=True
+        legal_config.milvus_uri, embedding_fn, collection_name, overwrite=True
     )
     print("Vector db stored at", legal_config.milvus_uri)
 
@@ -85,7 +84,13 @@ def load_resolver():
         legal_config.neo4j_uri, legal_config.neo4j_username, legal_config.neo4j_password
     )
 
-    load_entity_resolver(driver, vector_db_client, embedding_fn, collection_name)
+    load_entity_resolver(
+        driver,
+        "MATCH (n) RETURN n.name AS name",
+        "name",
+        vector_db_client,
+        embedding_fn,
+    )
 
     driver.close()
     vector_db_client.close()
@@ -96,12 +101,14 @@ def load_resolver():
 )
 def ask():
 
-    vector_db_client = vector_db(legal_config.milvus_uri)
+    vector_db_client = vector_db(legal_config.milvus_uri, collection_name)
     print(
         "Connected to vector db stored at",
         legal_config.milvus_uri,
         "with embedding model",
         legal_config.embedding_model_id,
+        "and collection name",
+        collection_name,
     )
     print("\n")
 
