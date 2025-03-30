@@ -1,12 +1,10 @@
-from typing import List
-
+from typing import Optional
 from rich import print
 
 from langchain_core.documents.base import Document
 from neo4j import Driver
 
 from pymilvus import MilvusClient
-from pymilvus import model
 
 from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import closest_chunks
@@ -65,23 +63,23 @@ def load_entity_resolver(
 
 def find_matching_objects(
     vector_db_client: MilvusClient,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-    question_triples: List[tuple[str, str, str]],
-) -> List[tuple[str, str]]:
+    approximate: str,
+    resolver: EntityResolver,
+) -> Optional[str]:
 
-    subject_predicate_pairs = []
-    for triple in question_triples:
-        print("Finding entity matches for", triple[0], "(", triple[1], ")")
-        subject, predicate, obj = triple
-        # TODO collection_name = "resolver_" + field_name
-        collection_name = "chunks"  # TODO
-        # TODO apply distance threshold
-        hits = closest_chunks(
-            vector_db_client, embedding_fn, subject, collection_name, k=5
-        )
-        for match in [head["entity"]["text"] for head in hits[:1]]:
-            print("   match:", match)
-            subject_predicate_pairs.append((match, predicate))
-    # Note: the above block loses the tie-back link from the match to the original triple
+    print("Finding entity matches for", approximate, "using", resolver.collection_name)
 
-    return subject_predicate_pairs
+    hits = closest_chunks(
+        vector_db_client,
+        resolver.embedding_fn,
+        approximate,
+        resolver.collection_name,
+        k=5,
+    )
+    # TODO apply distance threshold
+    for match in [head["entity"]["text"] for head in hits[:1]]:
+        print("Closest match:", match)
+        return match
+
+    print("No match found")
+    return None

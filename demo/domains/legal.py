@@ -4,7 +4,6 @@ import logging
 import json
 
 from neo4j import Driver
-from pathlib import Path
 from rich import print
 from rich.panel import Panel
 from rich.table import Table
@@ -183,12 +182,6 @@ chunk_extraction_template = partial_formatter.format(
 ###################################
 # Knowledge Graph
 ###################################
-
-enrichment_jsonl_file = Path("enrichments.jsonl")
-
-neo4j_uri = "bolt://localhost:7687"  # os.environ["NEO4J_URI"]
-neo4j_username = "neo4j"  # os.environ["NEO4J_USERNAME"]
-neo4j_password = "password"  # os.environ["NEO4J_PASSWORD"]
 
 
 def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
