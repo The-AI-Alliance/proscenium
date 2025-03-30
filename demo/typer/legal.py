@@ -78,7 +78,6 @@ def load_resolver():
         driver,
         legal_config.resolvers,
         default_milvus_uri,
-        legal_config.embedding_model_id,
     )
 
     driver.close()

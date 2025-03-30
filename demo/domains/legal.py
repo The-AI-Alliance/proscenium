@@ -323,9 +323,10 @@ def query_extract(query: str, query_extraction_model_id: str) -> QueryExtraction
 
 resolvers = [
     EntityResolver(
-        "chunks",  # TODO change
         "MATCH (n) RETURN n.name AS name",
         "name",
+        "chunks",  # TODO change
+        "all-MiniLM-L6-v2",
     )
 ]
 
@@ -340,9 +341,6 @@ class LegalQueryContext(BaseModel):
     )
     query: str = Field(description="The original question asked by the user.")
     # citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
-
-
-embedding_model_id = "all-MiniLM-L6-v2"
 
 
 def extract_to_context(

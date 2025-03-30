@@ -17,23 +17,29 @@ from proscenium.verbs.display.milvus import collection_panel
 
 class EntityResolver:
 
-    def __init__(self, collection_name: str, cypher: str, field_name: str):
-        self.collection_name = collection_name
+    def __init__(
+        self,
+        cypher: str,
+        field_name: str,
+        collection_name: str,
+        embedding_model_id: str,
+    ):
         self.cypher = cypher
         self.field_name = field_name
+        self.collection_name = collection_name
+        self.embedding_model_id = embedding_model_id
 
 
 def load_entity_resolver(
     driver: Driver,
     resolvers: list[EntityResolver],
     milvus_uri: str,
-    embedding_model_id: str,
 ) -> None:
 
-    embedding_fn = embedding_function(embedding_model_id)
-    print("Embedding model", embedding_model_id)
-
     for resolver in resolvers:
+
+        embedding_fn = embedding_function(resolver.embedding_model_id)
+        print("Embedding model", resolver.embedding_model_id)
 
         vector_db_client = create_vector_db(
             milvus_uri, embedding_fn, resolver.collection_name, overwrite=True
