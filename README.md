@@ -29,7 +29,7 @@ including:
 Proscenium does not provide any sample web applications, opting instead to demonstrate simple console applications.
 Integrating with existing webapps and desktop software (eg chat clients) are a priority over implementating bespoke demo GUIs.
 
-Proscenium is built on large mountains of other libraries.  The library itself is intended to be minimal.  We will happily delete large parts of if they are redundant with clear de facto standards.  Further technical objectives include:
+Proscenium is built on large mountains of other libraries.  The library itself is intended to be minimal.  We will happily delete large parts if they are redundant with clear de facto standards.  Further technical objectives include:
 
 - Identify areas where innovation is still redefining interfaces
 - Highlight designs that can limit the "blast radius" of those changes
