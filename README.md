@@ -22,7 +22,7 @@ including:
 - Data discovery, enrichment, and indexing
 - Run-time inference patterns, including tool use
 - Application characteristics that support auditability and accountability
-- Decision support for product teams
+- Decision support for product and data science teams
 - Integration patterns for collaborative enterprise workflows including chat systems and document editors
 - Production deployments
 
