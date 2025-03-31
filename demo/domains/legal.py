@@ -225,24 +225,27 @@ def show_knowledge_graph(driver: Driver):
         relations = [record["rel"] for record in result]
         unique_relations = list(set(relations))
         table = Table(title="Relationship Types", show_lines=False)
-        table.add_column("Relationship Type", justify="left", style="blue")
+        table.add_column("Relationship Type", justify="left")
         for r in unique_relations:
             table.add_row(r)
         print(table)
 
-        result = session.run("MATCH (n) RETURN n.name AS name")  # all nodes
+        result = session.run(
+            "MATCH (n) RETURN n.name AS name, labels(n) as label"
+        )  # all nodes
         table = Table(title="Nodes", show_lines=False)
-        table.add_column("Node Name", justify="left", style="green")
+        table.add_column("Name", justify="left")
+        table.add_column("Labels", justify="left")
         for record in result:
-            table.add_row(record["name"])
+            table.add_row(record["name"], ", ".join(record["label"]))
         print(table)
 
         for r in unique_relations:
             cypher = f"MATCH (s)-[:{r}]->(o) RETURN s.name, o.name"
             result = session.run(cypher)
             table = Table(title=f"Relation: {r}", show_lines=False)
-            table.add_column("Subject Name", justify="left", style="blue")
-            table.add_column("Object Name", justify="left", style="purple")
+            table.add_column("Subject Name", justify="left")
+            table.add_column("Object Name", justify="left")
             for record in result:
                 table.add_row(record["s.name"], record["o.name"])
             print(table)
