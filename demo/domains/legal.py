@@ -219,6 +219,22 @@ def show_knowledge_graph(driver: Driver):
 
     with driver.session() as session:
 
+        judges_result = session.run(
+            "MATCH (n:Judge) RETURN n.name AS name"
+        )  # all nodes
+        judges_table = Table(title="Judges", show_lines=False)
+        judges_table.add_column("Name", justify="left")
+        for judge_record in judges_result:
+            judges_table.add_row(judge_record["name"])
+        print(judges_table)
+
+        cases_result = session.run("MATCH (n:Case) RETURN n.name AS name")  # all nodes
+        cases_table = Table(title="Cases", show_lines=False)
+        cases_table.add_column("Name", justify="left")
+        for case_record in cases_result:
+            cases_table.add_row(case_record["name"])
+        print(cases_table)
+
         result = session.run(
             "MATCH ()-[r]->() RETURN type(r) AS rel"
         )  # all relationships
@@ -228,16 +244,6 @@ def show_knowledge_graph(driver: Driver):
         table.add_column("Relationship Type", justify="left")
         for r in unique_relations:
             table.add_row(r)
-        print(table)
-
-        result = session.run(
-            "MATCH (n) RETURN n.name AS name, labels(n) as label"
-        )  # all nodes
-        table = Table(title="Nodes", show_lines=False)
-        table.add_column("Name", justify="left")
-        table.add_column("Labels", justify="left")
-        for record in result:
-            table.add_row(record["name"], ", ".join(record["label"]))
         print(table)
 
         for r in unique_relations:
