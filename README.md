@@ -7,8 +7,7 @@ succinct construction of compound AI systems.  It is not (yet?) intended for pro
 
 There are two ways to get started quickly:
 
-- [Command Line Interface](./CLI.md) to demos
-  - Either from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+- [Command Line Interface](./CLI.md) to demos.  Either from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
 
 - [Notebooks](./notebooks/)
 
