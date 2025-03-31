@@ -6,7 +6,8 @@ from neo4j import Driver
 
 from pymilvus import MilvusClient
 
-from proscenium.verbs.vector_database import create_vector_db
+from proscenium.verbs.vector_database import vector_db
+from proscenium.verbs.vector_database import create_collection
 from proscenium.verbs.vector_database import closest_chunks
 from proscenium.verbs.vector_database import add_chunks_to_vector_db
 from proscenium.verbs.vector_database import embedding_function
@@ -39,9 +40,7 @@ def load_entity_resolver(
         embedding_fn = embedding_function(resolver.embedding_model_id)
         print("Embedding model", resolver.embedding_model_id)
 
-        vector_db_client = create_vector_db(
-            milvus_uri, embedding_fn, resolver.collection_name, overwrite=True
-        )
+        vector_db_client = vector_db(milvus_uri, overwrite=True)
         print("Vector db stored at", milvus_uri)
 
         values = []
@@ -51,6 +50,9 @@ def load_entity_resolver(
             values.extend(new_values)
 
         print("Loading entity resolver into vector db", resolver.collection_name)
+        create_collection(
+            vector_db_client, embedding_fn, resolver.collection_name, overwrite=True
+        )
         info = add_chunks_to_vector_db(
             vector_db_client, embedding_fn, values, resolver.collection_name
         )

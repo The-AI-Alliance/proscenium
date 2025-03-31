@@ -2,18 +2,21 @@ import typer
 import os
 from rich import print
 from rich.panel import Panel
+from rich.prompt import Prompt
 import asyncio
 
 from proscenium.verbs.read import url_to_file
 from proscenium.verbs.vector_database import embedding_function
-from proscenium.verbs.vector_database import create_vector_db
 from proscenium.verbs.vector_database import vector_db
 
 from proscenium.scripts.rag import answer_question
 from proscenium.scripts.chunk_space import build_vector_db as bvd
-import demo.domains.literature as literature_config
+import demo.domains.literature as domain
 
-collection_name = "chunks"
+collection_name = "literature_chunks"
+
+milvus_uri = "file:/milvus.db"
+# milvus_uri = "http://localhost:19530"
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -22,21 +25,19 @@ app = typer.Typer(
 )
 
 
-@app.command(help=f"Build a vector database from chunks of {literature_config.url}.")
+@app.command(help=f"Build a vector database from chunks of {domain.url}.")
 def prepare():
 
-    asyncio.run(url_to_file(literature_config.url, literature_config.data_file))
-    print("Data file to chunk:", literature_config.data_file)
+    asyncio.run(url_to_file(domain.url, domain.data_file))
+    print("Data file to chunk:", domain.data_file)
 
-    embedding_fn = embedding_function(literature_config.embedding_model_id)
-    print("Embedding model", literature_config.embedding_model_id)
+    embedding_fn = embedding_function(domain.embedding_model_id)
+    print("Embedding model", domain.embedding_model_id)
 
-    vector_db_client = create_vector_db(
-        literature_config.milvus_uri, embedding_fn, collection_name, overwrite=True
-    )
-    print("Vector db at uri", literature_config.milvus_uri)
+    vector_db_client = vector_db(milvus_uri, overwrite=True)
+    print("Vector db at uri", milvus_uri)
 
-    bvd(literature_config.data_file, vector_db_client, embedding_fn)
+    bvd(domain.data_file, vector_db_client, embedding_fn, collection_name)
 
     vector_db_client.close()
 
@@ -48,17 +49,20 @@ Ask a question about literature using the RAG pattern with the chunks prepared i
 )
 def ask():
 
-    query = literature_config.user_question()
+    query = Prompt.ask(
+        domain.user_prompt,
+        default=domain.default_question,
+    )
 
-    embedding_fn = embedding_function(literature_config.embedding_model_id)
-    print("Embedding model:", literature_config.embedding_model_id)
+    vector_db_client = vector_db(milvus_uri)
+    print("Vector db at uri", milvus_uri)
 
-    vector_db_client = vector_db(literature_config.milvus_uri, collection_name)
-    print("Vector db at uri", literature_config.milvus_uri)
+    embedding_fn = embedding_function(domain.embedding_model_id)
+    print("Embedding model:", domain.embedding_model_id)
 
     answer = answer_question(
         query,
-        literature_config.model_id,
+        domain.model_id,
         vector_db_client,
         embedding_fn,
         collection_name,

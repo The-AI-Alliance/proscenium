@@ -42,11 +42,9 @@ def schema_chunks(
 from urllib.parse import urlsplit
 
 
-def create_vector_db(
+def vector_db(
     uri: str,
-    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
-    collection_name: str,
-    overwrite: bool = True,
+    overwrite: bool = False,
 ) -> MilvusClient:
 
     uri_fields = urlsplit(uri)
@@ -58,11 +56,29 @@ def create_vector_db(
                 file_path.unlink()
                 print("Deleted existing vector db file", file_path)
             else:
-                print("File", uri_fields[2], "exists. Use overwrite=True to replace.")
-                return None
+                print(
+                    "Using existing",
+                    uri_fields[2],
+                    "file. Use overwrite=True to replace.",
+                )
+        else:
+            print("Creating new vector db file", file_path)
+
         client = MilvusClient(uri=str(file_path))
+
     else:
+
         client = MilvusClient(uri=uri)
+
+    return client
+
+
+def create_collection(
+    client: MilvusClient,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    collection_name: str,
+    overwrite: bool = True,
+) -> None:
 
     if overwrite and client.has_collection(collection_name):
         client.drop_collection(collection_name)
@@ -82,26 +98,9 @@ def create_vector_db(
     )
 
     client.create_index(
-        collection_name=collection_name, index_params=index_params, sync=False
+        collection_name=collection_name, index_params=index_params, sync=True
     )
-
-    return client
-
-
-def vector_db(uri: str, collection_name: Optional[str] = None) -> MilvusClient:
-
-    uri_fields = urlsplit(uri)
-    client = None
-    if uri_fields[0] == "file":
-        file_path = Path(uri_fields[2][1:])
-        client = MilvusClient(uri=str(file_path))
-    else:
-        client = MilvusClient(uri=uri)
-
-    if collection_name is not None:
-        client.load_collection(collection_name)
-
-    return client
+    print("Created collection", collection_name)
 
 
 def add_chunks_to_vector_db(
@@ -110,6 +109,8 @@ def add_chunks_to_vector_db(
     chunks: List[Document],
     collection_name: str,
 ) -> Dict:
+
+    # client.load_collection(collection_name)
 
     vectors = embedding_fn.encode_documents([chunk.page_content for chunk in chunks])
 
@@ -130,6 +131,8 @@ def closest_chunks(
     collection_name: str,
     k: int = 4,
 ) -> List[Dict]:
+
+    client.load_collection(collection_name)
 
     result = client.search(
         collection_name=collection_name,
