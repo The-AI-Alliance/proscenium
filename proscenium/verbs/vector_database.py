@@ -110,8 +110,6 @@ def add_chunks_to_vector_db(
     collection_name: str,
 ) -> Dict:
 
-    # client.load_collection(collection_name)
-
     vectors = embedding_fn.encode_documents([chunk.page_content for chunk in chunks])
 
     data = [
