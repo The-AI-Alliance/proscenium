@@ -24,6 +24,7 @@ including:
 - Application characteristics that support auditability and accountability
 - Decision support for product teams
 - Integration patterns for collaborative enterprise workflows including chat systems and document editors
+- Production deployments
 
 Proscenium uses text output, and does not offer any GUI, as it is meant to be
 lower-level glue.
