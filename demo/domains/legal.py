@@ -4,7 +4,6 @@ import logging
 import json
 
 from neo4j import Driver
-from pathlib import Path
 from rich import print
 from rich.panel import Panel
 from rich.table import Table
@@ -13,13 +12,16 @@ from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
 from pydantic import BaseModel, Field
-from pymilvus import MilvusClient
 
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
+from proscenium.verbs.vector_database import vector_db
+
+from proscenium.scripts.entity_resolver import EntityResolver
+from proscenium.scripts.entity_resolver import find_matching_objects
 
 from demo.config import default_model_id
 
@@ -31,11 +33,8 @@ RELATION_JUDGE = "Judge"
 RELATION_LEGAL_CITATION = "LegalCitation"
 RELATION_COURT = "Court"
 
-NODE_CASE = "Case"
-NODE_ENTITY = "Entity"
-
 ###################################
-# Retrieve Documens
+# Retrieve Documents
 ###################################
 
 hf_dataset_id = "free-law/nh"
@@ -186,36 +185,33 @@ chunk_extraction_template = partial_formatter.format(
 # Knowledge Graph
 ###################################
 
-enrichment_jsonl_file = Path("enrichments.jsonl")
-
-neo4j_uri = "bolt://localhost:7687"  # os.environ["NEO4J_URI"]
-neo4j_username = "neo4j"  # os.environ["NEO4J_USERNAME"]
-neo4j_password = "password"  # os.environ["NEO4J_PASSWORD"]
-
 
 def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
 
     case_name = enrichments.name
     dataset_index = enrichments.dataset_index
 
-    triples = []
-    triples.append((enrichments.court, RELATION_COURT, case_name))
-    for judge in enrichments.judges:
-        triples.append((judge, RELATION_JUDGE, case_name))
-    for citation in enrichments.citations:
-        triples.append((citation, RELATION_LEGAL_CITATION, case_name))
+    tx.run(
+        "MERGE (c:Case {name: $case, dataset_index: $dataset_index})",
+        case=case_name,
+        dataset_index=dataset_index,
+    )
 
-    for subject, predicate, object in triples:
-        query = (
-            "MERGE (e:Entity {name: $entity}) "
-            "MERGE (c:Case {name: $case, dataset_index: $dataset_index}) "
-            "MERGE (e)-[r:%s]->(c)"
-        ) % snakecase(lowercase(predicate))
+    for judge in enrichments.judges:
         tx.run(
-            query,
-            entity=subject,
+            "MERGE (j:Judge {name: $judge})\n"
+            + "MERGE (c:Case {name: $case})-[:mentions]->(j)",
+            judge=judge,
             case=case_name,
-            dataset_index=dataset_index,
+        )
+
+    for citation in enrichments.citations:
+        # TODO resolve citation
+        tx.run(
+            "MERGE (c:Case {name: $citation})\n"
+            + "MERGE (o:Case {name: $case})-[:cites]->(c)",
+            case=case_name,
+            citation=citation,
         )
 
 
@@ -229,24 +225,27 @@ def show_knowledge_graph(driver: Driver):
         relations = [record["rel"] for record in result]
         unique_relations = list(set(relations))
         table = Table(title="Relationship Types", show_lines=False)
-        table.add_column("Relationship Type", justify="left", style="blue")
+        table.add_column("Relationship Type", justify="left")
         for r in unique_relations:
             table.add_row(r)
         print(table)
 
-        result = session.run("MATCH (n) RETURN n.name AS name")  # all nodes
+        result = session.run(
+            "MATCH (n) RETURN n.name AS name, labels(n) as label"
+        )  # all nodes
         table = Table(title="Nodes", show_lines=False)
-        table.add_column("Node Name", justify="left", style="green")
+        table.add_column("Name", justify="left")
+        table.add_column("Labels", justify="left")
         for record in result:
-            table.add_row(record["name"])
+            table.add_row(record["name"], ", ".join(record["label"]))
         print(table)
 
         for r in unique_relations:
             cypher = f"MATCH (s)-[:{r}]->(o) RETURN s.name, o.name"
             result = session.run(cypher)
             table = Table(title=f"Relation: {r}", show_lines=False)
-            table.add_column("Subject Name", justify="left", style="blue")
-            table.add_column("Object Name", justify="left", style="purple")
+            table.add_column("Subject Name", justify="left")
+            table.add_column("Object Name", justify="left")
             for record in result:
                 table.add_row(record["s.name"], record["o.name"])
             print(table)
@@ -323,6 +322,27 @@ def query_extract(query: str, query_extraction_model_id: str) -> QueryExtraction
 # extract_to_context
 ###################################
 
+embedding_model_id = "all-MiniLM-L6-v2"
+
+citation_resolver = EntityResolver(
+    "MATCH (c:Case) RETURN c.name AS name",
+    "name",
+    "resolve_citations",  # TODO change
+    embedding_model_id,
+)
+
+judge_resolver = EntityResolver(
+    "MATCH (j:Judge) RETURN j.name AS name",
+    "name",
+    "resolve_judges",
+    embedding_model_id,
+)
+
+resolvers = [
+    citation_resolver,
+    # TODO judge_resolver
+]
+
 
 class LegalQueryContext(BaseModel):
     """
@@ -336,42 +356,43 @@ class LegalQueryContext(BaseModel):
     # citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
 
-embedding_model_id = "all-MiniLM-L6-v2"
-
-milvus_uri = "file:/grag-milvus.db"
-
-
 def extract_to_context(
-    qe: QueryExtractions, query: str, driver: Driver, vector_db_client: MilvusClient
+    qe: QueryExtractions, query: str, driver: Driver, milvus_uri: str
 ) -> LegalQueryContext:
 
-    subject_predicate_constraints = []
-    for judge in qe.judges:
-        subject_predicate_constraints.append((judge, RELATION_JUDGE))
-    for citation in get_citations(query):
-        subject_predicate_constraints.append((citation, RELATION_LEGAL_CITATION))
+    vector_db_client = vector_db(milvus_uri)
 
     query = ""
-    for i, (subject, predicate) in enumerate(subject_predicate_constraints):
-        predicate_lc = snakecase(lowercase(predicate.replace("/", "_")))
-        query += (
-            f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
+    # TODO
+    # for i, judge in enumerate(qe.judges):
+    #     query += (
+    #         f"MATCH (judge{str(i)}:Judge {{name: '{judge}'}})-[:mentioned_in]->(c)\n"
+    #     )
+    for citation in get_citations(query):
+        citation_match = find_matching_objects(
+            vector_db_client, citation, citation_resolver
         )
-    query += "RETURN c.name AS name"
+        query += f"MATCH (o:Case)-[:cites]->(c:Case {{name: '{citation_match}'}})\n"
+    query += "RETURN o.name AS name"
 
-    object_names = []
+    print(Panel(query, title="Cypher Query"))
+
+    case_names = []
     with driver.session() as session:
         result = session.run(query)
-        object_names.extend([record["name"] for record in result])
+        case_names.extend([record["name"] for record in result])
 
-    print("Objects with names:", object_names, "are matches")
+    # TODO check for empty result
 
-    doc = retrieve_document(object_names[0])
+    print("Cases with names:", str(case_names), "are matches")
+
+    doc = retrieve_document(case_names[0])
 
     context = LegalQueryContext(
         doc=doc.page_content,
         query=query,
     )
+    vector_db_client.close()
 
     return context
 
