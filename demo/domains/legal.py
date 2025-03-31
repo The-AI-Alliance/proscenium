@@ -327,14 +327,14 @@ embedding_model_id = "all-MiniLM-L6-v2"
 citation_resolver = EntityResolver(
     "MATCH (c:Case) RETURN c.name AS name",
     "name",
-    "chunks",  # TODO change
+    "resolve_citations",  # TODO change
     embedding_model_id,
 )
 
 judge_resolver = EntityResolver(
     "MATCH (j:Judge) RETURN j.name AS name",
     "name",
-    "judges",
+    "resolve_judges",
     embedding_model_id,
 )
 
