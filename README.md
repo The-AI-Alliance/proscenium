@@ -7,7 +7,7 @@ There are a few ways to get started quickly:
 
 - [Command Line Interface](./CLI.md) to demos
 - [Notebooks](./notebooks/)
-- [Open in GitHub Codespaces](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+- Open the Proscenium repository in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
 
 ## Goals
 
