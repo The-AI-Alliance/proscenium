@@ -25,11 +25,15 @@ app = typer.Typer(
 )
 
 
-@app.command(help=f"Build a vector database from chunks of {domain.url}.")
+@app.command(
+    help=f"Build a vector DB from chunks of {len(domain.books)} books from Project Gutenberg."
+)
 def prepare():
 
-    asyncio.run(url_to_file(domain.url, domain.data_file))
-    print("Data file to chunk:", domain.data_file)
+    for book in domain.books:
+        print("Book:", book.title)
+        asyncio.run(url_to_file(book.url, book.data_file))
+        print("Local copy to chunk:", book.data_file)
 
     embedding_fn = embedding_function(domain.embedding_model_id)
     print("Embedding model", domain.embedding_model_id)
@@ -37,7 +41,12 @@ def prepare():
     vector_db_client = vector_db(milvus_uri, overwrite=True)
     print("Vector db at uri", milvus_uri)
 
-    bvd(domain.data_file, vector_db_client, embedding_fn, collection_name)
+    bvd(
+        [str(book.data_file) for book in domain.books],
+        vector_db_client,
+        embedding_fn,
+        collection_name,
+    )
 
     vector_db_client.close()
 
