@@ -51,7 +51,6 @@ def load_entity_resolver(
             values.extend(new_values)
 
         print("Loading entity resolver into vector db", resolver.collection_name)
-
         info = add_chunks_to_vector_db(
             vector_db_client, embedding_fn, values, resolver.collection_name
         )
@@ -66,6 +65,9 @@ def find_matching_objects(
     approximate: str,
     resolver: EntityResolver,
 ) -> Optional[str]:
+
+    print("Loading collection", resolver.collection_name)
+    vector_db_client.load_collection(resolver.collection_name)
 
     print("Finding entity matches for", approximate, "using", resolver.collection_name)
 

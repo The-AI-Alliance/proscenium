@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pathlib import Path
 from langchain_core.documents.base import Document
@@ -88,7 +88,7 @@ def create_vector_db(
     return client
 
 
-def vector_db(uri: str, collection_name: str) -> MilvusClient:
+def vector_db(uri: str, collection_name: Optional[str] = None) -> MilvusClient:
 
     uri_fields = urlsplit(uri)
     client = None
@@ -98,7 +98,8 @@ def vector_db(uri: str, collection_name: str) -> MilvusClient:
     else:
         client = MilvusClient(uri=uri)
 
-    client.load_collection(collection_name)
+    if collection_name is not None:
+        client.load_collection(collection_name)
 
     return client
 

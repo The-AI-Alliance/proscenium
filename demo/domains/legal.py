@@ -18,8 +18,10 @@ from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
+from proscenium.verbs.vector_database import vector_db
 
 from proscenium.scripts.entity_resolver import EntityResolver
+from proscenium.scripts.entity_resolver import find_matching_objects
 
 from demo.config import default_model_id
 
@@ -189,24 +191,27 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
     case_name = enrichments.name
     dataset_index = enrichments.dataset_index
 
-    triples = []
-    triples.append((enrichments.court, RELATION_COURT, case_name))
-    for judge in enrichments.judges:
-        triples.append((judge, RELATION_JUDGE, case_name))
-    for citation in enrichments.citations:
-        triples.append((citation, RELATION_LEGAL_CITATION, case_name))
+    tx.run(
+        "MERGE (c:Case {name: $case, dataset_index: $dataset_index})",
+        case=case_name,
+        dataset_index=dataset_index,
+    )
 
-    for subject, predicate, object in triples:
-        query = (
-            "MERGE (e:Entity {name: $entity}) "
-            "MERGE (c:Case {name: $case, dataset_index: $dataset_index}) "
-            "MERGE (e)-[r:%s]->(c)"
-        ) % snakecase(lowercase(predicate))
+    for judge in enrichments.judges:
         tx.run(
-            query,
-            entity=subject,
+            "MERGE (j:Judge {name: $judge})\n"
+            + "MERGE (c:Case {name: $case})-[:mentions]->(j)",
+            judge=judge,
             case=case_name,
-            dataset_index=dataset_index,
+        )
+
+    for citation in enrichments.citations:
+        # TODO resolve citation
+        tx.run(
+            "MERGE (c:Case {name: $citation})\n"
+            + "MERGE (o:Case {name: $case})-[:cites]->(c)",
+            case=case_name,
+            citation=citation,
         )
 
 
@@ -314,13 +319,25 @@ def query_extract(query: str, query_extraction_model_id: str) -> QueryExtraction
 # extract_to_context
 ###################################
 
+embedding_model_id = "all-MiniLM-L6-v2"
+
+citation_resolver = EntityResolver(
+    "MATCH (c:Case) RETURN c.name AS name",
+    "name",
+    "chunks",  # TODO change
+    embedding_model_id,
+)
+
+judge_resolver = EntityResolver(
+    "MATCH (j:Judge) RETURN j.name AS name",
+    "name",
+    "judges",
+    embedding_model_id,
+)
+
 resolvers = [
-    EntityResolver(
-        "MATCH (n) RETURN n.name AS name",
-        "name",
-        "chunks",  # TODO change
-        "all-MiniLM-L6-v2",
-    )
+    citation_resolver,
+    # TODO judge_resolver
 ]
 
 
@@ -340,46 +357,39 @@ def extract_to_context(
     qe: QueryExtractions, query: str, driver: Driver, milvus_uri: str
 ) -> LegalQueryContext:
 
-    # TODO
-    #    vector_db_client = vector_db(legal_config.milvus_uri, collection_name)
-    #    print(
-    #        "Connected to vector db stored at",
-    #        legal_config.milvus_uri,
-    #        "with embedding model",
-    #        legal_config.embedding_model_id,
-    #        "and collection name",
-    #        collection_name,
-    #    )
-    #    print("\n")
-
-    subject_predicate_constraints = []
-    for judge in qe.judges:
-        subject_predicate_constraints.append((judge, RELATION_JUDGE))
-    for citation in get_citations(query):
-        subject_predicate_constraints.append((citation, RELATION_LEGAL_CITATION))
+    vector_db_client = vector_db(milvus_uri)
 
     query = ""
-    for i, (subject, predicate) in enumerate(subject_predicate_constraints):
-        predicate_lc = snakecase(lowercase(predicate.replace("/", "_")))
-        query += (
-            f"MATCH (e{str(i)}:Entity {{name: '{subject}'}})-[:{predicate_lc}]->(c)\n"
+    # TODO
+    # for i, judge in enumerate(qe.judges):
+    #     query += (
+    #         f"MATCH (judge{str(i)}:Judge {{name: '{judge}'}})-[:mentioned_in]->(c)\n"
+    #     )
+    for citation in get_citations(query):
+        citation_match = find_matching_objects(
+            vector_db_client, citation, citation_resolver
         )
-    query += "RETURN c.name AS name"
+        query += f"MATCH (o:Case)-[:cites]->(c:Case {{name: '{citation_match}'}})\n"
+    query += "RETURN o.name AS name"
 
-    object_names = []
+    print(Panel(query, title="Cypher Query"))
+
+    case_names = []
     with driver.session() as session:
         result = session.run(query)
-        object_names.extend([record["name"] for record in result])
+        case_names.extend([record["name"] for record in result])
 
-    print("Objects with names:", object_names, "are matches")
+    # TODO check for empty result
 
-    doc = retrieve_document(object_names[0])
+    print("Cases with names:", str(case_names), "are matches")
+
+    doc = retrieve_document(case_names[0])
 
     context = LegalQueryContext(
         doc=doc.page_content,
         query=query,
     )
-    # TODO vector_db_client.close()
+    vector_db_client.close()
 
     return context
 
