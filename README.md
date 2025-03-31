@@ -1,7 +1,9 @@
 # Proscenium: Framing AI
 
 Proscenium is a small library of composable glue that allows for
-succinct construction of compound AI systems.  It is not (yet?) intended for production use.
+succinct construction of enterprise AI applications.  It is in early development and is not (yet?) intended for production use.
+
+It is also set of simple demonstration applications that elucidate aspects of application and library design.
 
 ## Quickstart
 
@@ -12,8 +14,6 @@ There are two ways to get started quickly:
 - [Notebooks](./notebooks/)
 
 ## Goals
-
-A few of the initial goals of this project include:
 
 Proscenium is a library and a set of demonstration applications.
 The applications illustrate a full picture of the AI application development and optimization process,
@@ -27,9 +27,9 @@ including:
 - Production deployments
 
 Proscenium does not provide any sample web applications, opting instead to demonstrate simple console applications.
-Existing webapps and desktop software (eg chat clients) are a priority over implementating bespoke demo GUIs.
+Integrating with existing webapps and desktop software (eg chat clients) are a priority over implementating bespoke demo GUIs.
 
-Further technical objectives include:
+Proscenium is built on large mountains of other libraries.  The library itself is intended to be minimal.  We will happily delete large parts of if they are redundant with clear de facto standards.  Further technical objectives include:
 
 - Identify areas where innovation is still redefining interfaces
 - Highlight designs that can limit the "blast radius" of those changes
