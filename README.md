@@ -7,7 +7,7 @@ succinct construction of compound AI systems.  It is not (yet?) intended for pro
 
 There are two ways to get started quickly:
 
-- [Command Line Interface](./CLI.md) to demos.  Either from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+- [Command Line Interface](./CLI.md) to demos, ither from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
 
 - [Notebooks](./notebooks/)
 
@@ -26,8 +26,8 @@ including:
 - Integration patterns for collaborative enterprise workflows including chat systems and document editors
 - Production deployments
 
-Proscenium uses text output, and does not offer any GUI, as it is meant to be
-lower-level glue.
+Proscenium does not provide any sample web applications, opting instead to demonstrate simple console applications.
+Existing webapps and desktop software (eg chat clients) are a priority over implementating bespoke demo GUIs.
 
 Further technical objectives include:
 
