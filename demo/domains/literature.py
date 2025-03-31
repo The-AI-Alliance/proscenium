@@ -29,5 +29,5 @@ walden = Book(
 
 books = [aeschylus, walden]
 
-user_prompt = f"What is your question about {", ".join([b.title for b in books])}?"
+user_prompt = f"What is your question about {', '.join([b.title for b in books])}?"
 default_question = "What did Hermes say to Prometheus about giving fire to humans?"
