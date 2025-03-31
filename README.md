@@ -3,18 +3,21 @@
 Proscenium is a small library of composable glue that allows for
 succinct construction of compound AI systems.  It is not (yet?) intended for production use.
 
-There are a few ways to get started quickly:
+## Quickstart
+
+There are two ways to get started quickly:
 
 - [Command Line Interface](./CLI.md) to demos
+  - Either from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+
 - [Notebooks](./notebooks/)
-- Open the Proscenium repository in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
 
 ## Goals
 
 A few of the initial goals of this project include:
 
 Proscenium is a library and a set of demonstration applications.
-The applications illustrate a fuller picture of the application development and optimization process,
+The applications illustrate a full picture of the AI application development and optimization process,
 including:
 
 - Data discovery, enrichment, and indexing
