@@ -24,6 +24,9 @@ from proscenium.scripts.entity_resolver import find_matching_objects
 
 from demo.config import default_model_id
 
+from eyecite import get_citations
+from eyecite.models import CitationBase
+
 ###################################
 # Knowledge Graph Schema
 ###################################
@@ -122,8 +125,6 @@ def doc_as_rich(doc: Document):
 # `judge` is not well captured in many of these documents,
 # so we will extract it from the text
 
-from eyecite import get_citations
-
 default_chunk_extraction_model_id = default_model_id
 
 
@@ -142,22 +143,39 @@ class LegalOpinionEnrichments(BaseModel):
     Enrichments for a legal opinion document.
     """
 
+    # Fields that come directly from the document metadata
     name: str = Field(description="opinion identifier; name abbreviation")
-    dataset_index: int = Field(description="index of the document in the dataset")
+    reporter: str = Field(description="name of the publising reporter")
+    volume: str = Field(description="volume number of the reporter")
+    first_page: str = Field(description="first page number of the opinion")
+    last_page: str = Field(description="last page number of the opinion")
     court: str = Field(description="name of the court")
-    judgerefs: list[str] = Field(
-        description="A list of the judge names mentioned in the text. For example: ['Judge John Doe', 'Judge Jane Smith']"
-    )
+    decision_date: str = Field(description="date of the decision")
+    # TODO use (incoming) citations comes with the document
+    docket_number: str = Field(description="docket number of the case")
+    jurisdiction: str = Field(description="jurisdiction of the case")
+    # TODO note that judges comes with the document, pre-extracted
+    # TODO parties
+    # TODO word_count, char_count, last_updated, provenance, id
+
+    # Extracted from the text without LLM
     caserefs: list[str] = Field(
         description="A list of the legal citations in the text.  For example: ['123 F.3d 456', '456 F.3d 789']"
     )
+
+    # Extracted from the text with LLM
+    judgerefs: list[str] = Field(
+        description="A list of the judge names mentioned in the text. For example: ['Judge John Doe', 'Judge Jane Smith']"
+    )
+    # Denoted by Proscenium
+    dataset_index: int = Field(description="index of the document in the dataset")
 
 
 def doc_enrichments(
     doc: Document, chunk_extracts: list[LegalOpinionChunkExtractions]
 ) -> LegalOpinionEnrichments:
 
-    caserefs: List[str] = get_citations(doc.page_content)
+    citations: List[CitationBase] = get_citations(doc.page_content)
 
     # merge information from all chunks
     judgerefs = []
@@ -165,12 +183,21 @@ def doc_enrichments(
         if chunk_extract.__dict__.get("judge_names") is not None:
             judgerefs.extend(chunk_extract.judge_names)
 
+    print(str(doc.metadata))
+
     enrichments = LegalOpinionEnrichments(
         name=doc.metadata["name_abbreviation"],
-        dataset_index=int(doc.metadata["dataset_index"]),
+        reporter=doc.metadata["reporter"],
+        volume=doc.metadata["volume"],
+        first_page=str(doc.metadata["first_page"]),
+        last_page=str(doc.metadata["last_page"]),
         court=doc.metadata["court"],
-        caserefs=[c.matched_text() for c in caserefs],
+        decision_date=doc.metadata["decision_date"],
+        docket_number=doc.metadata["docket_number"],
+        jurisdiction=doc.metadata["jurisdiction"],
+        caserefs=[c.matched_text() for c in citations],
         judgerefs=judgerefs,
+        dataset_index=int(doc.metadata["dataset_index"]),
     )
 
     return enrichments
@@ -189,12 +216,26 @@ chunk_extraction_template = partial_formatter.format(
 def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
 
     case_name = enrichments.name
-    dataset_index = enrichments.dataset_index
 
     tx.run(
-        "MERGE (c:Case {name: $case, dataset_index: $dataset_index})",
+        "MERGE (c:Case {"
+        + "name: $case, "
+        + "reporter: $reporter, volume: $volume, "
+        + "first_page: $first_page, last_page: $last_page, "
+        + "court: $court, decision_date: $decision_date, "
+        + "docket_number: $docket_number, jurisdiction: $jurisdiction, "
+        + "dataset_index: $dataset_index"
+        + "})",
         case=case_name,
-        dataset_index=dataset_index,
+        reporter=enrichments.reporter,
+        volume=enrichments.volume,
+        first_page=enrichments.first_page,
+        last_page=enrichments.last_page,
+        court=enrichments.court,
+        decision_date=enrichments.decision_date,
+        docket_number=enrichments.docket_number,
+        jurisdiction=enrichments.jurisdiction,
+        dataset_index=enrichments.dataset_index,
     )
 
     for judgeref in enrichments.judgerefs:
