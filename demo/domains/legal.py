@@ -366,12 +366,13 @@ default_query_extraction_model_id = default_model_id
 
 class QueryExtractions(BaseModel):
     """
-    The extracted judges from the user query.
+    The judge names mentioned in the user query.
     """
 
-    judgerefs: list[str] = Field(
-        description="A list of the judges mentioned in the query. For example: `Judge John Doe`"
+    judge_names: list[str] = Field(
+        description="A list of the judge names in the user query. For example: ['Judge John Doe', 'Judge Jane Smith']",
     )
+
     # caserefs: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
 
 
