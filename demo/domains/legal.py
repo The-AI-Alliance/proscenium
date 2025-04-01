@@ -8,7 +8,6 @@ from rich import print
 from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt
-from stringcase import snakecase, lowercase
 from langchain_core.documents.base import Document
 
 from pydantic import BaseModel, Field
@@ -24,6 +23,9 @@ from proscenium.scripts.entity_resolver import EntityResolver
 from proscenium.scripts.entity_resolver import find_matching_objects
 
 from demo.config import default_model_id
+
+from eyecite import get_citations
+from eyecite.models import CitationBase
 
 ###################################
 # Knowledge Graph Schema
@@ -62,7 +64,8 @@ def retrieve_documents() -> List[Document]:
     )
 
     for i, doc in enumerate(docs):
-        doc.metadata["dataset_index"] = i
+        doc.metadata["hf_dataset_id"] = hf_dataset_id
+        doc.metadata["hf_dataset_index"] = i
 
     return docs
 
@@ -74,12 +77,12 @@ def retrieve_document(id: str, driver: Driver) -> Optional[Document]:
     )
 
     with driver.session() as session:
-        result = session.run("MATCH (n) RETURN n.dataset_index AS dataset_index")
+        result = session.run("MATCH (n) RETURN n.hf_dataset_index AS hf_dataset_index")
         if len(result) == 0:
             logging.warning("No node n found in the graph")
             return None
 
-        index = int(result[0]["dataset_index"])
+        index = int(result[0]["hf_dataset_index"])
 
         if 0 <= index < len(docs):
             return docs[index]
@@ -123,18 +126,16 @@ def doc_as_rich(doc: Document):
 # `judge` is not well captured in many of these documents,
 # so we will extract it from the text
 
-from eyecite import get_citations
-
 default_chunk_extraction_model_id = default_model_id
 
 
 class LegalOpinionChunkExtractions(BaseModel):
     """
-    The extracted judges from a chunk of a legal opinion.
+    The judge names mentioned in a chunk of a legal opinion.
     """
 
-    judges: list[str] = Field(
-        description="A list of the judges mentioned in the text. For example: `Judge John Doe`"
+    judge_names: list[str] = Field(
+        description="A list of the judge names in the text. For example: ['Judge John Doe', 'Judge Jane Smith']",
     )
 
 
@@ -143,34 +144,63 @@ class LegalOpinionEnrichments(BaseModel):
     Enrichments for a legal opinion document.
     """
 
+    # Fields that come directly from the document metadata
     name: str = Field(description="opinion identifier; name abbreviation")
-    dataset_index: int = Field(description="index of the document in the dataset")
+    reporter: str = Field(description="name of the publising reporter")
+    volume: str = Field(description="volume number of the reporter")
+    first_page: str = Field(description="first page number of the opinion")
+    last_page: str = Field(description="last page number of the opinion")
     court: str = Field(description="name of the court")
-    judges: list[str] = Field(
-        description="A list of the judges mentioned in the text. For example: `Judge John Doe`"
+    decision_date: str = Field(description="date of the decision")
+    # TODO use (incoming) citations comes with the document
+    docket_number: str = Field(description="docket number of the case")
+    jurisdiction: str = Field(description="jurisdiction of the case")
+    # TODO note that judges comes with the document, pre-extracted
+    # TODO parties
+    # TODO word_count, char_count, last_updated, provenance, id
+
+    # Extracted from the text without LLM
+    caserefs: list[str] = Field(
+        description="A list of the legal citations in the text.  For example: ['123 F.3d 456', '456 F.3d 789']"
     )
-    citations: list[str] = Field(
-        description="A list of the legal citations in the text.  For example: `123 F.3d 456`"
+
+    # Extracted from the text with LLM
+    judgerefs: list[str] = Field(
+        description="A list of the judge names mentioned in the text. For example: ['Judge John Doe', 'Judge Jane Smith']"
     )
+    # Denoted by Proscenium framework
+    hf_dataset_id: str = Field(description="id of the dataset in HF")
+    hf_dataset_index: int = Field(description="index of the document in the HF dataset")
 
 
 def doc_enrichments(
     doc: Document, chunk_extracts: list[LegalOpinionChunkExtractions]
 ) -> LegalOpinionEnrichments:
 
-    citations: List[str] = get_citations(doc.page_content)
+    citations: List[CitationBase] = get_citations(doc.page_content)
 
-    # merge informaiion from all chunks
-    judges = []
+    # merge information from all chunks
+    judgerefs = []
     for chunk_extract in chunk_extracts:
-        judges.extend(chunk_extract.judges)
+        if chunk_extract.__dict__.get("judge_names") is not None:
+            judgerefs.extend(chunk_extract.judge_names)
+
+    print(str(doc.metadata))
 
     enrichments = LegalOpinionEnrichments(
         name=doc.metadata["name_abbreviation"],
-        dataset_index=int(doc.metadata["dataset_index"]),
+        reporter=doc.metadata["reporter"],
+        volume=doc.metadata["volume"],
+        first_page=str(doc.metadata["first_page"]),
+        last_page=str(doc.metadata["last_page"]),
         court=doc.metadata["court"],
-        citations=[c.matched_text() for c in citations],
-        judges=judges,
+        decision_date=doc.metadata["decision_date"],
+        docket_number=doc.metadata["docket_number"],
+        jurisdiction=doc.metadata["jurisdiction"],
+        caserefs=[c.matched_text() for c in citations],
+        judgerefs=judgerefs,
+        hf_dataset_id=doc.metadata["hf_dataset_id"],
+        hf_dataset_index=int(doc.metadata["hf_dataset_index"]),
     )
 
     return enrichments
@@ -187,31 +217,49 @@ chunk_extraction_template = partial_formatter.format(
 
 
 def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
+    """
+    See https://neo4j.com/docs/cypher-manual/current/clauses/merge/ for
+    Cypher semantics of MERGE.
+    """
 
     case_name = enrichments.name
-    dataset_index = enrichments.dataset_index
 
     tx.run(
-        "MERGE (c:Case {name: $case, dataset_index: $dataset_index})",
+        "MERGE (c:Case {"
+        + "name: $case, "
+        + "reporter: $reporter, volume: $volume, "
+        + "first_page: $first_page, last_page: $last_page, "
+        + "court: $court, decision_date: $decision_date, "
+        + "docket_number: $docket_number, jurisdiction: $jurisdiction, "
+        + "hf_dataset_id: $hf_dataset_id, hf_dataset_index: $hf_dataset_index"
+        + "})",
         case=case_name,
-        dataset_index=dataset_index,
+        reporter=enrichments.reporter,
+        volume=enrichments.volume,
+        first_page=enrichments.first_page,
+        last_page=enrichments.last_page,
+        court=enrichments.court,
+        decision_date=enrichments.decision_date,
+        docket_number=enrichments.docket_number,
+        jurisdiction=enrichments.jurisdiction,
+        hf_dataset_id=enrichments.hf_dataset_id,
+        hf_dataset_index=enrichments.hf_dataset_index,
     )
 
-    for judge in enrichments.judges:
+    for judgeref in enrichments.judgerefs:
         tx.run(
-            "MERGE (j:Judge {name: $judge})\n"
-            + "MERGE (c:Case {name: $case})-[:mentions]->(j)",
-            judge=judge,
+            "MATCH (c:Case {name: $case}) "
+            + "MERGE (c)-[:mentions]->(:JudgeRef {name: $judgeref})",
+            judgeref=judgeref,
             case=case_name,
         )
 
-    for citation in enrichments.citations:
-        # TODO resolve citation
+    for caseref in enrichments.caserefs:
         tx.run(
-            "MERGE (c:Case {name: $citation})\n"
-            + "MERGE (o:Case {name: $case})-[:cites]->(c)",
+            "MATCH (c:Case {name: $case}) "
+            + "MERGE (c)-[:mentions]->(:CaseRef {name: $caseref})",
             case=case_name,
-            citation=citation,
+            caseref=caseref,
         )
 
 
@@ -219,25 +267,35 @@ def show_knowledge_graph(driver: Driver):
 
     with driver.session() as session:
 
-        result = session.run(
-            "MATCH ()-[r]->() RETURN type(r) AS rel"
-        )  # all relationships
+        cases_result = session.run("MATCH (n:Case) RETURN properties(n) AS p")
+        cases_table = Table(title="Cases", show_lines=False)
+        cases_table.add_column("Properties", justify="left")
+        for case_record in cases_result:
+            cases_table.add_row(str(case_record["p"]))
+        print(cases_table)
+
+        judgerefs_result = session.run("MATCH (n:JudgeRef) RETURN n.name AS name")
+        judgerefs_table = Table(title="JudgeRefs", show_lines=False)
+        judgerefs_table.add_column("Name", justify="left")
+        for judgeref_record in judgerefs_result:
+            judgerefs_table.add_row(judgeref_record["name"])
+        print(judgerefs_table)
+
+        caserefs_result = session.run("MATCH (n:CaseRef) RETURN n.name AS name")
+        caserefs_table = Table(title="CaseRefs", show_lines=False)
+        caserefs_table.add_column("Name", justify="left")
+        for caseref_record in caserefs_result:
+            caserefs_table.add_row(caseref_record["name"])
+        print(caserefs_table)
+
+        # all relations
+        result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
         relations = [record["rel"] for record in result]
         unique_relations = list(set(relations))
         table = Table(title="Relationship Types", show_lines=False)
         table.add_column("Relationship Type", justify="left")
         for r in unique_relations:
             table.add_row(r)
-        print(table)
-
-        result = session.run(
-            "MATCH (n) RETURN n.name AS name, labels(n) as label"
-        )  # all nodes
-        table = Table(title="Nodes", show_lines=False)
-        table.add_column("Name", justify="left")
-        table.add_column("Labels", justify="left")
-        for record in result:
-            table.add_row(record["name"], ", ".join(record["label"]))
         print(table)
 
         for r in unique_relations:
@@ -278,10 +336,10 @@ class QueryExtractions(BaseModel):
     The extracted judges from the user query.
     """
 
-    judges: list[str] = Field(
+    judgerefs: list[str] = Field(
         description="A list of the judges mentioned in the query. For example: `Judge John Doe`"
     )
-    # citations: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
+    # caserefs: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
 
 
 query_extraction_template = partial_formatter.format(
@@ -325,23 +383,20 @@ def query_extract(query: str, query_extraction_model_id: str) -> QueryExtraction
 embedding_model_id = "all-MiniLM-L6-v2"
 
 citation_resolver = EntityResolver(
-    "MATCH (c:Case) RETURN c.name AS name",
+    "MATCH (c:CaseRef) RETURN c.name AS name",
     "name",
-    "resolve_citations",  # TODO change
+    "resolve_caserefs",
     embedding_model_id,
 )
 
 judge_resolver = EntityResolver(
-    "MATCH (j:Judge) RETURN j.name AS name",
+    "MATCH (j:JudgeRefs) RETURN j.name AS name",
     "name",
-    "resolve_judges",
+    "resolve_judgerefs",
     embedding_model_id,
 )
 
-resolvers = [
-    citation_resolver,
-    # TODO judge_resolver
-]
+resolvers = [citation_resolver, judge_resolver]
 
 
 class LegalQueryContext(BaseModel):
@@ -353,7 +408,7 @@ class LegalQueryContext(BaseModel):
         description="The retrieved document text that is relevant to the question."
     )
     query: str = Field(description="The original question asked by the user.")
-    # citations: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
+    # caserefs: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
 
 def extract_to_context(
@@ -363,17 +418,18 @@ def extract_to_context(
     vector_db_client = vector_db(milvus_uri)
 
     query = ""
-    # TODO
-    # for i, judge in enumerate(qe.judges):
-    #     query += (
-    #         f"MATCH (judge{str(i)}:Judge {{name: '{judge}'}})-[:mentioned_in]->(c)\n"
-    #     )
-    for citation in get_citations(query):
-        citation_match = find_matching_objects(
-            vector_db_client, citation, citation_resolver
+
+    # TODO use judge (not judgref) from query
+
+    caserefs = get_citations(query)
+    for caseref in caserefs:
+        caseref_match = find_matching_objects(
+            vector_db_client, caseref, citation_resolver
         )
-        query += f"MATCH (o:Case)-[:cites]->(c:Case {{name: '{citation_match}'}})\n"
-    query += "RETURN o.name AS name"
+        query += (
+            f"MATCH (c:Case)-[:mentions]->(r:CaseRef {{name: '{caseref_match}'}})\n"
+        )
+    query += "RETURN c.name AS name"
 
     print(Panel(query, title="Cypher Query"))
 
@@ -384,8 +440,9 @@ def extract_to_context(
 
     # TODO check for empty result
 
-    print("Cases with names:", str(case_names), "are matches")
+    print("Cases with names:", str(case_names), "mention", str(caserefs))
 
+    # TODO: take all docs -- not just head
     doc = retrieve_document(case_names[0])
 
     context = LegalQueryContext(
