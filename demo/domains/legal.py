@@ -214,6 +214,9 @@ class LegalOpinionEnrichments(BaseModel):
     judgerefs: list[str] = Field(
         description="A list of the judge names mentioned in the text. For example: ['Judge John Doe', 'Judge Jane Smith']"
     )
+    georefs: list[str] = Field(
+        description="A list of the geographic locations mentioned in the text. For example: ['New Hampshire', 'Portland, Maine', 'Elm Street']"
+    )
     # Denoted by Proscenium framework
     hf_dataset_id: str = Field(description="id of the dataset in HF")
     hf_dataset_index: int = Field(description="index of the document in the HF dataset")
@@ -227,9 +230,12 @@ def doc_enrichments(
 
     # merge information from all chunks
     judgerefs = []
+    georefs = []
     for chunk_extract in chunk_extracts:
         if chunk_extract.__dict__.get("judge_names") is not None:
             judgerefs.extend(chunk_extract.judge_names)
+        if chunk_extract.__dict__.get("geographic_locations") is not None:
+            georefs.extend(chunk_extract.geographic_locations)
 
     print(str(doc.metadata))
 
@@ -245,6 +251,7 @@ def doc_enrichments(
         jurisdiction=doc.metadata["jurisdiction"],
         caserefs=[c.matched_text() for c in citations],
         judgerefs=judgerefs,
+        georefs=georefs,
         hf_dataset_id=doc.metadata["hf_dataset_id"],
         hf_dataset_index=int(doc.metadata["hf_dataset_index"]),
     )
@@ -308,6 +315,14 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
             caseref=caseref,
         )
 
+    for georef in enrichments.georefs:
+        tx.run(
+            "MATCH (c:Case {name: $case}) "
+            + "MERGE (c)-[:mentions]->(:GeoRef {text: $georef})",
+            case=case_name,
+            georef=georef,
+        )
+
 
 def show_knowledge_graph(driver: Driver):
 
@@ -351,6 +366,13 @@ def show_knowledge_graph(driver: Driver):
         for caseref_record in caserefs_result:
             caserefs_table.add_row(caseref_record["text"])
         print(caserefs_table)
+
+        georefs_result = session.run("MATCH (n:GeoRef) RETURN n.text AS text")
+        georefs_table = Table(title="GeoRefs", show_lines=False)
+        georefs_table.add_column("Text", justify="left")
+        for georef_record in georefs_result:
+            georefs_table.add_row(georef_record["text"])
+        print(georefs_table)
 
 
 ###################################
