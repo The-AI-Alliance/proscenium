@@ -1,6 +1,7 @@
 import typer
 from rich import print
 from rich.panel import Panel
+from rich.prompt import Prompt
 from pathlib import Path
 
 from proscenium.verbs.know import knowledge_graph_client
@@ -91,7 +92,10 @@ def ask():
 
     driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
-    question = domain.user_question()
+    question = Prompt.ask(
+        domain.user_prompt,
+        default=domain.default_question,
+    )
 
     answer = answer_question(
         question,

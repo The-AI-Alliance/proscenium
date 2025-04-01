@@ -1,16 +1,17 @@
 from typing import List, Optional
+from enum import StrEnum
 
 import logging
 import json
-
-from neo4j import Driver
 from rich import print
 from rich.panel import Panel
 from rich.table import Table
-from rich.prompt import Prompt
+
 from langchain_core.documents.base import Document
 
 from pydantic import BaseModel, Field
+
+from neo4j import Driver
 
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
@@ -19,7 +20,7 @@ from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.vector_database import vector_db
 
-from proscenium.scripts.entity_resolver import EntityResolver
+from proscenium.scripts.entity_resolver import Resolver
 from proscenium.scripts.entity_resolver import find_matching_objects
 
 from demo.config import default_model_id
@@ -31,9 +32,50 @@ from eyecite.models import CitationBase
 # Knowledge Graph Schema
 ###################################
 
-RELATION_JUDGE = "Judge"
-RELATION_LEGAL_CITATION = "LegalCitation"
-RELATION_COURT = "Court"
+
+class NodeLabel(StrEnum):
+    Judge = "Judge"
+    JudgeRef = "JudgeRef"
+    Case = "Case"
+    CaseRef = "CaseRef"
+
+
+class RelationLabel(StrEnum):
+    mentions = "mentions"
+    references = "references"
+
+
+# TODO `ReferenceSchema` may move to `proscenium.scripts.knowledge_graph`
+# depending on how much potentially resuable behavior is built around it
+
+
+class ReferenceSchema:
+    """
+    A `ReferenceSchema` is a way of denoting the text span used to establish
+    a relationship between two nodes in the knowledge graph.
+    """
+
+    # (mentioner) -> [:mentions] -> (ref)
+    # (ref) -> [:references] -> (referent)
+
+    # All fields refer to node labels
+    def __init__(self, mentioners: list[str], ref_label: str, referent: str):
+        self.mentioners = mentioners
+        self.ref_label = ref_label
+        self.referent = referent
+
+
+judge_ref = ReferenceSchema(
+    [NodeLabel.Case],
+    NodeLabel.JudgeRef,
+    NodeLabel.Judge,
+)
+
+case_ref = ReferenceSchema(
+    [NodeLabel.Case],
+    NodeLabel.CaseRef,
+    NodeLabel.Case,
+)
 
 ###################################
 # Retrieve Documents
@@ -249,7 +291,7 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
     for judgeref in enrichments.judgerefs:
         tx.run(
             "MATCH (c:Case {name: $case}) "
-            + "MERGE (c)-[:mentions]->(:JudgeRef {name: $judgeref})",
+            + "MERGE (c)-[:mentions]->(:JudgeRef {text: $judgeref})",
             judgeref=judgeref,
             case=case_name,
         )
@@ -257,7 +299,7 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
     for caseref in enrichments.caserefs:
         tx.run(
             "MATCH (c:Case {name: $case}) "
-            + "MERGE (c)-[:mentions]->(:CaseRef {name: $caseref})",
+            + "MERGE (c)-[:mentions]->(:CaseRef {text: $caseref})",
             case=case_name,
             caseref=caseref,
         )
@@ -267,6 +309,24 @@ def show_knowledge_graph(driver: Driver):
 
     with driver.session() as session:
 
+        node_types_result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
+        node_types = [record["rel"] for record in node_types_result]
+        unique_node_types = list(set(node_types))
+        ntt = Table(title="Node Types", show_lines=False)
+        ntt.add_column("Type", justify="left")
+        for nt in unique_node_types:
+            ntt.add_row(nt)
+        print(ntt)
+
+        relations_types_result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
+        relation_types = [record["rel"] for record in relations_types_result]
+        unique_relations = list(set(relation_types))
+        rtt = Table(title="Relationship Types", show_lines=False)
+        rtt.add_column("Type", justify="left")
+        for rt in unique_relations:
+            rtt.add_row(rt)
+        print(rtt)
+
         cases_result = session.run("MATCH (n:Case) RETURN properties(n) AS p")
         cases_table = Table(title="Cases", show_lines=False)
         cases_table.add_column("Properties", justify="left")
@@ -274,55 +334,28 @@ def show_knowledge_graph(driver: Driver):
             cases_table.add_row(str(case_record["p"]))
         print(cases_table)
 
-        judgerefs_result = session.run("MATCH (n:JudgeRef) RETURN n.name AS name")
+        judgerefs_result = session.run("MATCH (n:JudgeRef) RETURN n.text AS text")
         judgerefs_table = Table(title="JudgeRefs", show_lines=False)
-        judgerefs_table.add_column("Name", justify="left")
+        judgerefs_table.add_column("Text", justify="left")
         for judgeref_record in judgerefs_result:
-            judgerefs_table.add_row(judgeref_record["name"])
+            judgerefs_table.add_row(judgeref_record["text"])
         print(judgerefs_table)
 
-        caserefs_result = session.run("MATCH (n:CaseRef) RETURN n.name AS name")
+        caserefs_result = session.run("MATCH (n:CaseRef) RETURN n.text AS text")
         caserefs_table = Table(title="CaseRefs", show_lines=False)
-        caserefs_table.add_column("Name", justify="left")
+        caserefs_table.add_column("Text", justify="left")
         for caseref_record in caserefs_result:
-            caserefs_table.add_row(caseref_record["name"])
+            caserefs_table.add_row(caseref_record["text"])
         print(caserefs_table)
-
-        # all relations
-        result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
-        relations = [record["rel"] for record in result]
-        unique_relations = list(set(relations))
-        table = Table(title="Relationship Types", show_lines=False)
-        table.add_column("Relationship Type", justify="left")
-        for r in unique_relations:
-            table.add_row(r)
-        print(table)
-
-        for r in unique_relations:
-            cypher = f"MATCH (s)-[:{r}]->(o) RETURN s.name, o.name"
-            result = session.run(cypher)
-            table = Table(title=f"Relation: {r}", show_lines=False)
-            table.add_column("Subject Name", justify="left")
-            table.add_column("Object Name", justify="left")
-            for record in result:
-                table.add_row(record["s.name"], record["o.name"])
-            print(table)
 
 
 ###################################
 # user_question
 ###################################
 
+user_prompt = f"What is your question about {hf_dataset_id}?"
 
-def user_question() -> str:
-
-    question = Prompt.ask(
-        f"What is your question about {hf_dataset_id}?",
-        default="How has Judge Kenison used Ballou v. Ballou to rule on cases?",
-    )
-
-    return question
-
+default_question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
 
 ###################################
 # query_extract
@@ -333,12 +366,13 @@ default_query_extraction_model_id = default_model_id
 
 class QueryExtractions(BaseModel):
     """
-    The extracted judges from the user query.
+    The judge names mentioned in the user query.
     """
 
-    judgerefs: list[str] = Field(
-        description="A list of the judges mentioned in the query. For example: `Judge John Doe`"
+    judge_names: list[str] = Field(
+        description="A list of the judge names in the user query. For example: ['Judge John Doe', 'Judge Jane Smith']",
     )
+
     # caserefs: list[str] = Field(description = "A list of the legal citations in the query.  For example: `123 F.3d 456`")
 
 
@@ -382,21 +416,21 @@ def query_extract(query: str, query_extraction_model_id: str) -> QueryExtraction
 
 embedding_model_id = "all-MiniLM-L6-v2"
 
-citation_resolver = EntityResolver(
-    "MATCH (c:CaseRef) RETURN c.name AS name",
-    "name",
+case_resolver = Resolver(
+    "MATCH (cr:CaseRef) RETURN cr.text AS text",
+    "text",
     "resolve_caserefs",
     embedding_model_id,
 )
 
-judge_resolver = EntityResolver(
-    "MATCH (j:JudgeRefs) RETURN j.name AS name",
-    "name",
+judge_resolver = Resolver(
+    "MATCH (jr:JudgeRef) RETURN jr.text AS text",
+    "text",
     "resolve_judgerefs",
     embedding_model_id,
 )
 
-resolvers = [citation_resolver, judge_resolver]
+resolvers = [case_resolver, judge_resolver]
 
 
 class LegalQueryContext(BaseModel):
@@ -423,9 +457,7 @@ def extract_to_context(
 
     caserefs = get_citations(query)
     for caseref in caserefs:
-        caseref_match = find_matching_objects(
-            vector_db_client, caseref, citation_resolver
-        )
+        caseref_match = find_matching_objects(vector_db_client, caseref, case_resolver)
         query += (
             f"MATCH (c:Case)-[:mentions]->(r:CaseRef {{name: '{caseref_match}'}})\n"
         )

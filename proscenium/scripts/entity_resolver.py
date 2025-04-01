@@ -14,7 +14,7 @@ from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.display.milvus import collection_panel
 
 
-class EntityResolver:
+class Resolver:
 
     def __init__(
         self,
@@ -31,17 +31,17 @@ class EntityResolver:
 
 def load_entity_resolver(
     driver: Driver,
-    resolvers: list[EntityResolver],
+    resolvers: list[Resolver],
     milvus_uri: str,
 ) -> None:
+
+    vector_db_client = vector_db(milvus_uri, overwrite=True)
+    print("Vector db stored at", milvus_uri)
 
     for resolver in resolvers:
 
         embedding_fn = embedding_function(resolver.embedding_model_id)
         print("Embedding model", resolver.embedding_model_id)
-
-        vector_db_client = vector_db(milvus_uri, overwrite=True)
-        print("Vector db stored at", milvus_uri)
 
         values = []
         with driver.session() as session:
@@ -59,13 +59,13 @@ def load_entity_resolver(
         print(info["insert_count"], "chunks inserted")
         print(collection_panel(vector_db_client, resolver.collection_name))
 
-        vector_db_client.close()
+    vector_db_client.close()
 
 
 def find_matching_objects(
     vector_db_client: MilvusClient,
     approximate: str,
-    resolver: EntityResolver,
+    resolver: Resolver,
 ) -> Optional[str]:
 
     print("Loading collection", resolver.collection_name)
