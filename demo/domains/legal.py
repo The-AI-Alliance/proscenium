@@ -1,12 +1,11 @@
 from typing import List, Optional
-from enum import StrEnum, auto
+from enum import StrEnum
 
 import logging
 import json
 from rich import print
 from rich.panel import Panel
 from rich.table import Table
-from rich.prompt import Prompt
 
 from langchain_core.documents.base import Document
 
@@ -346,16 +345,9 @@ def show_knowledge_graph(driver: Driver):
 # user_question
 ###################################
 
+user_prompt = f"What is your question about {hf_dataset_id}?"
 
-def user_question() -> str:
-
-    question = Prompt.ask(
-        f"What is your question about {hf_dataset_id}?",
-        default="How has Judge Kenison used Ballou v. Ballou to rule on cases?",
-    )
-
-    return question
-
+default_question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
 
 ###################################
 # query_extract
