@@ -173,15 +173,19 @@ default_chunk_extraction_model_id = default_model_id
 
 class LegalOpinionChunkExtractions(BaseModel):
     """
-    The judge names and geographic locations mentioned in a chunk of a legal opinion.
+    The judge names, geographic locations, and company names mentioned in a chunk of a legal opinion.
     """
 
     judge_names: list[str] = Field(
-        description="A list of the judge names in the text. For example: ['Judge John Doe', 'Judge Jane Smith']",
+        description="A list of the judge names in the text. For example: ['Judge John Doe', 'Judge Jane Smith']"
     )
 
     geographic_locations: list[str] = Field(
-        description="A list of the geographic locations in the text. For example: ['New Hampshire', 'Portland, Maine', 'Elm Street']",
+        description="A list of the geographic locations in the text. For example: ['New Hampshire', 'Portland, Maine', 'Elm Street']"
+    )
+
+    company_names: list[str] = Field(
+        description="A list of the company names in the text. For example: ['Acme Corp', 'IBM', 'Bob's Auto Repair']"
     )
 
 
@@ -217,6 +221,9 @@ class LegalOpinionEnrichments(BaseModel):
     georefs: list[str] = Field(
         description="A list of the geographic locations mentioned in the text. For example: ['New Hampshire', 'Portland, Maine', 'Elm Street']"
     )
+    companyrefs: list[str] = Field(
+        description="A list of the company names mentioned in the text. For example: ['Acme Corp', 'IBM', 'Bob's Auto Repair']"
+    )
     # Denoted by Proscenium framework
     hf_dataset_id: str = Field(description="id of the dataset in HF")
     hf_dataset_index: int = Field(description="index of the document in the HF dataset")
@@ -231,11 +238,14 @@ def doc_enrichments(
     # merge information from all chunks
     judgerefs = []
     georefs = []
+    companyrefs = []
     for chunk_extract in chunk_extracts:
         if chunk_extract.__dict__.get("judge_names") is not None:
             judgerefs.extend(chunk_extract.judge_names)
         if chunk_extract.__dict__.get("geographic_locations") is not None:
             georefs.extend(chunk_extract.geographic_locations)
+        if chunk_extract.__dict__.get("company_names") is not None:
+            companyrefs.extend(chunk_extract.company_names)
 
     print(str(doc.metadata))
 
@@ -252,6 +262,7 @@ def doc_enrichments(
         caserefs=[c.matched_text() for c in citations],
         judgerefs=judgerefs,
         georefs=georefs,
+        companyrefs=companyrefs,
         hf_dataset_id=doc.metadata["hf_dataset_id"],
         hf_dataset_index=int(doc.metadata["hf_dataset_index"]),
     )
@@ -323,6 +334,14 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
             georef=georef,
         )
 
+    for companyref in enrichments.companyrefs:
+        tx.run(
+            "MATCH (c:Case {name: $case}) "
+            + "MERGE (c)-[:mentions]->(:CompanyRef {text: $companyref})",
+            case=case_name,
+            companyref=companyref,
+        )
+
 
 def show_knowledge_graph(driver: Driver):
 
@@ -373,6 +392,13 @@ def show_knowledge_graph(driver: Driver):
         for georef_record in georefs_result:
             georefs_table.add_row(georef_record["text"])
         print(georefs_table)
+
+        companyrefs_result = session.run("MATCH (n:CompanyRef) RETURN n.text AS text")
+        companyrefs_table = Table(title="CompanyRefs", show_lines=False)
+        companyrefs_table.add_column("Text", justify="left")
+        for companyref_record in companyrefs_result:
+            companyrefs_table.add_row(companyref_record["text"])
+        print(companyrefs_table)
 
 
 ###################################
