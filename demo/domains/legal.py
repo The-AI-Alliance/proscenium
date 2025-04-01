@@ -258,34 +258,29 @@ def show_knowledge_graph(driver: Driver):
 
     with driver.session() as session:
 
-        cases_result = session.run("MATCH (n:Case) RETURN n.name AS name")  # all nodes
+        cases_result = session.run("MATCH (n:Case) RETURN properties(n) AS p")
         cases_table = Table(title="Cases", show_lines=False)
-        cases_table.add_column("Name", justify="left")
+        cases_table.add_column("Properties", justify="left")
         for case_record in cases_result:
-            cases_table.add_row(case_record["name"])
+            cases_table.add_row(str(case_record["p"]))
         print(cases_table)
 
-        judgerefs_result = session.run(
-            "MATCH (n:JudgeRef) RETURN n.name AS name"
-        )  # all nodes
+        judgerefs_result = session.run("MATCH (n:JudgeRef) RETURN n.name AS name")
         judgerefs_table = Table(title="JudgeRefs", show_lines=False)
         judgerefs_table.add_column("Name", justify="left")
         for judgeref_record in judgerefs_result:
             judgerefs_table.add_row(judgeref_record["name"])
         print(judgerefs_table)
 
-        caserefs_result = session.run(
-            "MATCH (n:CaseRef) RETURN n.name AS name"
-        )  # all nodes
+        caserefs_result = session.run("MATCH (n:CaseRef) RETURN n.name AS name")
         caserefs_table = Table(title="CaseRefs", show_lines=False)
         caserefs_table.add_column("Name", justify="left")
         for caseref_record in caserefs_result:
             caserefs_table.add_row(caseref_record["name"])
         print(caserefs_table)
 
-        result = session.run(
-            "MATCH ()-[r]->() RETURN type(r) AS rel"
-        )  # all relationships
+        # all relations
+        result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
         relations = [record["rel"] for record in result]
         unique_relations = list(set(relations))
         table = Table(title="Relationship Types", show_lines=False)
