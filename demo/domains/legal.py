@@ -173,11 +173,15 @@ default_chunk_extraction_model_id = default_model_id
 
 class LegalOpinionChunkExtractions(BaseModel):
     """
-    The judge names mentioned in a chunk of a legal opinion.
+    The judge names and geographic locations mentioned in a chunk of a legal opinion.
     """
 
     judge_names: list[str] = Field(
         description="A list of the judge names in the text. For example: ['Judge John Doe', 'Judge Jane Smith']",
+    )
+
+    geographic_locations: list[str] = Field(
+        description="A list of the geographic locations in the text. For example: ['New Hampshire', 'Portland, Maine', 'Elm Street']",
     )
 
 

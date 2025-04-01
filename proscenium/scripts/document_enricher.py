@@ -37,7 +37,7 @@ def extract_from_document_chunks(
             chunk_extraction_model_id,
             chunk_extraction_template,
             chunk_extract_clazz,
-            chunk,
+            chunk.page_content,
         )
 
         print("Extract model in chunk", i + 1, "of", len(chunks))
