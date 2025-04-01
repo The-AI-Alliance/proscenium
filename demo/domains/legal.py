@@ -349,6 +349,7 @@ def show_knowledge_graph(driver: Driver):
         print(caserefs_table)
 
 
+
 ###################################
 # user_question
 ###################################
