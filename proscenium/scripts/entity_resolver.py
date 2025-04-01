@@ -14,7 +14,7 @@ from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.display.milvus import collection_panel
 
 
-class EntityResolver:
+class Resolver:
 
     def __init__(
         self,
@@ -31,7 +31,7 @@ class EntityResolver:
 
 def load_entity_resolver(
     driver: Driver,
-    resolvers: list[EntityResolver],
+    resolvers: list[Resolver],
     milvus_uri: str,
 ) -> None:
 
@@ -65,7 +65,7 @@ def load_entity_resolver(
 def find_matching_objects(
     vector_db_client: MilvusClient,
     approximate: str,
-    resolver: EntityResolver,
+    resolver: Resolver,
 ) -> Optional[str]:
 
     print("Loading collection", resolver.collection_name)
