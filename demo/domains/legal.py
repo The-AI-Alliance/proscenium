@@ -217,6 +217,10 @@ chunk_extraction_template = partial_formatter.format(
 
 
 def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
+    """
+    See https://neo4j.com/docs/cypher-manual/current/clauses/merge/ for
+    Cypher semantics of MERGE.
+    """
 
     case_name = enrichments.name
 
@@ -244,15 +248,16 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
 
     for judgeref in enrichments.judgerefs:
         tx.run(
-            "MERGE (:Case {name: $case})-[:mentions]->(:JudgeRef {name: $judgeref})",
+            "MATCH (c:Case {name: $case}) "
+            + "MERGE (c)-[:mentions]->(:JudgeRef {name: $judgeref})",
             judgeref=judgeref,
             case=case_name,
         )
 
     for caseref in enrichments.caserefs:
-        # TODO resolve citation
         tx.run(
-            "MERGE (:Case {name: $case})-[:mentions]->(:CaseRef {name: $caseref})",
+            "MATCH (c:Case {name: $case}) "
+            + "MERGE (c)-[:mentions]->(:CaseRef {name: $caseref})",
             case=case_name,
             caseref=caseref,
         )
