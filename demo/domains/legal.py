@@ -64,7 +64,8 @@ def retrieve_documents() -> List[Document]:
     )
 
     for i, doc in enumerate(docs):
-        doc.metadata["dataset_index"] = i
+        doc.metadata["hf_dataset_id"] = hf_dataset_id
+        doc.metadata["hf_dataset_index"] = i
 
     return docs
 
@@ -76,12 +77,12 @@ def retrieve_document(id: str, driver: Driver) -> Optional[Document]:
     )
 
     with driver.session() as session:
-        result = session.run("MATCH (n) RETURN n.dataset_index AS dataset_index")
+        result = session.run("MATCH (n) RETURN n.hf_dataset_index AS hf_dataset_index")
         if len(result) == 0:
             logging.warning("No node n found in the graph")
             return None
 
-        index = int(result[0]["dataset_index"])
+        index = int(result[0]["hf_dataset_index"])
 
         if 0 <= index < len(docs):
             return docs[index]
@@ -167,8 +168,9 @@ class LegalOpinionEnrichments(BaseModel):
     judgerefs: list[str] = Field(
         description="A list of the judge names mentioned in the text. For example: ['Judge John Doe', 'Judge Jane Smith']"
     )
-    # Denoted by Proscenium
-    dataset_index: int = Field(description="index of the document in the dataset")
+    # Denoted by Proscenium framework
+    hf_dataset_id: str = Field(description="id of the dataset in HF")
+    hf_dataset_index: int = Field(description="index of the document in the HF dataset")
 
 
 def doc_enrichments(
@@ -197,7 +199,8 @@ def doc_enrichments(
         jurisdiction=doc.metadata["jurisdiction"],
         caserefs=[c.matched_text() for c in citations],
         judgerefs=judgerefs,
-        dataset_index=int(doc.metadata["dataset_index"]),
+        hf_dataset_id=doc.metadata["hf_dataset_id"],
+        hf_dataset_index=int(doc.metadata["hf_dataset_index"]),
     )
 
     return enrichments
@@ -224,7 +227,7 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
         + "first_page: $first_page, last_page: $last_page, "
         + "court: $court, decision_date: $decision_date, "
         + "docket_number: $docket_number, jurisdiction: $jurisdiction, "
-        + "dataset_index: $dataset_index"
+        + "hf_dataset_id: $hf_dataset_id, hf_dataset_index: $hf_dataset_index"
         + "})",
         case=case_name,
         reporter=enrichments.reporter,
@@ -235,7 +238,8 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
         decision_date=enrichments.decision_date,
         docket_number=enrichments.docket_number,
         jurisdiction=enrichments.jurisdiction,
-        dataset_index=enrichments.dataset_index,
+        hf_dataset_id=enrichments.hf_dataset_id,
+        hf_dataset_index=enrichments.hf_dataset_index,
     )
 
     for judgeref in enrichments.judgerefs:
