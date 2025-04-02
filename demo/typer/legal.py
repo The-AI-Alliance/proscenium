@@ -95,7 +95,7 @@ def show_graph():
 
 @app.command(
     help=f"""Load the vector db used for field disambiguation.
-Writes to milvus at MILVUS_URI, with a default of {domain.default_milvus_uri}.
+Writes to milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 {neo4j_help}"""
 )
 def load_resolver():
