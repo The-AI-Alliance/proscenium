@@ -34,10 +34,12 @@ from eyecite.models import CitationBase
 
 
 class NodeLabel(StrEnum):
-    Judge = "Judge"
-    JudgeRef = "JudgeRef"
     Case = "Case"
     CaseRef = "CaseRef"
+    JudgeRef = "JudgeRef"
+    Judge = "Judge"
+    GeoRef = "GeoRef"
+    CompanyRef = "CompanyRef"
 
 
 class RelationLabel(StrEnum):
@@ -347,12 +349,13 @@ def show_knowledge_graph(driver: Driver):
 
     with driver.session() as session:
 
-        node_types_result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
-        node_types = [record["rel"] for record in node_types_result]
-        unique_node_types = list(set(node_types))
+        node_types_result = session.run("MATCH (n) RETURN labels(n) AS nls")
+        node_types = set()
+        for record in node_types_result:
+            node_types.update(record["nls"])
         ntt = Table(title="Node Types", show_lines=False)
         ntt.add_column("Type", justify="left")
-        for nt in unique_node_types:
+        for nt in node_types:
             ntt.add_row(nt)
         print(ntt)
 

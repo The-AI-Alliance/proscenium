@@ -41,6 +41,7 @@ def enrich():
         domain.chunk_extraction_template,
         domain.LegalOpinionChunkExtractions,
         domain.doc_enrichments,
+        delay=1.0,
     )
 
 
