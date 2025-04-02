@@ -89,29 +89,33 @@ def load_resolver():
 @app.command(
     help="Ask a legal question using the knowledge graph and entity resolver established in the previous steps."
 )
-def ask():
+def ask(loop: bool = False):
 
     driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
-    question = Prompt.ask(
-        domain.user_prompt,
-        default=domain.default_question,
-    )
+    while True:
+        question = Prompt.ask(
+            domain.user_prompt,
+            default=domain.default_question,
+        )
 
-    answer = answer_question(
-        question,
-        domain.default_query_extraction_model_id,
-        default_milvus_uri,
-        driver,
-        domain.default_generation_model_id,
-        domain.query_extract,
-        domain.extract_to_context,
-        domain.context_to_prompts,
-    )
+        answer = answer_question(
+            question,
+            domain.default_query_extraction_model_id,
+            default_milvus_uri,
+            driver,
+            domain.default_generation_model_id,
+            domain.query_extract,
+            domain.extract_to_context,
+            domain.context_to_prompts,
+        )
 
-    if answer:
-        print(Panel(answer, title="Answer"))
-    else:
-        print("No answer")
+        if answer:
+            print(Panel(answer, title="Answer"))
+        else:
+            print("No answer")
+
+        if not loop:
+            break
 
     driver.close()
