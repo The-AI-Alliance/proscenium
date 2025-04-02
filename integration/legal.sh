@@ -2,7 +2,7 @@
 
 echo "Legal Integration Test"
 
-python -m demo.cli legal enrich
+python -m demo.cli legal enrich --docs-per-dataset=5
 
 python -m demo.cli legal load-graph
 

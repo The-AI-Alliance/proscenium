@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Callable
 from enum import StrEnum
 
 import logging
@@ -80,20 +80,19 @@ case_ref = ReferenceSchema(
 )
 
 ###################################
-# Retrieve Documents
+# retriever
 ###################################
 
 topic = "US Caselaw"
 
 # hf_dataset_ids = ["free-law/nh", "free-law/Caselaw_Access_Project"]
 hf_dataset_ids = ["free-law/nh"]
-hf_dataset_column = "text"
-
-docs_per_dataset = 10  # number of documents to use from each dataset
 # Early version looked at only: free-law/nh ids {'4440632', '4441078'}
 
+hf_dataset_column = "text"
 
-def retrieve_documents() -> List[Document]:
+
+def retrieve_documents(docs_per_dataset: int = None) -> List[Document]:
 
     docs = []
 
@@ -103,23 +102,31 @@ def retrieve_documents() -> List[Document]:
             hf_dataset_id, page_content_column=hf_dataset_column
         )
 
-        old_len = len(dataset_docs)
+        docs_in_dataset = len(dataset_docs)
+
+        num_docs_to_use = docs_in_dataset
+        if docs_per_dataset is not None:
+            num_docs_to_use = min(docs_per_dataset, docs_in_dataset)
 
         logging.info(
-            "using the first",
-            docs_per_dataset,
-            "documents of",
-            old_len,
-            "from HF dataset",
-            hf_dataset_id,
-        )
+            f"using {num_docs_to_use}/{docs_in_dataset} documents from {hf_dataset_id}"
+        ),
 
-        for i, doc in enumerate(dataset_docs[:docs_per_dataset]):
+        for i in range(num_docs_to_use):
+            doc = dataset_docs[i]
             doc.metadata["hf_dataset_id"] = hf_dataset_id
             doc.metadata["hf_dataset_index"] = i
             docs.append(doc)
 
     return docs
+
+
+def retriever(docs_per_dataset: int) -> Callable[[], List[Document]]:
+
+    def retrieve_documents_fn() -> List[Document]:
+        return retrieve_documents(docs_per_dataset)
+
+    return retrieve_documents_fn
 
 
 def retrieve_document(id: str, driver: Driver) -> Optional[Document]:
