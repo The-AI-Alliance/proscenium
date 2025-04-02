@@ -31,7 +31,7 @@ default_milvus_uri = "file:/grag-milvus.db"
 @app.command(
     help=f"Enrich documents from {', '.join(domain.hf_dataset_ids)} and write to {default_enrichment_jsonl_file}."
 )
-def enrich(docs_per_dataset: int = None):
+def enrich(docs_per_dataset: int = None, verbose: bool = False):
 
     enrich_documents(
         domain.retriever(docs_per_dataset),
@@ -42,6 +42,7 @@ def enrich(docs_per_dataset: int = None):
         domain.LegalOpinionChunkExtractions,
         domain.doc_enrichments,
         delay=0.1,
+        verbose=verbose,
     )
 
 

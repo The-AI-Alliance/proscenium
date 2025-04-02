@@ -36,6 +36,7 @@ def extract_to_pydantic_model(
     extraction_template: str,
     clazz: type[BaseModel],
     text: str,
+    verbose: bool = False,
 ) -> BaseModel:
 
     extract_str = complete_simple(
@@ -46,7 +47,7 @@ def extract_to_pydantic_model(
             "type": "json_object",
             "schema": clazz.model_json_schema(),
         },
-        rich_output=True,
+        rich_output=verbose,
     )
 
     logging.info("complete_to_pydantic_model: extract_str = <<<%s>>>", extract_str)

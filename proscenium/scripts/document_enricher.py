@@ -24,6 +24,7 @@ def extract_from_document_chunks(
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
     delay: float,
+    verbose: bool = False,
 ) -> List[BaseModel]:
 
     print(doc_as_rich(doc))
@@ -41,8 +42,9 @@ def extract_from_document_chunks(
             chunk.page_content,
         )
 
-        print("Extract model in chunk", i + 1, "of", len(chunks))
-        print(Panel(str(ce)))
+        if verbose:
+            print("Extract model in chunk", i + 1, "of", len(chunks))
+            print(Panel(str(ce)))
 
         extract_models.append(ce)
         time.sleep(delay)
@@ -59,6 +61,7 @@ def enrich_documents(
     chunk_extract_clazz: type[BaseModel],
     doc_enrichments: Callable[[Document, list[BaseModel]], BaseModel],
     delay: float = 1.0,  # intra-chunk delay between inference calls
+    verbose: bool = False,
 ) -> None:
 
     docs = retrieve_documents()
@@ -80,6 +83,7 @@ def enrich_documents(
                     chunk_extraction_template,
                     chunk_extract_clazz,
                     delay,
+                    verbose,
                 )
 
                 enrichments = doc_enrichments(doc, chunk_extract_models)
