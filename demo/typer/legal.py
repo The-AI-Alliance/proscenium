@@ -28,15 +28,17 @@ neo4j_password = "password"  # os.environ["NEO4J_PASSWORD"]
 default_milvus_uri = "file:/grag-milvus.db"
 
 
-@app.command(
-    help=f"Enrich documents from {', '.join(domain.hf_dataset_ids)} and write to {default_enrichment_jsonl_file}."
-)
-def enrich(docs_per_dataset: int = None, verbose: bool = False):
+@app.command(help=f"Enrich documents from {', '.join(domain.hf_dataset_ids)}.")
+def enrich(
+    docs_per_dataset: int = None,
+    output: Path = default_enrichment_jsonl_file,
+    verbose: bool = False,
+):
 
     enrich_documents(
         domain.retriever(docs_per_dataset),
         domain.doc_as_rich,
-        default_enrichment_jsonl_file,
+        output,
         domain.default_chunk_extraction_model_id,
         domain.chunk_extraction_template,
         domain.LegalOpinionChunkExtractions,
@@ -46,16 +48,16 @@ def enrich(docs_per_dataset: int = None, verbose: bool = False):
     )
 
 
-@app.command(
-    help=f"Load enrichments from {default_enrichment_jsonl_file} into the knowledge graph."
-)
-def load_graph():
+@app.command(help=f"Load enrichments from a .jsonl file into the knowledge graph.")
+def load_graph(
+    input: Path = default_enrichment_jsonl_file,
+):
 
     driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
     load_knowledge_graph(
         driver,
-        default_enrichment_jsonl_file,
+        input,
         domain.LegalOpinionEnrichments,
         domain.doc_enrichments_to_graph,
     )
