@@ -3,6 +3,7 @@
 echo "Legal Integration Test"
 
 JSONL_FILE=test-enrichments.jsonl
+MILVUS_URI=file://test-legal-milvus.db
 
 echo "Enriching documents"
 
@@ -29,4 +30,4 @@ echo "" | python -m demo.cli legal ask
 
 rm -f $JSONL_FILE
 
-rm -f grag-milvus.db
+rm -f test-legal-milvus.db
