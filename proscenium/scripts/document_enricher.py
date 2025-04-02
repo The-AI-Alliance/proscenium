@@ -23,6 +23,7 @@ def extract_from_document_chunks(
     chunk_extraction_model_id: str,
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
+    delay: float,
 ) -> List[BaseModel]:
 
     print(doc_as_rich(doc))
@@ -44,6 +45,7 @@ def extract_from_document_chunks(
         print(Panel(str(ce)))
 
         extract_models.append(ce)
+        time.sleep(delay)
 
     return extract_models
 
@@ -56,6 +58,7 @@ def enrich_documents(
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
     doc_enrichments: Callable[[Document, list[BaseModel]], BaseModel],
+    delay: float = 1.0,  # intra-chunk delay between inference calls
 ) -> None:
 
     docs = retrieve_documents()
@@ -76,6 +79,7 @@ def enrich_documents(
                     chunk_extraction_model_id,
                     chunk_extraction_template,
                     chunk_extract_clazz,
+                    delay,
                 )
 
                 enrichments = doc_enrichments(doc, chunk_extract_models)
@@ -83,6 +87,5 @@ def enrich_documents(
                 f.write(enrichments_json + "\n")
 
                 progress.update(task_enrich, advance=1)
-                time.sleep(1)  # TODO remove this hard-coded rate limiter
 
         print("Wrote document enrichments to", enrichments_jsonl_file)
