@@ -88,8 +88,8 @@ topic = "US Caselaw"
 # hf_dataset_ids = ["free-law/nh", "free-law/Caselaw_Access_Project"]
 hf_dataset_ids = ["free-law/nh"]
 hf_dataset_column = "text"
-docs_per_dataset = 100
 
+docs_per_dataset = 10  # number of documents to use from each dataset
 # Early version looked at only: free-law/nh ids {'4440632', '4441078'}
 
 
@@ -124,17 +124,19 @@ def retrieve_documents() -> List[Document]:
 
 def retrieve_document(id: str, driver: Driver) -> Optional[Document]:
 
-    docs = load_hugging_face_dataset(
-        hf_dataset_id, page_content_column=hf_dataset_column
-    )
-
     with driver.session() as session:
         result = session.run("MATCH (n) RETURN n.hf_dataset_index AS hf_dataset_index")
         if len(result) == 0:
             logging.warning("No node n found in the graph")
             return None
 
-        index = int(result[0]["hf_dataset_index"])
+        head = result[0]
+        hf_dataset_id = head["hf_dataset_id"]
+        index = int(head["hf_dataset_index"])
+
+        docs = load_hugging_face_dataset(
+            hf_dataset_id, page_content_column=hf_dataset_column
+        )
 
         if 0 <= index < len(docs):
             return docs[index]
