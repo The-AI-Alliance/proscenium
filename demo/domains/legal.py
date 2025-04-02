@@ -83,33 +83,41 @@ case_ref = ReferenceSchema(
 # Retrieve Documents
 ###################################
 
-hf_dataset_id = "free-law/nh"
-hf_dataset_column = "text"
-num_docs = 4
+topic = "US Caselaw"
 
-# Note: early version looked at only: doc.metadata["id"] in ['4440632', '4441078']
+# hf_dataset_ids = ["free-law/nh", "free-law/Caselaw_Access_Project"]
+hf_dataset_ids = ["free-law/nh"]
+hf_dataset_column = "text"
+docs_per_dataset = 100
+
+# Early version looked at only: free-law/nh ids {'4440632', '4441078'}
 
 
 def retrieve_documents() -> List[Document]:
 
-    docs = load_hugging_face_dataset(
-        hf_dataset_id, page_content_column=hf_dataset_column
-    )
+    docs = []
 
-    old_len = len(docs)
-    docs = docs[:num_docs]
-    logging.info(
-        "using the first",
-        num_docs,
-        "documents of",
-        old_len,
-        "from HF dataset",
-        hf_dataset_id,
-    )
+    for hf_dataset_id in hf_dataset_ids:
 
-    for i, doc in enumerate(docs):
-        doc.metadata["hf_dataset_id"] = hf_dataset_id
-        doc.metadata["hf_dataset_index"] = i
+        dataset_docs = load_hugging_face_dataset(
+            hf_dataset_id, page_content_column=hf_dataset_column
+        )
+
+        old_len = len(dataset_docs)
+
+        logging.info(
+            "using the first",
+            docs_per_dataset,
+            "documents of",
+            old_len,
+            "from HF dataset",
+            hf_dataset_id,
+        )
+
+        for i, doc in enumerate(dataset_docs[:docs_per_dataset]):
+            doc.metadata["hf_dataset_id"] = hf_dataset_id
+            doc.metadata["hf_dataset_index"] = i
+            docs.append(doc)
 
     return docs
 
@@ -408,7 +416,7 @@ def show_knowledge_graph(driver: Driver):
 # user_question
 ###################################
 
-user_prompt = f"What is your question about {hf_dataset_id}?"
+user_prompt = f"What is your question about {topic}?"
 
 default_question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
 
