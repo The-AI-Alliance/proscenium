@@ -266,8 +266,6 @@ def doc_enrichments(
         if chunk_extract.__dict__.get("company_names") is not None:
             companyrefs.extend(chunk_extract.company_names)
 
-    print(str(doc.metadata))
-
     enrichments = LegalOpinionEnrichments(
         name=doc.metadata["name_abbreviation"],
         reporter=doc.metadata["reporter"],
