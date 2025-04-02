@@ -4,8 +4,8 @@ from rich.table import Table
 def messages_table(messages: list) -> Table:
 
     table = Table(title="Messages in Chat Context", show_lines=True)
-    table.add_column("Role", justify="left", style="blue")
-    table.add_column("Content", justify="left", style="green")
+    table.add_column("Role", justify="left")
+    table.add_column("Content", justify="left")
     for message in messages:
         if type(message) is dict:
             role = message["role"]

@@ -8,9 +8,9 @@ from pymilvus import MilvusClient
 def chunk_hits_table(chunks: list[dict]) -> Table:
 
     table = Table(title="Closest Chunks", show_lines=True)
-    table.add_column("id", justify="right", style="cyan")
-    table.add_column("distance", style="magenta")
-    table.add_column("entity.text", justify="right", style="green")
+    table.add_column("id", justify="right")
+    table.add_column("distance")
+    table.add_column("entity.text", justify="right")
     for chunk in chunks:
         table.add_row(str(chunk["id"]), str(chunk["distance"]), chunk["entity"]["text"])
     return table
@@ -39,13 +39,13 @@ def collection_panel(client: MilvusClient, collection_name: str) -> Panel:
     params_panel = Panel(params_text, title="Params")
 
     fields_table = Table(title="Fields", show_lines=True)
-    fields_table.add_column("id", justify="left", style="blue")
-    fields_table.add_column("name", justify="left", style="green")
-    fields_table.add_column("description", justify="left", style="green")
-    fields_table.add_column("type", justify="left", style="green")
-    fields_table.add_column("params", justify="left", style="green")
-    fields_table.add_column("auto_id", justify="left", style="green")
-    fields_table.add_column("is_primary", justify="left", style="green")
+    fields_table.add_column("id", justify="left")
+    fields_table.add_column("name", justify="left")
+    fields_table.add_column("description", justify="left")
+    fields_table.add_column("type", justify="left")
+    fields_table.add_column("params", justify="left")
+    fields_table.add_column("auto_id", justify="left")
+    fields_table.add_column("is_primary", justify="left")
     for field in desc["fields"]:
         fields_table.add_row(
             str(field["field_id"]),  # int

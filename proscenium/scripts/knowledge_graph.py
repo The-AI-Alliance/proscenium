@@ -28,7 +28,7 @@ def load_knowledge_graph(
     with Progress() as progress:
 
         task_load = progress.add_task(
-            f"[green]Loading {len(enrichmentss)} enriched documents into graph...",
+            f"Loading {len(enrichmentss)} enriched documents into graph...",
             total=len(enrichmentss),
         )
 

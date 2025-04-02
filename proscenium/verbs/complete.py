@@ -82,8 +82,8 @@ model_id: {model_id}
         )
 
         messages_table = Table(title="Messages", show_lines=True)
-        messages_table.add_column("Role", justify="left", style="blue")
-        messages_table.add_column("Content", justify="left", style="green")
+        messages_table.add_column("Role", justify="left")
+        messages_table.add_column("Content", justify="left")  # style="green"
         for message in messages:
             messages_table.add_row(message["role"], message["content"])
 
