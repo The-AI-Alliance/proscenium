@@ -29,7 +29,7 @@ default_milvus_uri = "file:/grag-milvus.db"
 
 
 @app.command(
-    help=f"Enrich documents from {", ".join(domain.hf_dataset_ids)} and write to {default_enrichment_jsonl_file}."
+    help=f"Enrich documents from {', '.join(domain.hf_dataset_ids)} and write to {default_enrichment_jsonl_file}."
 )
 def enrich():
 
