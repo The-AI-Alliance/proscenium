@@ -89,7 +89,7 @@ def load_resolver():
 @app.command(
     help="Ask a legal question using the knowledge graph and entity resolver established in the previous steps."
 )
-def ask(loop: bool = False):
+def ask(loop: bool = False, verbose: bool = False):
 
     driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
@@ -108,6 +108,7 @@ def ask(loop: bool = False):
             domain.query_extract,
             domain.extract_to_context,
             domain.context_to_prompts,
+            verbose,
         )
 
         if answer:

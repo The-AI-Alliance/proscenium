@@ -19,30 +19,31 @@ def answer_question(
     driver: Driver,
     generation_model_id: str,
     query_extract: Callable[
-        [str, str], BaseModel
+        [str, str, bool], BaseModel
     ],  # (query_str, query_extraction_model_id) -> QueryExtractions
     extract_to_context: Callable[
-        [BaseModel, str, Driver, str], BaseModel
+        [BaseModel, str, Driver, str, bool], BaseModel
     ],  # (QueryExtractions, query_str, Driver, milvus_uri) -> Context
     context_to_prompts: Callable[
-        [BaseModel], tuple[str, str]
+        [BaseModel, bool], tuple[str, str]
     ],  # Context -> (system_prompt, user_prompt)
+    verbose: bool = False,
 ) -> str:
 
     print(Panel(question, title="Question"))
 
     print("Extracting information from the question")
-    extract = query_extract(question, query_extraction_model_id)
+    extract = query_extract(question, query_extraction_model_id, verbose)
     if extract is None:
         print("Unable to extract information from that question")
         return None
     print("Extract:", extract)
 
     print("Forming context from the extracted information")
-    context = extract_to_context(extract, question, driver, milvus_uri)
+    context = extract_to_context(extract, question, driver, milvus_uri, verbose)
     print("Context:", context)
 
-    prompts = context_to_prompts(context, generation_model_id)
+    prompts = context_to_prompts(context, generation_model_id, verbose)
 
     if prompts is None:
 
@@ -53,7 +54,7 @@ def answer_question(
         system_prompt, user_prompt = prompts
 
         response = complete_simple(
-            generation_model_id, system_prompt, user_prompt, rich_output=True
+            generation_model_id, system_prompt, user_prompt, rich_output=verbose
         )
 
         return response

@@ -453,7 +453,9 @@ query_extraction_template = partial_formatter.format(
 )
 
 
-def query_extract(query: str, query_extraction_model_id: str) -> QueryExtractions:
+def query_extract(
+    query: str, query_extraction_model_id: str, verbose: bool = False
+) -> QueryExtractions:
 
     extract = complete_simple(
         query_extraction_model_id,
@@ -463,7 +465,7 @@ def query_extract(query: str, query_extraction_model_id: str) -> QueryExtraction
             "type": "json_object",
             "schema": QueryExtractions.model_json_schema(),
         },
-        rich_output=True,
+        rich_output=verbose,
     )
 
     logging.info("query_extract: extract = <<<%s>>>", extract)
@@ -518,12 +520,14 @@ class LegalQueryContext(BaseModel):
 
 
 def extract_to_context(
-    qe: QueryExtractions, query: str, driver: Driver, milvus_uri: str
+    qe: QueryExtractions,
+    query: str,
+    driver: Driver,
+    milvus_uri: str,
+    verbose: bool = False,
 ) -> LegalQueryContext:
 
     vector_db_client = vector_db(milvus_uri)
-
-    query = ""
 
     # TODO use judge (not judgref) from query
 
@@ -535,7 +539,8 @@ def extract_to_context(
         )
     query += "RETURN c.name AS name"
 
-    print(Panel(query, title="Cypher Query"))
+    if verbose:
+        print(Panel(query, title="Cypher Query"))
 
     case_names = []
     with driver.session() as session:
@@ -573,7 +578,9 @@ Question: {question}
 """
 
 
-def context_to_prompts(context: LegalQueryContext) -> tuple[str, str]:
+def context_to_prompts(
+    context: LegalQueryContext, verbose: bool = False
+) -> tuple[str, str]:
 
     user_prompt = graphrag_prompt_template.format(
         document_text=context.doc, question=context.query
