@@ -20,10 +20,11 @@ model identifier for [AI Suite](https://github.com/andrewyng/aisuite/).
 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
 
-## Legal (GraphRAG)
+## Legal
 
-[Legal-GraphRAG.ipynb](./Legal-GraphRAG.ipynb)
+[Legal.ipynb](./Legal.ipynb) demonstrates using an LLM to extract and resolve a Knowledge Graph from
+publicly available legal opinions.
 
-<a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Legal-GraphRAG.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Legal.ipynb">
 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
