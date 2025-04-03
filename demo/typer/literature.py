@@ -15,7 +15,7 @@ import demo.domains.literature as domain
 
 collection_name = "literature_chunks"
 
-milvus_uri = "file:/milvus.db"
+default_milvus_uri = "file:/milvus.db"
 # milvus_uri = "http://localhost:19530"
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -26,9 +26,13 @@ app = typer.Typer(
 
 
 @app.command(
-    help=f"Build a vector DB from chunks of {len(domain.books)} books from Project Gutenberg."
+    help=f"""Build a vector DB from chunks of {len(domain.books)} books from Project Gutenberg.
+Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
+"""
 )
 def prepare():
+
+    milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
     for book in domain.books:
         print("Book:", book.title)
@@ -54,27 +58,36 @@ def prepare():
 @app.command(
     help="""
 Ask a question about literature using the RAG pattern with the chunks prepared in the previous step.
+Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 """
 )
-def ask():
+def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
-    query = Prompt.ask(
-        domain.user_prompt,
-        default=domain.default_question,
-    )
+    milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
-    vector_db_client = vector_db(milvus_uri)
-    print("Vector db at uri", milvus_uri)
+    while True:
 
-    embedding_fn = embedding_function(domain.embedding_model_id)
-    print("Embedding model:", domain.embedding_model_id)
+        if question is None:
+            q = Prompt.ask(
+                domain.user_prompt,
+                default=domain.default_question,
+            )
+        else:
+            q = question
 
-    answer = answer_question(
-        query,
-        domain.model_id,
-        vector_db_client,
-        embedding_fn,
-        collection_name,
-    )
+        vector_db_client = vector_db(milvus_uri)
+        print("Vector db at uri", milvus_uri)
 
-    print(Panel(answer, title="Assistant"))
+        embedding_fn = embedding_function(domain.embedding_model_id)
+        print("Embedding model:", domain.embedding_model_id)
+
+        answer = answer_question(
+            q, domain.model_id, vector_db_client, embedding_fn, collection_name, verbose
+        )
+
+        print(Panel(answer, title="Assistant"))
+
+        if loop:
+            question = None
+        else:
+            break

@@ -44,17 +44,20 @@ def answer_question(
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     collection_name: str,
+    verbose: bool = False,
 ) -> str:
 
     print(Panel(query, title="User"))
 
     chunks = closest_chunks(vector_db_client, embedding_fn, query, collection_name)
-    print("Found", len(chunks), "closest chunks")
-    print(chunk_hits_table(chunks))
+    if verbose:
+        print("Found", len(chunks), "closest chunks")
+        print(chunk_hits_table(chunks))
 
     prompt = rag_prompt(chunks, query)
-    print("RAG prompt created. Calling inference at", model_id, "\n\n")
+    if verbose:
+        print("RAG prompt created. Calling inference at", model_id, "\n\n")
 
-    answer = complete_simple(model_id, rag_system_prompt, prompt)
+    answer = complete_simple(model_id, rag_system_prompt, prompt, rich_output=verbose)
 
     return answer

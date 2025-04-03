@@ -122,7 +122,7 @@ def load_resolver():
 Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 {neo4j_help}"""
 )
-def ask(loop: bool = False, verbose: bool = False):
+def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
@@ -133,13 +133,17 @@ def ask(loop: bool = False, verbose: bool = False):
     driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
     while True:
-        question = Prompt.ask(
-            domain.user_prompt,
-            default=domain.default_question,
-        )
+
+        if question is None:
+            q = Prompt.ask(
+                domain.user_prompt,
+                default=domain.default_question,
+            )
+        else:
+            q = question
 
         answer = answer_question(
-            question,
+            q,
             domain.default_query_extraction_model_id,
             milvus_uri,
             driver,
@@ -155,7 +159,9 @@ def ask(loop: bool = False, verbose: bool = False):
         else:
             print("No answer")
 
-        if not loop:
+        if loop:
+            question = None
+        else:
             break
 
     driver.close()
