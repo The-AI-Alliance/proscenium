@@ -17,7 +17,8 @@ It requires a Neo4j instance in addition to an inference service.
 
 ## Literature
 
-[Literature.ipynb](./Literature.ipynb)
+[Literature.ipynb](./Literature.ipynb) demonstrates using a vector database to store chunks of two books,
+and using those chunks to form a context for LLM inference based on a user question (the Retrieval Augmented Generation pattern, aka "RAG".)
 
 <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Literature.ipynb">
 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
@@ -25,7 +26,7 @@ It requires a Neo4j instance in addition to an inference service.
 
 ## Abacus
 
-[Abacus-Tools.ipynb](./Abacus-Tools.ipynb)
+[Abacus.ipynb](./Abacus.ipynb)
 
 <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Abacus-Tools.ipynb">
 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
