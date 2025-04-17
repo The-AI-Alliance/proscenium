@@ -40,9 +40,17 @@ def enrich(
     verbose: bool = False,
 ):
 
+    extract_from_opinion_chunks = domain.extract_from_opinion_chunks_function(
+        domain.doc_as_rich,
+        domain.default_chunk_extraction_model_id,
+        domain.chunk_extraction_template,
+        domain.LegalOpinionChunkExtractions,
+        delay=0.1,
+    )
+
     enrich_documents(
         domain.retriever(docs_per_dataset),
-        domain.extract_from_opinion_chunks,
+        extract_from_opinion_chunks,
         domain.doc_enrichments,
         output,
         verbose=verbose,

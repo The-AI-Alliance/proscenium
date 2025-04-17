@@ -293,7 +293,7 @@ chunk_extraction_template = partial_formatter.format(
 )
 
 
-def extract_from_doc_chunks_function(
+def extract_from_opinion_chunks_function(
     doc_as_rich: Callable[[Document], Panel],
     chunk_extraction_model_id: str,
     chunk_extraction_template: str,
@@ -318,15 +318,6 @@ def extract_from_doc_chunks_function(
         return chunk_extract_models
 
     return extract_from_doc_chunks
-
-
-extract_from_opinion_chunks = extract_from_doc_chunks_function(
-    doc_as_rich,
-    default_chunk_extraction_model_id,
-    chunk_extraction_template,
-    LegalOpinionChunkExtractions,
-    delay=0.1,
-)
 
 
 ###################################
