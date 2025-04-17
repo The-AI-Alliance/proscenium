@@ -14,8 +14,6 @@ from langchain_core.documents.base import Document
 from proscenium.verbs.chunk import documents_to_chunks_by_tokens
 from proscenium.verbs.extract import extract_to_pydantic_model
 
-# TODO move this method somewhere else
-
 
 def extract_from_document_chunks(
     doc: Document,
@@ -54,13 +52,9 @@ def extract_from_document_chunks(
 
 def enrich_documents(
     retrieve_documents: Callable[[], List[Document]],
-    doc_as_rich: Callable[[Document], Panel],
-    enrichments_jsonl_file: str,
-    chunk_extraction_model_id: str,
-    chunk_extraction_template: str,
-    chunk_extract_clazz: type[BaseModel],
+    extract_from_doc_chunks: Callable[[Document], List[BaseModel]],
     doc_enrichments: Callable[[Document, list[BaseModel]], BaseModel],
-    delay: float = 1.0,  # intra-chunk delay between inference calls
+    enrichments_jsonl_file: str,
     verbose: bool = False,
 ) -> None:
 
@@ -76,16 +70,7 @@ def enrich_documents(
 
             for doc in docs:
 
-                chunk_extract_models = extract_from_document_chunks(
-                    doc,
-                    doc_as_rich,
-                    chunk_extraction_model_id,
-                    chunk_extraction_template,
-                    chunk_extract_clazz,
-                    delay,
-                    verbose,
-                )
-
+                chunk_extract_models = extract_from_doc_chunks(doc, verbose)
                 enrichments = doc_enrichments(doc, chunk_extract_models)
                 enrichments_json = enrichments.model_dump_json()
                 f.write(enrichments_json + "\n")
