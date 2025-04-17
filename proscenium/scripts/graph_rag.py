@@ -7,8 +7,6 @@ from rich.panel import Panel
 
 from neo4j import Driver
 
-from pymilvus import MilvusClient
-
 from proscenium.verbs.complete import complete_simple
 
 
