@@ -299,7 +299,7 @@ def extract_from_opinion_chunks_function(
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
     delay: float = 1.0,  # intra-chunk delay between inference calls
-) -> Callable[[Document], List[BaseModel, bool]]:
+) -> Callable[[Document, bool], List[BaseModel]]:
 
     def extract_from_doc_chunks(
         doc: Document, verbose: bool = False
