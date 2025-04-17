@@ -8,7 +8,6 @@ from rich.prompt import Prompt
 from proscenium.verbs.know import knowledge_graph_client
 
 from proscenium.scripts.document_enricher import enrich_documents
-from proscenium.scripts.document_enricher import extract_from_doc_chunks_function
 from proscenium.scripts.knowledge_graph import load_knowledge_graph
 from proscenium.scripts.entity_resolver import load_entity_resolver
 from proscenium.scripts.graph_rag import answer_question
@@ -41,18 +40,9 @@ def enrich(
     verbose: bool = False,
 ):
 
-    extract_from_doc_chunks = extract_from_doc_chunks_function(
-        domain.doc_as_rich,
-        domain.default_chunk_extraction_model_id,
-        domain.chunk_extraction_template,
-        domain.LegalOpinionChunkExtractions,
-        delay=0.1,
-        verbose=verbose,
-    )
-
     enrich_documents(
         domain.retriever(docs_per_dataset),
-        extract_from_doc_chunks,
+        domain.extract_from_opinion_chunks,
         domain.doc_enrichments,
         output,
         verbose=verbose,

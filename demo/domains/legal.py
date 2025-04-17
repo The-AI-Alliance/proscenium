@@ -20,6 +20,7 @@ from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.vector_database import vector_db
 
+from proscenium.scripts.document_enricher import extract_from_document_chunks
 from proscenium.scripts.entity_resolver import Resolver
 from proscenium.scripts.entity_resolver import find_matching_objects
 
@@ -289,6 +290,42 @@ def doc_enrichments(
 
 chunk_extraction_template = partial_formatter.format(
     raw_extraction_template, extraction_description=LegalOpinionChunkExtractions.__doc__
+)
+
+
+def extract_from_doc_chunks_function(
+    doc_as_rich: Callable[[Document], Panel],
+    chunk_extraction_model_id: str,
+    chunk_extraction_template: str,
+    chunk_extract_clazz: type[BaseModel],
+    delay: float = 1.0,  # intra-chunk delay between inference calls
+) -> Callable[[Document], List[BaseModel, bool]]:
+
+    def extract_from_doc_chunks(
+        doc: Document, verbose: bool = False
+    ) -> List[BaseModel]:
+
+        chunk_extract_models = extract_from_document_chunks(
+            doc,
+            doc_as_rich,
+            chunk_extraction_model_id,
+            chunk_extraction_template,
+            chunk_extract_clazz,
+            delay,
+            verbose,
+        )
+
+        return chunk_extract_models
+
+    return extract_from_doc_chunks
+
+
+extract_from_opinion_chunks = extract_from_doc_chunks_function(
+    doc_as_rich,
+    default_chunk_extraction_model_id,
+    chunk_extraction_template,
+    LegalOpinionChunkExtractions,
+    delay=0.1,
 )
 
 
