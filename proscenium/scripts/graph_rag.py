@@ -1,13 +1,9 @@
 from typing import Callable
 
 from pydantic import BaseModel
-
 from rich import print
-from rich.panel import Panel
-
+from uuid import uuid4
 from neo4j import Driver
-
-from proscenium.verbs.complete import complete_simple
 
 
 def query_to_prompts(
@@ -27,16 +23,34 @@ def query_to_prompts(
     verbose: bool = False,
 ) -> str:
 
+    query_id = uuid4()
+
+    with driver.session() as session:
+        # TODO manage this in a separate namespace from the application graph
+        query_save_result = session.run(
+            "CREATE (:Query {id: $query_id, value: $value})",
+            query_id=str(query_id),
+            value=question,
+        )
+        if verbose:
+            print(f"Saved query {question} with id {query_id} to the graph")
+            print(query_save_result.consume())
+
     print("Extracting information from the question")
+
     extract = query_extract(question, query_extraction_model_id, verbose)
     if extract is None:
         print("Unable to extract information from that question")
         return None
-    print("Extract:", extract)
+
+    if verbose:
+        print("Extract:", extract)
 
     print("Forming context from the extracted information")
     context = extract_to_context(extract, question, driver, milvus_uri, verbose)
-    print("Context:", context)
+
+    if verbose:
+        print("Context:", context)
 
     prompts = context_to_prompts(context, verbose)
 
