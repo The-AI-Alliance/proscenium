@@ -10,12 +10,11 @@ from neo4j import Driver
 from proscenium.verbs.complete import complete_simple
 
 
-def answer_question(
+def query_to_prompts(
     question: str,
     query_extraction_model_id: str,
     milvus_uri: str,
     driver: Driver,
-    generation_model_id: str,
     query_extract: Callable[
         [str, str, bool], BaseModel
     ],  # (query_str, query_extraction_model_id) -> QueryExtractions
@@ -28,8 +27,6 @@ def answer_question(
     verbose: bool = False,
 ) -> str:
 
-    print(Panel(question, title="Question"))
-
     print("Extracting information from the question")
     extract = query_extract(question, query_extraction_model_id, verbose)
     if extract is None:
@@ -41,18 +38,6 @@ def answer_question(
     context = extract_to_context(extract, question, driver, milvus_uri, verbose)
     print("Context:", context)
 
-    prompts = context_to_prompts(context, generation_model_id, verbose)
+    prompts = context_to_prompts(context, verbose)
 
-    if prompts is None:
-
-        return None
-
-    else:
-
-        system_prompt, user_prompt = prompts
-
-        response = complete_simple(
-            generation_model_id, system_prompt, user_prompt, rich_output=verbose
-        )
-
-        return response
+    return prompts
