@@ -155,7 +155,8 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
             milvus_uri,
             driver,
             domain.query_extract,
-            domain.extract_to_context,
+            domain.query_extract_to_graph,
+            domain.query_extract_to_context,
             domain.context_to_prompts,
             verbose,
         )

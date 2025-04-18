@@ -6,6 +6,7 @@ import json
 from rich import print
 from rich.panel import Panel
 from rich.table import Table
+from uuid import UUID
 
 from langchain_core.documents.base import Document
 
@@ -220,13 +221,13 @@ class LegalOpinionEnrichments(BaseModel):
     volume: str = Field(description="volume number of the reporter")
     first_page: str = Field(description="first page number of the opinion")
     last_page: str = Field(description="last page number of the opinion")
+    cited_as: str = Field(description="how the opinion is cited")
     court: str = Field(description="name of the court")
     decision_date: str = Field(description="date of the decision")
-    # TODO use (incoming) citations comes with the document
     docket_number: str = Field(description="docket number of the case")
     jurisdiction: str = Field(description="jurisdiction of the case")
-    # TODO note that judges comes with the document, pre-extracted
-    # TODO parties
+    judges: str = Field(description="authoring judges")
+    parties: str = Field(description="parties in the case")
     # TODO word_count, char_count, last_updated, provenance, id
 
     # Extracted from the text without LLM
@@ -244,6 +245,7 @@ class LegalOpinionEnrichments(BaseModel):
     companyrefs: list[str] = Field(
         description="A list of the company names mentioned in the text. For example: ['Acme Corp', 'IBM', 'Bob's Auto Repair']"
     )
+
     # Denoted by Proscenium framework
     hf_dataset_id: str = Field(description="id of the dataset in HF")
     hf_dataset_index: int = Field(description="index of the document in the HF dataset")
@@ -267,16 +269,21 @@ def doc_enrichments(
         if chunk_extract.__dict__.get("company_names") is not None:
             companyrefs.extend(chunk_extract.company_names)
 
+    print(doc.metadata)
+
     enrichments = LegalOpinionEnrichments(
         name=doc.metadata["name_abbreviation"],
         reporter=doc.metadata["reporter"],
         volume=doc.metadata["volume"],
         first_page=str(doc.metadata["first_page"]),
         last_page=str(doc.metadata["last_page"]),
+        cited_as=doc.metadata["citations"],
         court=doc.metadata["court"],
         decision_date=doc.metadata["decision_date"],
         docket_number=doc.metadata["docket_number"],
         jurisdiction=doc.metadata["jurisdiction"],
+        judges=doc.metadata["judges"],
+        parties=doc.metadata["parties"],
         caserefs=[c.matched_text() for c in citations],
         judgerefs=judgerefs,
         georefs=georefs,
@@ -338,6 +345,7 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
         + "name: $case, "
         + "reporter: $reporter, volume: $volume, "
         + "first_page: $first_page, last_page: $last_page, "
+        + "cited_as: $cited_as, "
         + "court: $court, decision_date: $decision_date, "
         + "docket_number: $docket_number, jurisdiction: $jurisdiction, "
         + "hf_dataset_id: $hf_dataset_id, hf_dataset_index: $hf_dataset_index"
@@ -347,6 +355,7 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
         volume=enrichments.volume,
         first_page=enrichments.first_page,
         last_page=enrichments.last_page,
+        cited_as=enrichments.cited_as,
         court=enrichments.court,
         decision_date=enrichments.decision_date,
         docket_number=enrichments.docket_number,
@@ -355,36 +364,64 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
         hf_dataset_index=enrichments.hf_dataset_index,
     )
 
+    # Resolvable fields from the document metadata
+
+    # TODO split multiple judges upstream
+    judge = enrichments.judges
+    if len(judge) > 0:
+        tx.run(
+            "MATCH (c:Case {name: $case}) "
+            + "MERGE (c)-[:authored_by]->(:JudgeRef {text: $judge, confidence: $confidence})",
+            judge=judge,
+            case=case_name,
+            confidence=0.9,
+        )
+    # TODO split into plaintiff(s) and defendant(s) upstream
+    parties = enrichments.parties
+    tx.run(
+        "MATCH (c:Case {name: $case}) "
+        + "MERGE (c)-[:involves]->(:PartyRef {name: $party, confidence: $confidence})",
+        party=parties,
+        case=case_name,
+        confidence=0.9,
+    )
+
+    # Fields extracted from the text with LLM:
+
     for judgeref in enrichments.judgerefs:
         tx.run(
             "MATCH (c:Case {name: $case}) "
-            + "MERGE (c)-[:mentions]->(:JudgeRef {text: $judgeref})",
+            + "MERGE (c)-[:mentions]->(:JudgeRef {text: $judgeref, confidence: $confidence})",
             judgeref=judgeref,
             case=case_name,
+            confidence=0.6,
         )
 
     for caseref in enrichments.caserefs:
         tx.run(
             "MATCH (c:Case {name: $case}) "
-            + "MERGE (c)-[:mentions]->(:CaseRef {text: $caseref})",
+            + "MERGE (c)-[:mentions]->(:CaseRef {text: $caseref, confidence: $confidence})",
             case=case_name,
             caseref=caseref,
+            confidence=0.6,
         )
 
     for georef in enrichments.georefs:
         tx.run(
             "MATCH (c:Case {name: $case}) "
-            + "MERGE (c)-[:mentions]->(:GeoRef {text: $georef})",
+            + "MERGE (c)-[:mentions]->(:GeoRef {text: $georef, confidence: $confidence})",
             case=case_name,
             georef=georef,
+            confidence=0.6,
         )
 
     for companyref in enrichments.companyrefs:
         tx.run(
             "MATCH (c:Case {name: $case}) "
-            + "MERGE (c)-[:mentions]->(:CompanyRef {text: $companyref})",
+            + "MERGE (c)-[:mentions]->(:CompanyRef {text: $companyref, confidence: $confidence})",
             case=case_name,
             companyref=companyref,
+            confidence=0.6,
         )
 
 
@@ -483,10 +520,15 @@ def query_extract(
     query: str, query_extraction_model_id: str, verbose: bool = False
 ) -> QueryExtractions:
 
+    user_prompt = query_extraction_template.format(text=query)
+
+    if verbose:
+        print(Panel(user_prompt, title="Query Extraction Prompt"))
+
     extract = complete_simple(
         query_extraction_model_id,
         extraction_system_prompt,
-        query_extraction_template.format(text=query),
+        user_prompt,
         response_format={
             "type": "json_object",
             "schema": QueryExtractions.model_json_schema(),
@@ -494,20 +536,50 @@ def query_extract(
         rich_output=verbose,
     )
 
-    logging.info("query_extract: extract = <<<%s>>>", extract)
+    if verbose:
+        print(Panel(str(extract), title="Query Extraction String"))
 
     try:
 
         qe_json = json.loads(extract)
-
-        return QueryExtractions(**qe_json)
+        result = QueryExtractions(**qe_json)
+        return result
 
     except Exception as e:
 
         logging.error("query_extract: Exception: %s", e)
 
-    finally:
-        return None
+    return None
+
+
+def query_extract_to_graph(
+    query: str,
+    query_id: UUID,
+    qe: QueryExtractions,
+    driver: Driver,
+    verbose: bool = False,
+) -> None:
+
+    with driver.session() as session:
+        # TODO manage the query logging in a separate namespace from the
+        # domain graph
+        query_save_result = session.run(
+            "CREATE (:Query {id: $query_id, value: $value})",
+            query_id=str(query_id),
+            value=query,
+        )
+        if verbose:
+            print(f"Saved query {query} with id {query_id} to the graph")
+            print(query_save_result.consume())
+
+        for judgeref in qe.judge_names:
+            session.run(
+                "MATCH (q:Query {id: $query_id}) "
+                + "MERGE (q)-[:mentions]->(:JudgeRef {text: $judgeref, confidence: $confidence})",
+                query_id=str(query_id),
+                judgeref=judgeref,
+                confidence=0.6,
+            )
 
 
 ###################################
@@ -545,7 +617,7 @@ class LegalQueryContext(BaseModel):
     # caserefs: list[str] = Field(description = "A list of the legal citations in the text.  For example: `123 F.3d 456`")
 
 
-def extract_to_context(
+def query_extract_to_context(
     qe: QueryExtractions,
     query: str,
     driver: Driver,
@@ -557,20 +629,21 @@ def extract_to_context(
 
     # TODO use judge (not judgref) from query
 
+    cypher = ""
     caserefs = get_citations(query)
     for caseref in caserefs:
         caseref_match = find_matching_objects(vector_db_client, caseref, case_resolver)
-        query += (
+        cypher += (
             f"MATCH (c:Case)-[:mentions]->(r:CaseRef {{name: '{caseref_match}'}})\n"
         )
-    query += "RETURN c.name AS name"
+    cypher += "RETURN c.name AS name"
 
     if verbose:
-        print(Panel(query, title="Cypher Query"))
+        print(Panel(cypher, title="Cypher Query"))
 
     case_names = []
     with driver.session() as session:
-        result = session.run(query)
+        result = session.run(cypher)
         case_names.extend([record["name"] for record in result])
 
     # TODO check for empty result
