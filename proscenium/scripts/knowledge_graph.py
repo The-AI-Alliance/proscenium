@@ -37,5 +37,3 @@ def load_knowledge_graph(
             for e in enrichmentss:
                 session.execute_write(doc_enrichments_to_graph, e)
                 progress.update(task_load, advance=1)
-
-        driver.close()

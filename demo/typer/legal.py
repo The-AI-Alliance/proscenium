@@ -6,11 +6,12 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 from proscenium.verbs.know import knowledge_graph_client
+from proscenium.verbs.complete import complete_simple
 
 from proscenium.scripts.document_enricher import enrich_documents
 from proscenium.scripts.knowledge_graph import load_knowledge_graph
 from proscenium.scripts.entity_resolver import load_entity_resolver
-from proscenium.scripts.graph_rag import answer_question
+from proscenium.scripts.graph_rag import query_to_prompts
 
 import demo.domains.legal as domain
 
@@ -40,15 +41,19 @@ def enrich(
     verbose: bool = False,
 ):
 
-    enrich_documents(
-        domain.retriever(docs_per_dataset),
+    extract_from_opinion_chunks = domain.extract_from_opinion_chunks_function(
         domain.doc_as_rich,
-        output,
         domain.default_chunk_extraction_model_id,
         domain.chunk_extraction_template,
         domain.LegalOpinionChunkExtractions,
-        domain.doc_enrichments,
         delay=0.1,
+    )
+
+    enrich_documents(
+        domain.retriever(docs_per_dataset),
+        extract_from_opinion_chunks,
+        domain.doc_enrichments,
+        output,
         verbose=verbose,
     )
 
@@ -142,22 +147,38 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
         else:
             q = question
 
-        answer = answer_question(
+        print(Panel(q, title="Question"))
+
+        prompts = query_to_prompts(
             q,
             domain.default_query_extraction_model_id,
             milvus_uri,
             driver,
-            domain.default_generation_model_id,
             domain.query_extract,
             domain.extract_to_context,
             domain.context_to_prompts,
             verbose,
         )
 
-        if answer:
-            print(Panel(answer, title="Answer"))
+        if prompts is None:
+
+            print("Unable to form prompts")
+
         else:
-            print("No answer")
+
+            system_prompt, user_prompt = prompts
+
+            response = complete_simple(
+                domain.default_generation_model_id,
+                system_prompt,
+                user_prompt,
+                rich_output=verbose,
+            )
+
+            if response:
+                print(Panel(response, title="Answer"))
+            else:
+                print("No answer")
 
         if loop:
             question = None
