@@ -14,9 +14,9 @@ It is also set of simple demonstration applications that elucidate aspects of ap
 
 There are two ways to get started quickly:
 
-- [Command Line Interface](./CLI.md) to demos, ither from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+- [Command Line Interface](https://github.com/The-AI-Alliance/proscenium/blob/main/CLI.md) to demos, ither from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
 
-- [Notebooks](./notebooks/)
+- [Notebooks](https://github.com/The-AI-Alliance/proscenium/tree/main/notebooks)
 
 ## Resources
 
