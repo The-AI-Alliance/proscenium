@@ -5,6 +5,8 @@ title: Proscenium
 
 ## Proscenium
 
+![logo](./assets/images/logo.png)
+
 Proscenium is a small library of composable glue that allows for
 succinct construction of enterprise AI applications.  It is in early development and is not (yet?) intended for production use.
 
