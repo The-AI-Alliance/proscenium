@@ -1,4 +1,9 @@
-# Proscenium: Framing AI
+![CI](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml/badge.svg)
+![License](https://img.shields.io/github/license/The-AI-Alliance/proscenium)
+![Issues](https://img.shields.io/github/issues/The-AI-Alliance/proscenium)
+![GitHub stars](https://img.shields.io/github/stars/The-AI-Alliance/proscenium?style=social)
+
+# Proscenium
 
 Proscenium is a small library of composable glue that allows for
 succinct construction of enterprise AI applications.  It is in early development and is not (yet?) intended for production use.
