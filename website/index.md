@@ -7,10 +7,15 @@ title: Proscenium
 
 ![logo](./assets/images/logo.png)
 
-Proscenium is a small library of composable glue that allows for
-succinct construction of enterprise AI applications.  It is in early development and is not (yet?) intended for production use.
+Proscenium is a small, experimental library of composable glue that allows for
+succinct construction of enterprise AI applications.  It is in early development.
 
 It is also set of simple demonstration applications that elucidate aspects of application and library design.
+
+See the [repository](https://github.com/The-AI-Alliance/proscenium) on GitHub.
+
+Currently, proscenium development prioritizes support for domains where
+the creation and use of structured data is critical.
 
 ## Quickstart
 
@@ -21,8 +26,6 @@ There are two ways to get started quickly:
 - [Notebooks](https://github.com/The-AI-Alliance/proscenium/tree/main/notebooks)
 
 ## Resources
-
-See the [repository](https://github.com/The-AI-Alliance/proscenium) on GitHub.
 
 For more background and future plans, see the [wiki](https://github.com/The-AI-Alliance/proscenium/wiki)
 
