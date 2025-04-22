@@ -13,6 +13,7 @@ from langchain_core.documents.base import Document
 from pydantic import BaseModel, Field
 
 from neo4j import Driver
+from neo4j.data import Record
 
 from proscenium.verbs.read import load_hugging_face_dataset
 from proscenium.verbs.extract import partial_formatter
@@ -134,12 +135,13 @@ def retriever(docs_per_dataset: int) -> Callable[[], List[Document]]:
 def retrieve_document(id: str, driver: Driver) -> Optional[Document]:
 
     with driver.session() as session:
-        result = session.run("MATCH (n) RETURN n.hf_dataset_index AS hf_dataset_index")
-        if len(result) == 0:
-            logging.warning("No node n found in the graph")
+        result = session.run("MATCH (c: Case {name: $name}) RETURN c", name=id)
+
+        head = result.single()["c"]
+        if head is None:
+            logging.error("retrieve_document: no results for id %s", id)
             return None
 
-        head = result[0]
         hf_dataset_id = head["hf_dataset_id"]
         index = int(head["hf_dataset_index"])
 
@@ -490,7 +492,8 @@ def show_knowledge_graph(driver: Driver):
 
 user_prompt = f"What is your question about {topic}?"
 
-default_question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+# default_question = "How has Judge Kenison used Ballou v. Ballou to rule on cases?"
+default_question = "How has 291 A.2d 605 been used in NH caselaw?"
 
 ###################################
 # query_extract
@@ -627,15 +630,19 @@ def query_extract_to_context(
 
     vector_db_client = vector_db(milvus_uri)
 
-    # TODO use judge (not judgref) from query
+    cypher = ""
+    if qe is not None:
+        for judgeref in qe.judge_names:
+            # TODO judgeref_match = find_matching_objects(vector_db_client, judgeref, judge_resolver)
+            cypher += (
+                f"MATCH (c:Case)-[:mentions]->(:JudgeRef {{text: '{judgeref}'}})\n"
+            )
 
     cypher = ""
     caserefs = get_citations(query)
     for caseref in caserefs:
-        caseref_match = find_matching_objects(vector_db_client, caseref, case_resolver)
-        cypher += (
-            f"MATCH (c:Case)-[:mentions]->(r:CaseRef {{name: '{caseref_match}'}})\n"
-        )
+        # TODO caseref_match = find_matching_objects(vector_db_client, caseref, case_resolver)
+        cypher += f"MATCH (c:Case)-[:mentions]->(:CaseRef {{text: '{caseref.matched_text()}'}})\n"
     cypher += "RETURN c.name AS name"
 
     if verbose:
@@ -647,11 +654,10 @@ def query_extract_to_context(
         case_names.extend([record["name"] for record in result])
 
     # TODO check for empty result
-
     print("Cases with names:", str(case_names), "mention", str(caserefs))
 
     # TODO: take all docs -- not just head
-    doc = retrieve_document(case_names[0])
+    doc = retrieve_document(case_names[0], driver)
 
     context = LegalQueryContext(
         doc=doc.page_content,

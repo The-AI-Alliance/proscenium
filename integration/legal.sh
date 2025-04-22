@@ -26,7 +26,7 @@ python -m demo.cli legal load-resolver
 
 echo "Answer default legal question"
 
-echo "" | python -m demo.cli legal ask
+echo "" | python -m demo.cli legal ask --verbose
 
 rm -f $JSONL_FILE
 
