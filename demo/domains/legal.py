@@ -586,7 +586,7 @@ def query_extract_to_graph(
 
 
 ###################################
-# extract_to_context
+# query_extract_to_context
 ###################################
 
 embedding_model_id = "all-MiniLM-L6-v2"
