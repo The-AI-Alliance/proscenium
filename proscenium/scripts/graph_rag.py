@@ -29,10 +29,7 @@ def query_to_prompts(
 
     print("Extracting information from the question")
     extract = query_extract(question, query_extraction_model_id, verbose)
-    if extract is None:
-        print("Unable to extract information from that question")
-        return None
-    print("Extract:", extract)
+    print("Extract:", str(extract))
 
     print("Forming context from the extracted information")
     context = extract_to_context(extract, question, driver, milvus_uri, verbose)
