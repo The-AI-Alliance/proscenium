@@ -67,17 +67,27 @@ including:
 
 Legal use cases rely heavily on deriving structured data from unstructured data, so this is an ideal domain to demonstrate several related subsystems.
 
-The first use case in the legal domain is question answering related to
+### Federal Caselaw and Statute Research
+
+The first use case in the legal domain is question-answering related to
 large, public-domain legal datasets including U.S. federal case law and statutes.
+
+<img src="./assets/images/enrich.png" width="400px" alt="legal kg"/>
+
 The questions chosen highlight categories of questions where the ability to traverse a
 Knowledge Graph provides advantages over a naive RAG approach.
 
 <img src="./assets/images/legal_kg.png" width="400px" alt="legal kg"/>
 
+### Email Generation with Context from Matter Management System
+
 The second use case in development is a email authoring capability that
 integrates with a Matter Management system.
 
-Both applications will be demonstrated as Slack integrations as well as Python notebooks.
+### Common Features and Requirements
+
+Demo applications will be demonstrated as Slack integrations as well as Python notebooks.
+
 They will use Llama 4 models hosted by Together.AI, and make use of
 a Neo4j graph database.
 
