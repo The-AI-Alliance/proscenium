@@ -63,6 +63,8 @@ including:
 - Graph RAG
 - Tool Use
 
+<img src="./assets/images/kg_diagram.png" width="400px" alt="kg diagram"/>
+
 ## Demonstrations in the Legal Domain
 
 Legal use cases rely heavily on deriving structured data from unstructured data, so this is an ideal domain to demonstrate several related subsystems.
