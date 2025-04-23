@@ -63,7 +63,7 @@ including:
 - Graph RAG
 - Tool Use
 
-<img src="./assets/images/kg_diagram.png" width="400px" alt="kg diagram"/>
+<img src="./assets/images/kg_diagram.png" width="600px" alt="kg diagram"/>
 
 ## Demonstrations in the Legal Domain
 
@@ -74,12 +74,12 @@ Legal use cases rely heavily on deriving structured data from unstructured data,
 The first use case in the legal domain is question-answering related to
 large, public-domain legal datasets including U.S. federal case law and statutes.
 
-<img src="./assets/images/enrich.png" width="400px" alt="legal kg"/>
+<img src="./assets/images/enrich.png" width="600px" alt="legal kg"/>
 
 The questions chosen highlight categories of questions where the ability to traverse a
 Knowledge Graph provides advantages over a naive RAG approach.
 
-<img src="./assets/images/legal_kg.png" width="400px" alt="legal kg"/>
+<img src="./assets/images/legal_kg.png" width="600px" alt="legal kg"/>
 
 ### Email Generation with Context from Matter Management System
 
