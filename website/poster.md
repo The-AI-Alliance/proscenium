@@ -45,10 +45,13 @@ prioritized in the early phases of its design.
 
 ## Library Design
 
-Be flexible.  The AI model, software, hardware, and cloud ecosystem is evolving rapidly.  Keep library design easy to understand and reconfigure.
+The AI model, software, hardware, and cloud ecosystem is evolving rapidly.
+Proscenium is designed to co-evolve with the ecosystem by keeping interfaces
+simple and loosely-coupled.
 
-Proscenium is organized into low-level "verbs" such as:
-chunk, complete (inference), extract, and ivoke (tools).
+It's simplest offerings are low-level "verbs" such as:
+chunk, complete (inference), extract, and invoke (tools).
+In many cases these are thin wrappers around well-known libraries.
 
 Those verbs are composed to form higher-level generic systems
 including:
@@ -69,10 +72,14 @@ large, public-domain legal datasets including U.S. federal case law and statutes
 The questions chosen highlight categories of questions where the ability to traverse a
 Knowledge Graph provides advantages to a naive RAG approach.
 
+![legal kg](./assets/images/legal_kg.png)
+
 The second use case in development is a email authoring capability that
 integrates with a Matter Management system.
 
 Both applications will be demonstrated as Slack integrations as well as Python notebooks.
+They will use Llama 4 models hosted by Together.AI, and make use of
+a Neo4j graph database.
 
 These applications will also demonstrate the creation and tuning of custom
 benchmarks.  Existing legal benchmarks today are very narrow and/or do not map
