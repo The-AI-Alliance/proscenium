@@ -70,9 +70,9 @@ Legal use cases rely heavily on deriving structured data from unstructured data,
 The first use case in the legal domain is question answering related to
 large, public-domain legal datasets including U.S. federal case law and statutes.
 The questions chosen highlight categories of questions where the ability to traverse a
-Knowledge Graph provides advantages to a naive RAG approach.
+Knowledge Graph provides advantages over a naive RAG approach.
 
-![legal kg](./assets/images/legal_kg.png)
+<img src="./assets/images/legal_kg.png" width="400px" alt="legal kg"/>
 
 The second use case in development is a email authoring capability that
 integrates with a Matter Management system.
