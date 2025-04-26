@@ -134,8 +134,11 @@ if __name__ == "__main__":
     socket_mode_client.socket_mode_request_listeners.append(process)
     print("Listening for events...")
 
-    while True:
-        time.sleep(1)
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Exiting...")
 
     socket_mode_client.socket_mode_request_listeners.remove(process)
     socket_mode_client.disconnect()
