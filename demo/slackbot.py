@@ -2,14 +2,66 @@
 
 import os
 import time
+from pathlib import Path
 from rich import print
-
 from rich.pretty import pprint
 
 from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.web import WebClient
 from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
+
+from proscenium.verbs.complete import complete_simple
+from proscenium.verbs.know import knowledge_graph_client
+from proscenium.scripts.graph_rag import query_to_prompts
+
+import demo.domains.legal as domain
+
+default_enrichment_jsonl_file = Path("enrichments.jsonl")
+default_neo4j_uri = "bolt://localhost:7687"
+default_neo4j_username = "neo4j"
+default_neo4j_password = "password"
+default_milvus_uri = "file:/grag-milvus.db"
+
+neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
+neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
+neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
+milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
+
+driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+
+
+def ask(question: str = None, verbose: bool = False):
+
+    prompts = query_to_prompts(
+        question,
+        domain.default_query_extraction_model_id,
+        milvus_uri,
+        driver,
+        domain.query_extract,
+        domain.query_extract_to_graph,
+        domain.query_extract_to_context,
+        domain.context_to_prompts,
+        verbose,
+    )
+
+    if prompts is None:
+
+        print("Unable to form prompts")
+        return None
+
+    else:
+
+        system_prompt, user_prompt = prompts
+
+        response = complete_simple(
+            domain.default_generation_model_id,
+            system_prompt,
+            user_prompt,
+            rich_output=verbose,
+        )
+
+        return response
 
 
 def make_process(self_user_id: str):
@@ -36,9 +88,11 @@ def make_process(self_user_id: str):
                 # pprint(event)
                 print(user, "in", channel, ":", text)
 
-                client.web_client.chat_postMessage(
-                    channel=channel, text=f"Hello <@{user}>, you said: {text}"
-                )
+                response = ask(text, verbose=True)
+
+                if response is not None:
+                    client.web_client.chat_postMessage(channel=channel, text=response)
+
         elif req.type == "interactive":
             pass
         elif req.type == "slash_commands":
@@ -81,3 +135,9 @@ if __name__ == "__main__":
 
     while True:
         time.sleep(1)
+
+    socket_mode_client.socket_mode_request_listeners.remove(process)
+    socket_mode_client.disconnect()
+    print("Disconnected.")
+    driver.close()
+    print("Driver closed.")
