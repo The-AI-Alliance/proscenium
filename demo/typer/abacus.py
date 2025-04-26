@@ -35,7 +35,7 @@ def ask():
     answer = apply_tools(
         model_id=model_id,
         system_message=""""
-Use the tools specified in this request to perform the arithmeticin the user's question.
+Use the tools specified in this request to perform the arithmetic in the user's question.
 Do not use any other tools.
 """,
         message=question,
