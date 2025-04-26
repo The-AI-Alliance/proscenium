@@ -4,6 +4,7 @@ import os
 import time
 from pathlib import Path
 from rich import print
+
 from rich.pretty import pprint
 
 from slack_sdk.socket_mode import SocketModeClient
