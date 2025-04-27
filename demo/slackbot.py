@@ -53,8 +53,7 @@ def make_process(self_user_id: str, channels_by_id: dict, channel_to_handler: di
                         handler = channel_to_handler[channel_name]
                         print("Handler defined for channel", channel_name)
                         # TODO determine whether the handler has a good chance of being useful
-                        response = handler(text, verbose=True)
-                        if response is not None:
+                        for response in handler(text, verbose=True):
                             print("Sending response to channel:", response)
                             client.web_client.chat_postMessage(
                                 channel=channel_id, text=response

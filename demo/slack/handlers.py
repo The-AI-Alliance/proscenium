@@ -1,4 +1,5 @@
 from typing import Optional
+from typing import Generator
 from pathlib import Path
 import os
 
@@ -20,9 +21,8 @@ milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
 
-def handle_abacus(question: str, verbose: bool = False) -> Optional[str]:
+def handle_abacus(question: str, verbose: bool = False) -> Generator[str, None, None]:
 
-    from proscenium.verbs.invoke import process_tools
     from proscenium.scripts.tools import apply_tools
 
     import demo.domains.abacus as domain
@@ -38,10 +38,12 @@ def handle_abacus(question: str, verbose: bool = False) -> Optional[str]:
         rich_output=verbose,
     )
 
-    return answer
+    yield answer
 
 
-def handle_literature(question: str, verbose: bool = False) -> Optional[str]:
+def handle_literature(
+    question: str, verbose: bool = False
+) -> Generator[str, None, None]:
 
     from proscenium.verbs.vector_database import embedding_function
     from proscenium.verbs.vector_database import vector_db
@@ -69,10 +71,10 @@ def handle_literature(question: str, verbose: bool = False) -> Optional[str]:
         verbose,
     )
 
-    return answer
+    yield answer
 
 
-def handle_legal(question: str, verbose: bool = False) -> Optional[str]:
+def handle_legal(question: str, verbose: bool = False) -> Generator[str, None, None]:
 
     import demo.domains.legal as domain
 
@@ -90,8 +92,7 @@ def handle_legal(question: str, verbose: bool = False) -> Optional[str]:
 
     if prompts is None:
 
-        print("Unable to form prompts")
-        return None
+        yield "Sorry, I'm not able to answer that question."
 
     else:
 
@@ -104,7 +105,7 @@ def handle_legal(question: str, verbose: bool = False) -> Optional[str]:
             rich_output=verbose,
         )
 
-        return response
+        yield response
 
 
 channel_to_handler = {
