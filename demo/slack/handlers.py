@@ -96,6 +96,8 @@ def handle_legal(question: str, verbose: bool = False) -> Generator[str, None, N
 
     else:
 
+        yield "I think I can help with that..."
+
         system_prompt, user_prompt = prompts
 
         response = complete_simple(
