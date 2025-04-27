@@ -1,7 +1,10 @@
 from typing import Optional
 from typing import Generator
+from typing import Callable
 from pathlib import Path
 import os
+
+from neo4j import Driver
 
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.know import knowledge_graph_client
@@ -16,12 +19,11 @@ default_milvus_uri = "file:/grag-milvus.db"
 neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
 neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
 neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
+
 milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
-driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
-
-def handle_abacus(question: str, verbose: bool = False) -> Generator[str, None, None]:
+def make_abacus(verbose: bool = False) -> Callable[[str], Generator[str, None, None]]:
 
     from proscenium.scripts.tools import apply_tools
 
@@ -29,27 +31,28 @@ def handle_abacus(question: str, verbose: bool = False) -> Generator[str, None, 
 
     from demo.config import default_model_id
 
-    answer = apply_tools(
-        model_id=default_model_id,
-        system_message=domain.system_message,
-        message=question,
-        tool_desc_list=domain.tool_desc_list,
-        tool_map=domain.tool_map,
-        rich_output=verbose,
-    )
+    def handle(question: str) -> Generator[str, None, None]:
 
-    yield answer
+        yield apply_tools(
+            model_id=default_model_id,
+            system_message=domain.system_message,
+            message=question,
+            tool_desc_list=domain.tool_desc_list,
+            tool_map=domain.tool_map,
+            rich_output=verbose,
+        )
+
+    return handle
 
 
-def handle_literature(
-    question: str, verbose: bool = False
-) -> Generator[str, None, None]:
+def make_literature(
+    verbose: bool = False,
+) -> Callable[[str], Generator[str, None, None]]:
 
     from proscenium.verbs.vector_database import embedding_function
     from proscenium.verbs.vector_database import vector_db
 
     from proscenium.scripts.rag import answer_question
-    from proscenium.scripts.chunk_space import build_vector_db as bvd
     import demo.domains.literature as domain
 
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
@@ -62,61 +65,80 @@ def handle_literature(
     embedding_fn = embedding_function(domain.embedding_model_id)
     print("Embedding model:", domain.embedding_model_id)
 
-    answer = answer_question(
-        question,
-        domain.model_id,
-        vector_db_client,
-        embedding_fn,
-        collection_name,
-        verbose,
-    )
+    def handle(question: str) -> Generator[str, None, None]:
 
-    yield answer
+        yield answer_question(
+            question,
+            domain.model_id,
+            vector_db_client,
+            embedding_fn,
+            collection_name,
+            verbose,
+        )
+
+    return handle
 
 
-def handle_legal(question: str, verbose: bool = False) -> Generator[str, None, None]:
+def make_legal(
+    driver: Driver, verbose: bool = False
+) -> Callable[[str], Generator[str, None, None]]:
 
     import demo.domains.legal as domain
 
-    prompts = query_to_prompts(
-        question,
-        domain.default_query_extraction_model_id,
-        milvus_uri,
-        driver,
-        domain.query_extract,
-        domain.query_extract_to_graph,
-        domain.query_extract_to_context,
-        domain.context_to_prompts,
-        verbose,
-    )
+    def handle(question: str) -> Generator[str, None, None]:
 
-    if prompts is None:
-
-        yield "Sorry, I'm not able to answer that question."
-
-    else:
-
-        yield "I think I can help with that..."
-
-        system_prompt, user_prompt = prompts
-
-        response = complete_simple(
-            domain.default_generation_model_id,
-            system_prompt,
-            user_prompt,
-            rich_output=verbose,
+        prompts = query_to_prompts(
+            question,
+            domain.default_query_extraction_model_id,
+            milvus_uri,
+            driver,
+            domain.query_extract,
+            domain.query_extract_to_graph,
+            domain.query_extract_to_context,
+            domain.context_to_prompts,
+            verbose,
         )
 
-        yield response
+        if prompts is None:
+
+            yield "Sorry, I'm not able to answer that question."
+
+        else:
+
+            yield "I think I can help with that..."
+
+            system_prompt, user_prompt = prompts
+
+            response = complete_simple(
+                domain.default_generation_model_id,
+                system_prompt,
+                user_prompt,
+                rich_output=verbose,
+            )
+
+            yield response
+
+    return handle
 
 
-channel_to_handler = {
-    "legal": handle_legal,
-    "abacus": handle_abacus,
-    "literature": handle_literature,
-}
+driver = None
 
 
-def stop_handlers():
-    # TODO call stop on all handlers
+def start_handlers() -> dict[str, Callable[[str], Generator[str, None, None]]]:
+
+    verbose = True
+
+    driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+
+    channel_to_handler = {
+        "abacus": make_abacus(verbose),
+        "literature": make_literature(verbose),
+        "legal": make_legal(driver, verbose),
+    }
+
+    return channel_to_handler
+
+
+def stop_handlers() -> None:
+
     driver.close()

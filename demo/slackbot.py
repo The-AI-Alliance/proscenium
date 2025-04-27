@@ -13,7 +13,7 @@ from slack_sdk.socket_mode.response import SocketModeResponse
 
 from proscenium.verbs.display import header
 
-from demo.slack.handlers import channel_to_handler, stop_handlers
+from demo.slack.handlers import start_handlers, stop_handlers
 
 
 def make_process(self_user_id: str, channels_by_id: dict, channel_to_handler: dict):
@@ -53,7 +53,7 @@ def make_process(self_user_id: str, channels_by_id: dict, channel_to_handler: di
                         handler = channel_to_handler[channel_name]
                         print("Handler defined for channel", channel_name)
                         # TODO determine whether the handler has a good chance of being useful
-                        for response in handler(text, verbose=True):
+                        for response in handler(text):
                             print("Sending response to channel:", response)
                             client.web_client.chat_postMessage(
                                 channel=channel_id, text=response
@@ -110,6 +110,9 @@ if __name__ == "__main__":
 
     user_id = auth_response["user_id"]
     print("Bot id", auth_response["bot_id"])
+
+    print("Starting handlers...")
+    channel_to_handler = start_handlers()
 
     print()
     print("Handlers defined for channels:", ", ".join(list(channel_to_handler.keys())))
