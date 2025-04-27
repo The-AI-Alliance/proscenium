@@ -15,7 +15,6 @@ typer = "^0.15.2"
 python-dotenv = "^1.0.1"
 pydantic = "^2.10.6"
 stringcase = "^1.2.0"
-thespian = "^4.0.0"
 docstring_parser = "^0.16"
 pymilvus = {version = "^2.5.4"}
 pymilvus_model = {version = "^0.3.1"}

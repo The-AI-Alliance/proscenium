@@ -1,4 +1,4 @@
-from typing import List, Optional, Callable
+from typing import List, Optional, Callable, Generator
 from enum import StrEnum
 
 import logging
@@ -25,6 +25,7 @@ from proscenium.verbs.vector_database import vector_db
 from proscenium.scripts.document_enricher import extract_from_document_chunks
 from proscenium.scripts.entity_resolver import Resolver
 from proscenium.scripts.entity_resolver import find_matching_objects
+from proscenium.scripts.graph_rag import query_to_prompts
 
 from demo.config import default_model_id
 
@@ -699,3 +700,47 @@ def context_to_prompts(
 ###################################
 
 default_generation_model_id = default_model_id
+
+###################################
+# make_handler
+###################################
+
+
+def make_handler(
+    driver: Driver, milvus_uri: str, verbose: bool = False
+) -> Callable[[str], Generator[str, None, None]]:
+
+    def handle(question: str) -> Generator[str, None, None]:
+
+        prompts = query_to_prompts(
+            question,
+            default_query_extraction_model_id,
+            milvus_uri,
+            driver,
+            query_extract,
+            query_extract_to_graph,
+            query_extract_to_context,
+            context_to_prompts,
+            verbose,
+        )
+
+        if prompts is None:
+
+            yield "Sorry, I'm not able to answer that question."
+
+        else:
+
+            yield "I think I can help with that..."
+
+            system_prompt, user_prompt = prompts
+
+            response = complete_simple(
+                default_generation_model_id,
+                system_prompt,
+                user_prompt,
+                rich_output=verbose,
+            )
+
+            yield response
+
+    return handle
