@@ -6,12 +6,10 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 from proscenium.verbs.know import knowledge_graph_client
-from proscenium.verbs.complete import complete_simple
 
 from proscenium.scripts.document_enricher import enrich_documents
 from proscenium.scripts.knowledge_graph import load_knowledge_graph
 from proscenium.scripts.entity_resolver import load_entity_resolver
-from proscenium.scripts.graph_rag import query_to_prompts
 
 import demo.domains.legal as domain
 
@@ -137,6 +135,8 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
+    handler = domain.make_handler(driver, milvus_uri, verbose)
+
     while True:
 
         if question is None:
@@ -149,37 +149,8 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
         print(Panel(q, title="Question"))
 
-        prompts = query_to_prompts(
-            q,
-            domain.default_query_extraction_model_id,
-            milvus_uri,
-            driver,
-            domain.query_extract,
-            domain.query_extract_to_graph,
-            domain.query_extract_to_context,
-            domain.context_to_prompts,
-            verbose,
-        )
-
-        if prompts is None:
-
-            print("Unable to form prompts")
-
-        else:
-
-            system_prompt, user_prompt = prompts
-
-            response = complete_simple(
-                domain.default_generation_model_id,
-                system_prompt,
-                user_prompt,
-                rich_output=verbose,
-            )
-
-            if response:
-                print(Panel(response, title="Answer"))
-            else:
-                print("No answer")
+        for answer in handler(q):
+            print(Panel(answer, title="Answer"))
 
         if loop:
             question = None
