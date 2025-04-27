@@ -11,6 +11,8 @@ from slack_sdk.web import WebClient
 from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
 
+from proscenium.verbs.display import header
+
 from demo.slack.handlers import channel_to_handler, stop_handlers
 
 
@@ -76,6 +78,10 @@ def make_process(self_user_id: str, channels_by_id: dict, channel_to_handler: di
 
 if __name__ == "__main__":
 
+    print(header())
+
+    print("Starting the Proscenium Slack bot demo...")
+
     slack_app_token = os.environ.get("SLACK_APP_TOKEN")
     slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
 
@@ -98,21 +104,23 @@ if __name__ == "__main__":
 
     auth_response = socket_mode_client.web_client.auth_test()
 
-    bot_user_id = auth_response["user_id"]
+    print(auth_response["url"])
+    print()
+    print(f"Team '{auth_response["team"]}' ({auth_response["team_id"]})")
+    print(f"User '{auth_response["user"]}' ({auth_response["user_id"]})")
 
-    print("URL:", auth_response["url"])
-    print("Bot ID:", auth_response["bot_id"])
-    print("Team:", auth_response["team"], "ID:", auth_response["team_id"])
-    print("User:", auth_response["user"], "ID:", auth_response["user_id"])
+    user_id = auth_response["user_id"]
+    print("Bot id", auth_response["bot_id"])
 
+    print()
     print("Handlers defined for channels:", ", ".join(list(channel_to_handler.keys())))
 
-    process = make_process(bot_user_id, channels_by_id, channel_to_handler)
+    process = make_process(user_id, channels_by_id, channel_to_handler)
     socket_mode_client.socket_mode_request_listeners.append(process)
     print("Listening for events...")
 
     socket_mode_client.web_client.chat_postMessage(
-        channel=bot_user_id,
+        channel=user_id,
         text="Starting up.",
     )
 
@@ -123,7 +131,7 @@ if __name__ == "__main__":
         print("Exiting...")
 
     socket_mode_client.web_client.chat_postMessage(
-        channel=bot_user_id,
+        channel=user_id,
         text="Shutting down.",
     )
 
