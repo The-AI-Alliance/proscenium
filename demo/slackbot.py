@@ -112,7 +112,7 @@ if __name__ == "__main__":
     print("Bot id", auth_response["bot_id"])
 
     print("Starting handlers...")
-    channel_to_handler = start_handlers()
+    channel_to_handler = start_handlers(verbose=True)
 
     print()
     print("Handlers defined for channels:", ", ".join(list(channel_to_handler.keys())))

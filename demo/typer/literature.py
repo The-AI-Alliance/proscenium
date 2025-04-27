@@ -39,8 +39,8 @@ def prepare():
         asyncio.run(url_to_file(book.url, book.data_file))
         print("Local copy to chunk:", book.data_file)
 
-    embedding_fn = embedding_function(domain.embedding_model_id)
-    print("Embedding model", domain.embedding_model_id)
+    embedding_fn = embedding_function(domain.default_embedding_model_id)
+    print("Embedding model", domain.default_embedding_model_id)
 
     vector_db_client = vector_db(milvus_uri, overwrite=True)
     print("Vector db at uri", milvus_uri)
