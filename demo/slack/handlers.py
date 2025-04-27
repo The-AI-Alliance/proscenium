@@ -25,26 +25,16 @@ def handle_abacus(question: str, verbose: bool = False) -> Optional[str]:
     from proscenium.verbs.invoke import process_tools
     from proscenium.scripts.tools import apply_tools
 
-    from gofannon.basic_math.addition import Addition
-    from gofannon.basic_math.subtraction import Subtraction
-    from gofannon.basic_math.multiplication import Multiplication
-    from gofannon.basic_math.division import Division
-
-    tools = [Addition, Subtraction, Multiplication, Division]
-
-    tool_map, tool_desc_list = process_tools(tools)
+    import demo.domains.abacus as domain
 
     from demo.config import default_model_id
 
     answer = apply_tools(
         model_id=default_model_id,
-        system_message=""""
-Use the tools specified in this request to perform the arithmetic in the user's question.
-Do not use any other tools.
-""",
+        system_message=domain.system_message,
         message=question,
-        tool_desc_list=tool_desc_list,
-        tool_map=tool_map,
+        tool_desc_list=domain.tool_desc_list,
+        tool_map=domain.tool_map,
         rich_output=verbose,
     )
 
@@ -125,4 +115,5 @@ channel_to_handler = {
 
 
 def stop_handlers():
+    # TODO call stop on all handlers
     driver.close()
