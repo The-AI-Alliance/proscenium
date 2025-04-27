@@ -17,6 +17,7 @@ collection_name = "literature_chunks"
 
 default_milvus_uri = "file:/milvus.db"
 # milvus_uri = "http://localhost:19530"
+milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -31,8 +32,6 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 """
 )
 def prepare():
-
-    milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
     for book in domain.books:
         print("Book:", book.title)
@@ -63,7 +62,12 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
-    milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
+    handler = domain.make_handler(
+        domain.default_generator_model_id,
+        milvus_uri,
+        domain.default_embedding_model_id,
+        verbose,
+    )
 
     while True:
 
@@ -75,17 +79,8 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
         else:
             q = question
 
-        vector_db_client = vector_db(milvus_uri)
-        print("Vector db at uri", milvus_uri)
-
-        embedding_fn = embedding_function(domain.embedding_model_id)
-        print("Embedding model:", domain.embedding_model_id)
-
-        answer = answer_question(
-            q, domain.model_id, vector_db_client, embedding_fn, collection_name, verbose
-        )
-
-        print(Panel(answer, title="Assistant"))
+        for answer in handler(q):
+            print(Panel(answer, title="Assistant"))
 
         if loop:
             question = None
