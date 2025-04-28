@@ -1,11 +1,15 @@
 from typing import Generator
 from typing import Callable
 
+import asyncio
+
 from pathlib import Path
 
+from proscenium.verbs.read import url_to_file
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
 
+from proscenium.scripts.chunk_space import make_vector_db_builder
 from proscenium.scripts.rag import answer_question
 
 from demo.config import default_model_id
@@ -40,6 +44,41 @@ books = [aeschylus, walden]
 user_prompt = f"What is your question about {', '.join([b.title for b in books])}?"
 
 default_question = "What did Hermes say to Prometheus about giving fire to humans?"
+
+
+def make_chunk_space_builder(
+    milvus_uri: str,
+    collection_name: str,
+    embedding_model_id: str,
+    verbose: bool = False,
+) -> Callable[[], None]:
+
+    def build():
+        for book in books:
+            asyncio.run(url_to_file(book.url, book.data_file))
+            if verbose:
+                print(book.title, "local copy to chunk at", book.data_file)
+
+        embedding_fn = embedding_function(embedding_model_id)
+        if verbose:
+            print("Embedding model", embedding_model_id)
+
+        vector_db_client = vector_db(milvus_uri, overwrite=True)
+        if verbose:
+            print("Vector db at uri", milvus_uri)
+
+        vector_db_build = make_vector_db_builder(
+            [str(book.data_file) for book in books],
+            vector_db_client,
+            embedding_fn,
+            collection_name,
+        )
+
+        vector_db_build()
+
+        vector_db_client.close()
+
+    return build
 
 
 def make_handler(
