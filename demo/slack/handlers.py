@@ -2,11 +2,13 @@ from typing import Generator
 from typing import Callable
 from typing import List
 from typing import Optional
+from typing import Any
 
 from rich.console import Console
 from pathlib import Path
 import os
 from neo4j import GraphDatabase
+from neo4j import Driver
 
 import demo.domains.abacus as abacus_domain
 import demo.domains.literature as literature_domain
@@ -56,7 +58,10 @@ def prerequisites(console: Optional[Console] = None) -> List[Callable[[bool], No
 
 def start_handlers(
     console: Optional[Console] = None,
-) -> dict[str, Callable[[str], Generator[str, None, None]]]:
+) -> tuple[dict[str, Callable[[str], Generator[str, None, None]]], Any]:
+
+    if console is not None:
+        console.print("Starting handlers...")
 
     driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
@@ -71,9 +76,18 @@ def start_handlers(
         "legal": legal_domain.make_handler(driver, legal_milvus_uri, console=console),
     }
 
-    return channel_to_handler
+    if console is not None:
+        console.print(
+            "Handlers defined for channels:", ", ".join(list(channel_to_handler.keys()))
+        )
+
+    resources = driver
+
+    return channel_to_handler, resources
 
 
-def stop_handlers() -> None:
+def stop_handlers(resources: Any) -> None:
+
+    driver: Driver = resources
 
     driver.close()
