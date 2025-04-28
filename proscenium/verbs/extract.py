@@ -1,4 +1,6 @@
+from typing import Optional
 import logging
+from rich.console import Console
 from string import Formatter
 
 import json
@@ -36,7 +38,7 @@ def extract_to_pydantic_model(
     extraction_template: str,
     clazz: type[BaseModel],
     text: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> BaseModel:
 
     extract_str = complete_simple(
@@ -47,7 +49,7 @@ def extract_to_pydantic_model(
             "type": "json_object",
             "schema": clazz.model_json_schema(),
         },
-        rich_output=verbose,
+        console=console,
     )
 
     logging.info("complete_to_pydantic_model: extract_str = <<<%s>>>", extract_str)

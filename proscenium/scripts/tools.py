@@ -1,4 +1,7 @@
-from rich import print
+from typing import Optional
+import logging
+
+from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
@@ -16,7 +19,7 @@ def apply_tools(
     tool_desc_list: list,
     tool_map: dict,
     temperature: float = 0.75,
-    rich_output: bool = False,
+    console: Optional[Console] = None,
 ) -> str:
 
     messages = [
@@ -25,35 +28,33 @@ def apply_tools(
     ]
 
     response = complete_for_tool_applications(
-        model_id, messages, tool_desc_list, temperature, rich_output
+        model_id, messages, tool_desc_list, temperature, console
     )
 
     tool_call_message = response.choices[0].message
 
     if tool_call_message.tool_calls is None or len(tool_call_message.tool_calls) == 0:
 
-        if rich_output:
-            print(
+        if console is not None:
+            console.print(
                 Panel(
                     Text(str(tool_call_message.content)),
                     title="Tool Application Response",
                 )
             )
 
-        print("No tool applications detected")
+        logging.info("No tool applications detected")
 
         return tool_call_message.content
 
     else:
 
-        if rich_output:
-            print(
+        if console is not None:
+            console.print(
                 Panel(Text(str(tool_call_message)), title="Tool Application Response")
             )
 
-        tool_evaluation_messages = evaluate_tool_calls(
-            tool_call_message, tool_map, rich_output
-        )
+        tool_evaluation_messages = evaluate_tool_calls(tool_call_message, tool_map)
 
         result = complete_with_tool_results(
             model_id,
@@ -62,7 +63,7 @@ def apply_tools(
             tool_evaluation_messages,
             tool_desc_list,
             temperature,
-            rich_output,
+            console,
         )
 
         return result

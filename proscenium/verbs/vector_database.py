@@ -1,5 +1,6 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
+import logging
 from pathlib import Path
 from langchain_core.documents.base import Document
 from pymilvus import MilvusClient
@@ -54,15 +55,14 @@ def vector_db(
         if file_path.exists():
             if overwrite:
                 file_path.unlink()
-                print("Deleted existing vector db file", file_path)
+                logging.info("Deleted existing vector db file %s", file_path)
             else:
-                print(
-                    "Using existing",
+                logging.info(
+                    "Using existing %s file. Use overwrite=True to replace.",
                     uri_fields[2],
-                    "file. Use overwrite=True to replace.",
                 )
         else:
-            print("Creating new vector db file", file_path)
+            logging.info("Creating new vector db file", file_path)
 
         client = MilvusClient(uri=str(file_path))
 
@@ -100,7 +100,7 @@ def create_collection(
     client.create_index(
         collection_name=collection_name, index_params=index_params, sync=True
     )
-    print("Created collection", collection_name)
+    logging.info("Created collection %s", collection_name)
 
 
 def add_chunks_to_vector_db(

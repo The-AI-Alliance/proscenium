@@ -1,7 +1,11 @@
 from typing import Callable
+from typing import Optional
+
+import logging
+
+from rich.console import Console
 
 from pydantic import BaseModel
-from rich import print
 from uuid import uuid4, UUID
 from neo4j import Driver
 
@@ -12,41 +16,41 @@ def query_to_prompts(
     milvus_uri: str,
     driver: Driver,
     query_extract: Callable[
-        [str, str, bool], BaseModel
+        [str, str], BaseModel
     ],  # (query_str, query_extraction_model_id) -> QueryExtractions
     query_extract_to_graph: Callable[
-        [str, UUID, BaseModel, bool], None
-    ],  # query, query_id, extract, verbose
+        [str, UUID, BaseModel], None
+    ],  # query, query_id, extract
     query_extract_to_context: Callable[
-        [BaseModel, str, Driver, str, bool], BaseModel
+        [BaseModel, str, Driver, str, Optional[Console]], BaseModel
     ],  # (QueryExtractions, query_str, Driver, milvus_uri) -> Context
     context_to_prompts: Callable[
-        [BaseModel, bool], tuple[str, str]
+        [BaseModel], tuple[str, str]
     ],  # Context -> (system_prompt, user_prompt)
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> str:
 
     query_id = uuid4()
 
-    print("Extracting information from the question")
+    logging.info("Extracting information from the question")
 
-    extract = query_extract(query, query_extraction_model_id, verbose)
+    extract = query_extract(query, query_extraction_model_id)
     if extract is None:
-        print("Unable to extract information from that question")
+        logging.info("Unable to extract information from that question")
         return None
 
-    if verbose:
-        print("Extract:", extract)
+    logging.info("Extract: %s", extract)
 
-    print("Storing the extracted information in the graph")
-    query_extract_to_graph(query, query_id, extract, driver, verbose)
+    logging.info("Storing the extracted information in the graph")
+    query_extract_to_graph(query, query_id, extract, driver)
 
-    print("Forming context from the extracted information")
-    context = query_extract_to_context(extract, query, driver, milvus_uri, verbose)
+    logging.info("Forming context from the extracted information")
+    context = query_extract_to_context(
+        extract, query, driver, milvus_uri, console=console
+    )
 
-    if verbose:
-        print("Context:", context)
+    logging.info("Context: %s", context)
 
-    prompts = context_to_prompts(context, verbose)
+    prompts = context_to_prompts(context)
 
     return prompts

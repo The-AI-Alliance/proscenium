@@ -1,7 +1,7 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
+import logging
 
-from rich import print
-from rich.panel import Panel
+from rich.console import Console
 
 from pymilvus import MilvusClient
 from pymilvus import model
@@ -44,20 +44,16 @@ def answer_question(
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     collection_name: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> str:
 
-    print(Panel(query, title="User"))
-
     chunks = closest_chunks(vector_db_client, embedding_fn, query, collection_name)
-    if verbose:
-        print("Found", len(chunks), "closest chunks")
-        print(chunk_hits_table(chunks))
+    logging.info("Found %s closest chunks", len(chunks))
+    logging.info(chunk_hits_table(chunks))
 
     prompt = rag_prompt(chunks, query)
-    if verbose:
-        print("RAG prompt created. Calling inference at", model_id, "\n\n")
+    logging.info("RAG prompt created. Calling inference at %s", model_id)
 
-    answer = complete_simple(model_id, rag_system_prompt, prompt, rich_output=verbose)
+    answer = complete_simple(model_id, rag_system_prompt, prompt, console=console)
 
     return answer

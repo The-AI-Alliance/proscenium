@@ -1,10 +1,10 @@
 from typing import Callable
 from typing import Any
 
+import logging
 import json
 from pydantic import BaseModel
 
-from rich import print
 from rich.progress import Progress
 
 from neo4j import Driver
@@ -17,7 +17,7 @@ def load_knowledge_graph(
     doc_enrichments_to_graph: Callable[[Any, BaseModel], None],
 ) -> None:
 
-    print("Parsing enrichments from", enrichments_jsonl_file)
+    logging.info("Parsing enrichments from %s", enrichments_jsonl_file)
 
     enrichmentss = []
     with open(enrichments_jsonl_file, "r") as f:

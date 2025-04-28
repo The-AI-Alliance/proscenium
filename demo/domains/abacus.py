@@ -1,6 +1,9 @@
 from typing import Generator
 from typing import Callable
 from typing import List
+from typing import Optional
+
+from rich.console import Console
 
 from gofannon.basic_math.addition import Addition
 from gofannon.basic_math.subtraction import Subtraction
@@ -29,13 +32,15 @@ Do not use any other tools.
 
 
 def prerequisites(
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> List[Callable[[bool], None]]:
 
     return []
 
 
-def make_handler(verbose: bool = False) -> Callable[[str], Generator[str, None, None]]:
+def make_handler(
+    console: Optional[Console] = None,
+) -> Callable[[str], Generator[str, None, None]]:
 
     def handle(question: str) -> Generator[str, None, None]:
 
@@ -45,7 +50,7 @@ def make_handler(verbose: bool = False) -> Callable[[str], Generator[str, None, 
             message=question,
             tool_desc_list=domain.tool_desc_list,
             tool_map=domain.tool_map,
-            rich_output=verbose,
+            console=console,
         )
 
     return handle

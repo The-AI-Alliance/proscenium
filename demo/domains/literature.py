@@ -1,9 +1,11 @@
 from typing import Generator
 from typing import Callable
 from typing import List
+from typing import Optional
 
+import logging
 import asyncio
-
+from rich.console import Console
 from pathlib import Path
 
 from proscenium.verbs.read import url_to_file
@@ -53,7 +55,7 @@ def make_chunk_space_builder(
     milvus_uri: str,
     collection_name: str,
     embedding_model_id: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> Callable[[bool], None]:
 
     def build(force: bool = False) -> None:
@@ -62,7 +64,7 @@ def make_chunk_space_builder(
             vector_db_client = vector_db(milvus_uri, overwrite=False)
             if vector_db_client.has_collection(collection_name):
                 # TODO the existence of the collection might not be strong enough proof
-                print(
+                logging.info(
                     f"Milvus DB already exists at {milvus_uri} with collection {collection_name}.",
                     "Skipping its build.",
                 )
@@ -71,18 +73,14 @@ def make_chunk_space_builder(
             vector_db_client.close()
 
         for book in books:
-            if not Path(book.data_file).exists():
-                asyncio.run(url_to_file(book.url, book.data_file))
-            if verbose:
-                print(book.title, "local copy to chunk at", book.data_file)
+            asyncio.run(url_to_file(book.url, book.data_file))
+            logging.info("%s local copy to chunk at %s", book.title, book.data_file)
 
         embedding_fn = embedding_function(embedding_model_id)
-        if verbose:
-            print("Embedding model", embedding_model_id)
+        logging.info("Embedding model %s", embedding_model_id)
 
         vector_db_client = vector_db(milvus_uri, overwrite=True)
-        if verbose:
-            print("Vector db at uri", milvus_uri)
+        logging.info("Vector db at uri %s", milvus_uri)
 
         vector_db_build = make_vector_db_builder(
             [str(book.data_file) for book in books],
@@ -91,7 +89,7 @@ def make_chunk_space_builder(
             collection_name,
         )
 
-        print("Building chunk space")
+        logging.info("Building chunk space")
         vector_db_build()
 
         vector_db_client.close()
@@ -100,14 +98,14 @@ def make_chunk_space_builder(
 
 
 def prerequisites(
-    milvus_uri, collection_name, embedding_model_id, verbose: bool = False
+    milvus_uri, collection_name, embedding_model_id, console: Optional[Console] = None
 ) -> List[Callable[[bool], None]]:
 
     build = make_chunk_space_builder(
         milvus_uri,
         collection_name,
         embedding_model_id,
-        verbose=verbose,
+        console=console,
     )
 
     return [build]
@@ -117,14 +115,14 @@ def make_handler(
     generator_model_id: str,
     milvus_uri: str,
     embedding_model_id: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> Callable[[str], Generator[str, None, None]]:
 
     vector_db_client = vector_db(milvus_uri)
-    print("Vector db at uri", milvus_uri)
+    logging.info("Vector db at uri %s", milvus_uri)
 
     embedding_fn = embedding_function(embedding_model_id)
-    print("Embedding model:", embedding_model_id)
+    logging.info("Embedding model %s", embedding_model_id)
 
     def handle(question: str) -> Generator[str, None, None]:
 
@@ -134,7 +132,7 @@ def make_handler(
             vector_db_client,
             embedding_fn,
             default_collection_name,
-            verbose,
+            console,
         )
 
     return handle

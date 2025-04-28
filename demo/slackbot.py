@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
+from typing import Optional
 import os
 import time
-from rich import print
+import logging
 
 from rich.pretty import pprint
+from rich.console import Console
 
 from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.web import WebClient
@@ -17,7 +19,10 @@ from demo.slack.handlers import start_handlers, stop_handlers, prerequisites
 
 
 def make_slack_listener(
-    self_user_id: str, channels_by_id: dict, channel_to_handler: dict
+    self_user_id: str,
+    channels_by_id: dict,
+    channel_to_handler: dict,
+    console: Console,
 ):
 
     def process(client: SocketModeClient, req: SocketModeRequest):
@@ -41,7 +46,7 @@ def make_slack_listener(
                 channel_id = event.get("channel")
 
                 channel = channels_by_id.get(channel_id, None)
-                print(user, "in", "#" + channel["name"], "said ", f'"{text}"')
+                console.print(user, "in", "#" + channel["name"], "said ", f'"{text}"')
 
                 response = None
                 if channel is None:
@@ -51,15 +56,15 @@ def make_slack_listener(
                     channel_name = channel["name"]
                     if channel_name in channel_to_handler:
                         handle = channel_to_handler[channel_name]
-                        print("Handler defined for channel", channel_name)
+                        console.print("Handler defined for channel", channel_name)
                         # TODO determine whether the handler has a good chance of being useful
                         for response in handle(text):
-                            print("Sending response to channel:", response)
+                            console.print("Sending response to channel:", response)
                             client.web_client.chat_postMessage(
                                 channel=channel_id, text=response
                             )
                     else:
-                        print("No handler for channel", channel_name)
+                        logging.warning("No handler for channel", channel_name)
 
         elif req.type == "interactive":
             pass
@@ -77,9 +82,19 @@ def make_slack_listener(
 
 if __name__ == "__main__":
 
-    print(header())
+    verbose = True  # TODO make this a command line option
+    console = Console()
+    sub_console = None
 
-    print("Starting the Proscenium Slack bot demo...")
+    if verbose:
+        logging.basicConfig(level=logging.INFO)
+        sub_console = console
+    else:
+        logging.basicConfig(level=logging.WARN)
+
+    console.print(header())
+
+    console.print("Starting the Proscenium Slack bot demo...")
 
     slack_app_token = os.environ.get("SLACK_APP_TOKEN")
     slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
@@ -90,7 +105,7 @@ if __name__ == "__main__":
     )
 
     socket_mode_client.connect()
-    print("Connected.")
+    console.print("Connected.")
 
     subscribed_channels = socket_mode_client.web_client.conversations_list(
         types="public_channel,private_channel,mpim,im",
@@ -103,28 +118,32 @@ if __name__ == "__main__":
 
     auth_response = socket_mode_client.web_client.auth_test()
 
-    print(auth_response["url"])
-    print()
-    print(f"Team '{auth_response["team"]}' ({auth_response["team_id"]})")
-    print(f"User '{auth_response["user"]}' ({auth_response["user_id"]})")
+    console.print(auth_response["url"])
+    console.print()
+    console.print(f"Team '{auth_response["team"]}' ({auth_response["team_id"]})")
+    console.print(f"User '{auth_response["user"]}' ({auth_response["user_id"]})")
 
     user_id = auth_response["user_id"]
-    print("Bot id", auth_response["bot_id"])
+    console.print("Bot id", auth_response["bot_id"])
 
-    print("Building any missing resouces...")
-    pres = prerequisites(verbose=True)
+    console.print("Building any missing resouces...")
+    pres = prerequisites(console=sub_console)
     for pre in pres:
         pre()
 
-    print("Starting handlers...")
-    channel_to_handler = start_handlers(verbose=True)
+    console.print("Starting handlers...")
+    channel_to_handler = start_handlers(console=sub_console)
 
-    print()
-    print("Handlers defined for channels:", ", ".join(list(channel_to_handler.keys())))
+    console.print()
+    console.print(
+        "Handlers defined for channels:", ", ".join(list(channel_to_handler.keys()))
+    )
 
-    slack_listener = make_slack_listener(user_id, channels_by_id, channel_to_handler)
+    slack_listener = make_slack_listener(
+        user_id, channels_by_id, channel_to_handler, console
+    )
     socket_mode_client.socket_mode_request_listeners.append(slack_listener)
-    print("Listening for events...")
+    console.print("Listening for events...")
 
     socket_mode_client.web_client.chat_postMessage(
         channel=user_id,
@@ -135,7 +154,7 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Exiting...")
+        console.print("Exiting...")
 
     socket_mode_client.web_client.chat_postMessage(
         channel=user_id,
@@ -144,7 +163,7 @@ if __name__ == "__main__":
 
     socket_mode_client.socket_mode_request_listeners.remove(slack_listener)
     socket_mode_client.disconnect()
-    print("Disconnected.")
+    console.print("Disconnected.")
 
     stop_handlers()
-    print("Handlers stopped.")
+    console.print("Handlers stopped.")

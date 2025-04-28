@@ -1,12 +1,13 @@
 from typing import List
 from typing import Callable
-from typing import Any
+from typing import Optional
 
 import time
+import logging
 from pydantic import BaseModel
 
-from rich import print
 from rich.panel import Panel
+from rich.console import Console
 from rich.progress import Progress
 
 from langchain_core.documents.base import Document
@@ -22,11 +23,12 @@ def extract_from_document_chunks(
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
     delay: float,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> List[BaseModel]:
 
-    print(doc_as_rich(doc))
-    print()
+    if console is not None:
+        console.print(doc_as_rich(doc))
+        console.print()
 
     extract_models = []
 
@@ -40,9 +42,9 @@ def extract_from_document_chunks(
             chunk.page_content,
         )
 
-        if verbose:
-            print("Extract model in chunk", i + 1, "of", len(chunks))
-            print(Panel(str(ce)))
+        logging.info("Extract model in chunk %s of %s", i + 1, len(chunks))
+        if console is not None:
+            console.print(Panel(str(ce)))
 
         extract_models.append(ce)
         time.sleep(delay)
@@ -55,7 +57,7 @@ def enrich_documents(
     extract_from_doc_chunks: Callable[[Document], List[BaseModel]],
     doc_enrichments: Callable[[Document, list[BaseModel]], BaseModel],
     enrichments_jsonl_file: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> None:
 
     docs = retrieve_documents()
@@ -70,11 +72,11 @@ def enrich_documents(
 
             for doc in docs:
 
-                chunk_extract_models = extract_from_doc_chunks(doc, verbose)
+                chunk_extract_models = extract_from_doc_chunks(doc)
                 enrichments = doc_enrichments(doc, chunk_extract_models)
                 enrichments_json = enrichments.model_dump_json()
                 f.write(enrichments_json + "\n")
 
                 progress.update(task_enrich, advance=1)
 
-        print("Wrote document enrichments to", enrichments_jsonl_file)
+        logging.info("Wrote document enrichments to %s", enrichments_jsonl_file)
