@@ -29,7 +29,7 @@ def prepare(verbose: bool = False):
         milvus_uri, collection_name, domain.default_embedding_model_id, verbose
     )
     print("Building chunk space")
-    build()
+    build(force=True)
 
 
 @app.command(

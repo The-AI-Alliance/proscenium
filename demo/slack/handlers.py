@@ -28,7 +28,6 @@ neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 driver = None
 
 
-# TODO create `prerequisites` function in each domain
 def prerequisites(verbose: bool = False) -> List[Callable[[bool], None]]:
 
     abacus_pres = abacus_domain.prerequisites(verbose=verbose)
