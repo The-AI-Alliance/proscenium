@@ -40,7 +40,7 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
-    handler = domain.make_handler(
+    handle = domain.make_handler(
         domain.default_generator_model_id,
         milvus_uri,
         domain.default_embedding_model_id,
@@ -57,7 +57,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
         else:
             q = question
 
-        for answer in handler(q):
+        for answer in handle(q):
             print(Panel(answer, title="Assistant"))
 
         if loop:

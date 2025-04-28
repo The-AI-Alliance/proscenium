@@ -16,7 +16,9 @@ from proscenium.verbs.display import header
 from demo.slack.handlers import start_handlers, stop_handlers
 
 
-def make_process(self_user_id: str, channels_by_id: dict, channel_to_handler: dict):
+def make_slack_listener(
+    self_user_id: str, channels_by_id: dict, channel_to_handler: dict
+):
 
     def process(client: SocketModeClient, req: SocketModeRequest):
 
@@ -50,10 +52,10 @@ def make_process(self_user_id: str, channels_by_id: dict, channel_to_handler: di
                 else:
                     channel_name = channel["name"]
                     if channel_name in channel_to_handler:
-                        handler = channel_to_handler[channel_name]
+                        handle = channel_to_handler[channel_name]
                         print("Handler defined for channel", channel_name)
                         # TODO determine whether the handler has a good chance of being useful
-                        for response in handler(text):
+                        for response in handle(text):
                             print("Sending response to channel:", response)
                             client.web_client.chat_postMessage(
                                 channel=channel_id, text=response
@@ -117,8 +119,8 @@ if __name__ == "__main__":
     print()
     print("Handlers defined for channels:", ", ".join(list(channel_to_handler.keys())))
 
-    process = make_process(user_id, channels_by_id, channel_to_handler)
-    socket_mode_client.socket_mode_request_listeners.append(process)
+    slack_listener = make_slack_listener(user_id, channels_by_id, channel_to_handler)
+    socket_mode_client.socket_mode_request_listeners.append(slack_listener)
     print("Listening for events...")
 
     socket_mode_client.web_client.chat_postMessage(
@@ -137,7 +139,7 @@ if __name__ == "__main__":
         text="Shutting down.",
     )
 
-    socket_mode_client.socket_mode_request_listeners.remove(process)
+    socket_mode_client.socket_mode_request_listeners.remove(slack_listener)
     socket_mode_client.disconnect()
     print("Disconnected.")
 
