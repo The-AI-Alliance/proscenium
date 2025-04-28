@@ -71,8 +71,7 @@ def make_chunk_space_builder(
             vector_db_client.close()
 
         for book in books:
-            if not Path(book.data_file).exists():
-                asyncio.run(url_to_file(book.url, book.data_file))
+            asyncio.run(url_to_file(book.url, book.data_file))
             if verbose:
                 print(book.title, "local copy to chunk at", book.data_file)
 

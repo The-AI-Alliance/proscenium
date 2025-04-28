@@ -1,8 +1,8 @@
 from typing import List
 from typing import Callable
-from typing import Any
 
 import time
+import logging
 from pydantic import BaseModel
 
 from rich import print
@@ -77,4 +77,4 @@ def enrich_documents(
 
                 progress.update(task_enrich, advance=1)
 
-        print("Wrote document enrichments to", enrichments_jsonl_file)
+        logging.info("Wrote document enrichments to", enrichments_jsonl_file)

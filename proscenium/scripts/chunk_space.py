@@ -1,4 +1,4 @@
-from rich import print
+import logging
 
 from pymilvus import MilvusClient
 from pymilvus import model
@@ -27,13 +27,13 @@ def make_vector_db_builder(
 
             documents = load_file(data_file)
             chunks = documents_to_chunks_by_characters(documents)
-            print("Data file", data_file, "has", len(chunks), "chunks")
+            logging.info("Data file", data_file, "has", len(chunks), "chunks")
 
             info = add_chunks_to_vector_db(
                 vector_db_client, embedding_fn, chunks, collection_name
             )
-            print(info["insert_count"], "chunks inserted")
+            logging.info(info["insert_count"], "chunks inserted")
 
-        print(collection_panel(vector_db_client, collection_name))
+        logging.info(collection_panel(vector_db_client, collection_name))
 
     return build

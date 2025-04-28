@@ -1,7 +1,8 @@
 from typing import Callable
 
+import logging
+
 from pydantic import BaseModel
-from rich import print
 from uuid import uuid4, UUID
 from neo4j import Driver
 
@@ -28,24 +29,22 @@ def query_to_prompts(
 
     query_id = uuid4()
 
-    print("Extracting information from the question")
+    logging.info("Extracting information from the question")
 
     extract = query_extract(query, query_extraction_model_id, verbose)
     if extract is None:
-        print("Unable to extract information from that question")
+        logging.info("Unable to extract information from that question")
         return None
 
-    if verbose:
-        print("Extract:", extract)
+    logging.info("Extract:", extract)
 
-    print("Storing the extracted information in the graph")
+    logging.info("Storing the extracted information in the graph")
     query_extract_to_graph(query, query_id, extract, driver, verbose)
 
-    print("Forming context from the extracted information")
+    logging.info("Forming context from the extracted information")
     context = query_extract_to_context(extract, query, driver, milvus_uri, verbose)
 
-    if verbose:
-        print("Context:", context)
+    logging.info("Context:", context)
 
     prompts = context_to_prompts(context, verbose)
 

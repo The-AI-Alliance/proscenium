@@ -38,7 +38,7 @@ Valid model ids:
 """
 
 from typing import Any
-
+import logging
 import json
 from rich import print
 from rich.console import Group
@@ -111,13 +111,11 @@ def evaluate_tool_call(
     # TODO validate the arguments?
     function_args = json.loads(tool_call.function.arguments)
 
-    if rich_output:
-        print(f"Evaluating tool call: {function_name} with args {function_args}")
+    logging.info(f"Evaluating tool call: {function_name} with args {function_args}")
 
     function_response = tool_map[function_name](**function_args)
 
-    if rich_output:
-        print(f"   Response: {function_response}")
+    logging.info(f"   Response: {function_response}")
 
     return function_response
 
@@ -140,8 +138,7 @@ def evaluate_tool_calls(
 
     tool_call: ChatCompletionMessageToolCall
 
-    if rich_output:
-        print("Evaluating tool calls")
+    logging.info("Evaluating tool calls")
 
     new_messages: list[dict] = []
 
@@ -149,8 +146,7 @@ def evaluate_tool_calls(
         function_response = evaluate_tool_call(tool_map, tool_call, rich_output)
         new_messages.append(tool_response_message(tool_call, function_response))
 
-    if rich_output:
-        print("Tool calls evaluated")
+    logging.info("Tool calls evaluated")
 
     return new_messages
 

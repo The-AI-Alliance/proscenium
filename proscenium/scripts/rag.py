@@ -1,7 +1,5 @@
 from typing import List, Dict
-
-from rich import print
-from rich.panel import Panel
+import logging
 
 from pymilvus import MilvusClient
 from pymilvus import model
@@ -47,16 +45,12 @@ def answer_question(
     verbose: bool = False,
 ) -> str:
 
-    print(Panel(query, title="User"))
-
     chunks = closest_chunks(vector_db_client, embedding_fn, query, collection_name)
-    if verbose:
-        print("Found", len(chunks), "closest chunks")
-        print(chunk_hits_table(chunks))
+    logging.info("Found", len(chunks), "closest chunks")
+    logging.info(chunk_hits_table(chunks))
 
     prompt = rag_prompt(chunks, query)
-    if verbose:
-        print("RAG prompt created. Calling inference at", model_id, "\n\n")
+    logging.info("RAG prompt created. Calling inference at", model_id, "\n\n")
 
     answer = complete_simple(model_id, rag_system_prompt, prompt, rich_output=verbose)
 

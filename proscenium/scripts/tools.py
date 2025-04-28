@@ -1,3 +1,4 @@
+import logging
 from rich import print
 from rich.panel import Panel
 from rich.text import Text
@@ -40,7 +41,7 @@ def apply_tools(
                 )
             )
 
-        print("No tool applications detected")
+        logging.info("No tool applications detected")
 
         return tool_call_message.content
 
