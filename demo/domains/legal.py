@@ -343,9 +343,15 @@ from pathlib import Path
 
 def make_document_enricher(
     docs_per_dataset: int, output: Path, delay: float, verbose: bool = False
-) -> Callable[[], None]:
+) -> Callable[[bool], None]:
 
-    def enrich():
+    def enrich(force: bool = False):
+
+        if output.exists() and not force:
+            print(
+                f"Output file {output} already exists.",
+            )
+            return
 
         extract_from_opinion_chunks = extract_from_opinion_chunks_function(
             doc_as_rich,
@@ -470,10 +476,23 @@ def make_kg_loader(
     neo4j_username: str,
     neo4j_password: str,
     verbose: bool = False,
-) -> Callable[[], None]:
+) -> Callable[[bool], None]:
 
-    def load():
+    def load(force: bool = False):
+
         driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+
+        num_nodes = 0
+        with driver.session() as session:
+            num_nodes = session.run("MATCH (n) RETURN COUNT(n) AS cnt").single().value()
+
+        if num_nodes > 0 and not force:
+            print(
+                f"Knowledge graph already exists at {neo4j_uri} and has at least one node.",
+                "Skipping its load.",
+            )
+            driver.close()
+            return
 
         load_knowledge_graph(
             driver,
@@ -555,9 +574,9 @@ def make_kg_shower(
     neo4j_uri: str,
     neo4j_username: str,
     neo4j_password: str,
-) -> Callable[[], None]:
+) -> Callable[[bool], None]:
 
-    def show():
+    def show(force: bool = False):
         driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
         show_knowledge_graph(driver)
         driver.close()
@@ -576,9 +595,12 @@ def make_entity_resolver_loader(
     neo4j_username: str,
     neo4j_password: str,
     verbose: bool = False,
-) -> Callable[[], None]:
+) -> Callable[[bool], None]:
 
-    def load():
+    def load(force: bool = False):
+
+        # TODO check if the resolvers are already loaded
+
         driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
         load_entity_resolver(
