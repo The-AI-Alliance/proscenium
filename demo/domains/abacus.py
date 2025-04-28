@@ -7,6 +7,11 @@ from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
 from proscenium.verbs.invoke import process_tools
+from proscenium.scripts.tools import apply_tools
+
+import demo.domains.abacus as domain
+from demo.config import default_model_id
+
 
 tools = [Addition, Subtraction, Multiplication, Division]
 
@@ -19,12 +24,6 @@ Do not use any other tools.
 
 
 def make_handler(verbose: bool = False) -> Callable[[str], Generator[str, None, None]]:
-
-    from proscenium.scripts.tools import apply_tools
-
-    import demo.domains.abacus as domain
-
-    from demo.config import default_model_id
 
     def handle(question: str) -> Generator[str, None, None]:
 
