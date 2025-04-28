@@ -7,6 +7,7 @@ from rich import print
 from rich.panel import Panel
 from rich.table import Table
 from uuid import UUID
+from neo4j import GraphDatabase
 
 from langchain_core.documents.base import Document
 
@@ -21,7 +22,6 @@ from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.vector_database import vector_db
-from proscenium.verbs.know import knowledge_graph_client
 
 from proscenium.scripts.document_enricher import extract_from_document_chunks
 from proscenium.scripts.document_enricher import enrich_documents
@@ -484,7 +484,7 @@ def make_kg_loader(
 
     def load(force: bool = False):
 
-        driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+        driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
         num_nodes = 0
         with driver.session() as session:
@@ -581,7 +581,7 @@ def make_kg_shower(
 ) -> Callable[[bool], None]:
 
     def show(force: bool = False):
-        driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+        driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
         show_knowledge_graph(driver)
         driver.close()
 
@@ -605,7 +605,7 @@ def make_entity_resolver_loader(
 
         # TODO check if the resolvers are already loaded
 
-        driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+        driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
         load_entity_resolver(
             driver,

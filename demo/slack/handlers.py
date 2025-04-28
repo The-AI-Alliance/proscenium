@@ -4,8 +4,7 @@ from typing import List
 
 from pathlib import Path
 import os
-
-from proscenium.verbs.know import knowledge_graph_client
+from neo4j import GraphDatabase
 
 import demo.domains.abacus as abacus_domain
 import demo.domains.literature as literature_domain
@@ -57,7 +56,7 @@ def start_handlers(
     verbose: bool = False,
 ) -> dict[str, Callable[[str], Generator[str, None, None]]]:
 
-    driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
     channel_to_handler = {
         "abacus": abacus_domain.make_handler(verbose),

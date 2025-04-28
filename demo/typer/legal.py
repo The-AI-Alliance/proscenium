@@ -4,8 +4,7 @@ import typer
 from rich import print
 from rich.panel import Panel
 from rich.prompt import Prompt
-
-from proscenium.verbs.know import knowledge_graph_client
+from neo4j import GraphDatabase
 
 import demo.domains.legal as domain
 
@@ -111,7 +110,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
     handle = domain.make_handler(driver, milvus_uri, verbose)
 
