@@ -7,10 +7,6 @@ from rich.prompt import Prompt
 
 from proscenium.verbs.know import knowledge_graph_client
 
-from proscenium.scripts.document_enricher import enrich_documents
-from proscenium.scripts.knowledge_graph import load_knowledge_graph
-from proscenium.scripts.entity_resolver import load_entity_resolver
-
 import demo.domains.legal as domain
 
 app = typer.Typer(
@@ -36,24 +32,14 @@ default_milvus_uri = "file:/grag-milvus.db"
 def enrich(
     docs_per_dataset: int = None,
     output: Path = default_enrichment_jsonl_file,
+    delay: float = 0.1,
     verbose: bool = False,
 ):
 
-    extract_from_opinion_chunks = domain.extract_from_opinion_chunks_function(
-        domain.doc_as_rich,
-        domain.default_chunk_extraction_model_id,
-        domain.chunk_extraction_template,
-        domain.LegalOpinionChunkExtractions,
-        delay=0.1,
-    )
+    enrich = domain.make_document_enricher(docs_per_dataset, output, delay, verbose)
 
-    enrich_documents(
-        domain.retriever(docs_per_dataset),
-        extract_from_opinion_chunks,
-        domain.doc_enrichments,
-        output,
-        verbose=verbose,
-    )
+    print("Enriching documents")
+    enrich()
 
 
 @app.command(
@@ -62,21 +48,18 @@ def enrich(
 )
 def load_graph(
     input: Path = default_enrichment_jsonl_file,
+    verbose: bool = False,
 ):
     neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
-
-    load_knowledge_graph(
-        driver,
-        input,
-        domain.LegalOpinionEnrichments,
-        domain.doc_enrichments_to_graph,
+    load = domain.make_kg_loader(
+        input, neo4j_uri, neo4j_username, neo4j_password, verbose
     )
 
-    driver.close()
+    print("Loading knowledge graph")
+    load()
 
 
 @app.command(
@@ -89,11 +72,10 @@ def show_graph():
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+    show = domain.make_kg_shower(neo4j_uri, neo4j_username, neo4j_password)
 
-    domain.show_knowledge_graph(driver)
-
-    driver.close()
+    print("Showing knowledge graph")
+    show()
 
 
 @app.command(
@@ -101,7 +83,7 @@ def show_graph():
 Writes to milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 {neo4j_help}"""
 )
-def load_resolver():
+def load_resolver(verbose: bool = False):
 
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
@@ -109,15 +91,11 @@ def load_resolver():
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
-
-    load_entity_resolver(
-        driver,
-        domain.resolvers,
-        milvus_uri,
+    load = domain.make_entity_resolver_loader(
+        milvus_uri, neo4j_uri, neo4j_username, neo4j_password, verbose
     )
-
-    driver.close()
+    print("Loading entity resolver")
+    load()
 
 
 @app.command(
@@ -135,7 +113,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
 
-    handler = domain.make_handler(driver, milvus_uri, verbose)
+    handle = domain.make_handler(driver, milvus_uri, verbose)
 
     while True:
 
@@ -149,7 +127,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
         print(Panel(q, title="Question"))
 
-        for answer in handler(q):
+        for answer in handle(q):
             print(Panel(answer, title="Answer"))
 
         if loop:

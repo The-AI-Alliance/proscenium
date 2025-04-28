@@ -21,9 +21,13 @@ from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.vector_database import vector_db
+from proscenium.verbs.know import knowledge_graph_client
 
 from proscenium.scripts.document_enricher import extract_from_document_chunks
+from proscenium.scripts.document_enricher import enrich_documents
+from proscenium.scripts.knowledge_graph import load_knowledge_graph
 from proscenium.scripts.entity_resolver import Resolver
+from proscenium.scripts.entity_resolver import load_entity_resolver
 from proscenium.scripts.entity_resolver import find_matching_objects
 from proscenium.scripts.graph_rag import query_to_prompts
 
@@ -331,7 +335,39 @@ def extract_from_opinion_chunks_function(
 
 
 ###################################
-# Knowledge Graph
+# make_document_enricher
+###################################
+
+from pathlib import Path
+
+
+def make_document_enricher(
+    docs_per_dataset: int, output: Path, delay: float, verbose: bool = False
+) -> Callable[[], None]:
+
+    def enrich():
+
+        extract_from_opinion_chunks = extract_from_opinion_chunks_function(
+            doc_as_rich,
+            default_chunk_extraction_model_id,
+            chunk_extraction_template,
+            LegalOpinionChunkExtractions,
+            delay=delay,
+        )
+
+        enrich_documents(
+            retriever(docs_per_dataset),
+            extract_from_opinion_chunks,
+            doc_enrichments,
+            output,
+            verbose=verbose,
+        )
+
+    return enrich
+
+
+###################################
+# make_kg_loader
 ###################################
 
 
@@ -428,6 +464,34 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
         )
 
 
+def make_kg_loader(
+    input: Path,
+    neo4j_uri: str,
+    neo4j_username: str,
+    neo4j_password: str,
+    verbose: bool = False,
+) -> Callable[[], None]:
+
+    def load():
+        driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+
+        load_knowledge_graph(
+            driver,
+            input,
+            LegalOpinionEnrichments,
+            doc_enrichments_to_graph,
+        )
+
+        driver.close()
+
+    return load
+
+
+###################################
+# make_kg_shower
+###################################
+
+
 def show_knowledge_graph(driver: Driver):
 
     with driver.session() as session:
@@ -485,6 +549,47 @@ def show_knowledge_graph(driver: Driver):
         for companyref_record in companyrefs_result:
             companyrefs_table.add_row(companyref_record["text"])
         print(companyrefs_table)
+
+
+def make_kg_shower(
+    neo4j_uri: str,
+    neo4j_username: str,
+    neo4j_password: str,
+) -> Callable[[], None]:
+
+    def show():
+        driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+        show_knowledge_graph(driver)
+        driver.close()
+
+    return show
+
+
+###################################
+# make_entity_resolver_loader
+###################################
+
+
+def make_entity_resolver_loader(
+    milvus_uri: str,
+    neo4j_uri: str,
+    neo4j_username: str,
+    neo4j_password: str,
+    verbose: bool = False,
+) -> Callable[[], None]:
+
+    def load():
+        driver = knowledge_graph_client(neo4j_uri, neo4j_username, neo4j_password)
+
+        load_entity_resolver(
+            driver,
+            resolvers,
+            milvus_uri,
+        )
+
+        driver.close()
+
+    return load
 
 
 ###################################
