@@ -1,5 +1,6 @@
 from typing import Generator
 from typing import Callable
+from typing import List
 
 from gofannon.basic_math.addition import Addition
 from gofannon.basic_math.subtraction import Subtraction
@@ -21,6 +22,17 @@ system_message = """
 Use the tools specified in this request to perform the arithmetic in the user's question.
 Do not use any other tools.
 """
+
+###################################
+# prerequisites
+###################################
+
+
+def prerequisites(
+    verbose: bool = False,
+) -> List[Callable[[bool], None]]:
+
+    return []
 
 
 def make_handler(verbose: bool = False) -> Callable[[str], Generator[str, None, None]]:

@@ -1,5 +1,6 @@
 from typing import Generator
 from typing import Callable
+from typing import List
 
 import asyncio
 
@@ -96,6 +97,20 @@ def make_chunk_space_builder(
         vector_db_client.close()
 
     return build
+
+
+def prerequisites(
+    milvus_uri, collection_name, embedding_model_id, verbose: bool = False
+) -> List[Callable[[bool], None]]:
+
+    build = make_chunk_space_builder(
+        milvus_uri,
+        collection_name,
+        embedding_model_id,
+        verbose=verbose,
+    )
+
+    return [build]
 
 
 def make_handler(

@@ -99,6 +99,8 @@ hf_dataset_ids = ["free-law/nh"]
 
 hf_dataset_column = "text"
 
+default_docs_per_dataset = 10
+
 
 def retrieve_documents(docs_per_dataset: int = None) -> List[Document]:
 
@@ -197,6 +199,8 @@ def doc_as_rich(doc: Document):
 # so we will extract it from the text
 
 default_chunk_extraction_model_id = default_model_id
+
+default_delay = 1.0  # intra-chunk delay between inference calls
 
 
 class LegalOpinionChunkExtractions(BaseModel):
@@ -612,6 +616,45 @@ def make_entity_resolver_loader(
         driver.close()
 
     return load
+
+
+###################################
+# prerequisites
+###################################
+
+
+def prerequisites(
+    docs_per_dataset: int,
+    enrichment_jsonl_file: Path,
+    delay: float,
+    neo4j_uri: str,
+    neo4j_username: str,
+    neo4j_password: str,
+    milvus_uri: str,
+    verbose: bool = False,
+) -> List[Callable[[bool], None]]:
+
+    enrich = make_document_enricher(
+        docs_per_dataset, enrichment_jsonl_file, delay, verbose
+    )
+
+    load_kg = make_kg_loader(
+        enrichment_jsonl_file, neo4j_uri, neo4j_username, neo4j_password, verbose
+    )
+
+    load_resolver = make_entity_resolver_loader(
+        milvus_uri,
+        neo4j_uri,
+        neo4j_username,
+        neo4j_password,
+        verbose,
+    )
+
+    return [
+        enrich,
+        load_kg,
+        load_resolver,
+    ]
 
 
 ###################################

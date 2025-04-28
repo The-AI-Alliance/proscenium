@@ -29,39 +29,29 @@ driver = None
 
 
 # TODO create `prerequisites` function in each domain
-def prerequisites(verbose: bool = False) -> List[Callable[[], None]]:
+def prerequisites(verbose: bool = False) -> List[Callable[[bool], None]]:
 
-    # Literature
+    abacus_pres = abacus_domain.prerequisites(verbose=verbose)
 
-    build = literature_domain.make_chunk_space_builder(
+    literature_pres = literature_domain.prerequisites(
         literature_milvus_uri,
         literature_domain.default_collection_name,
         literature_domain.default_embedding_model_id,
         verbose=verbose,
     )
 
-    # Legal
-
-    enrich = legal_domain.make_document_enricher(4, enrichment_jsonl_file, 0.1, verbose)
-
-    load_kg = legal_domain.make_kg_loader(
-        enrichment_jsonl_file, neo4j_uri, neo4j_username, neo4j_password, verbose
-    )
-
-    load_resolver = legal_domain.make_entity_resolver_loader(
-        legal_milvus_uri,
+    legal_pres = legal_domain.prerequisites(
+        legal_domain.default_docs_per_dataset,
+        enrichment_jsonl_file,
+        legal_domain.default_delay,
         neo4j_uri,
         neo4j_username,
         neo4j_password,
-        verbose,
+        legal_milvus_uri,
+        verbose=verbose,
     )
 
-    return [
-        build,
-        enrich,
-        load_kg,
-        load_resolver,
-    ]
+    return abacus_pres + literature_pres + legal_pres
 
 
 def start_handlers(
