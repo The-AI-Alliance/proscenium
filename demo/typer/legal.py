@@ -1,7 +1,8 @@
-import os
-from pathlib import Path
 import typer
-from rich import print
+import os
+import logging
+from pathlib import Path
+from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 from neo4j import GraphDatabase
@@ -26,6 +27,8 @@ auth credentials NEO4J_USERNAME and NEO4J_PASSWORD, with defaults of
 
 default_milvus_uri = "file:/grag-milvus.db"
 
+console = Console()
+
 
 @app.command(help=f"Enrich documents from {', '.join(domain.hf_dataset_ids)}.")
 def enrich(
@@ -34,10 +37,14 @@ def enrich(
     delay: float = domain.default_delay,
     verbose: bool = False,
 ):
+    sub_console = None
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
+        sub_console = Console()
 
-    enrich = domain.make_document_enricher(docs_per_dataset, output, delay, verbose)
+    enrich = domain.make_document_enricher(docs_per_dataset, output, delay, sub_console)
 
-    print("Enriching documents")
+    console.print("Enriching documents")
     enrich(force=True)
 
 
@@ -53,11 +60,16 @@ def load_graph(
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
+    sub_console = None
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
+        sub_console = Console()
+
     load = domain.make_kg_loader(
-        input, neo4j_uri, neo4j_username, neo4j_password, verbose
+        input, neo4j_uri, neo4j_username, neo4j_password, sub_console
     )
 
-    print("Loading knowledge graph")
+    console.print("Loading knowledge graph")
     load(force=True)
 
 
@@ -65,15 +77,18 @@ def load_graph(
     help=f"""Show the knowledge graph as stored in the graph db.
 {neo4j_help}"""
 )
-def show_graph():
+def show_graph(verbose: bool = False):
+
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
 
     neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    show = domain.make_kg_shower(neo4j_uri, neo4j_username, neo4j_password)
+    show = domain.make_kg_shower(neo4j_uri, neo4j_username, neo4j_password, console)
 
-    print("Showing knowledge graph")
+    console.print("Showing knowledge graph")
     show()
 
 
@@ -84,6 +99,11 @@ Writes to milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def load_resolver(verbose: bool = False):
 
+    sub_console = None
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
+        sub_console = Console()
+
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
     neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
@@ -91,9 +111,9 @@ def load_resolver(verbose: bool = False):
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
     load = domain.make_entity_resolver_loader(
-        milvus_uri, neo4j_uri, neo4j_username, neo4j_password, verbose
+        milvus_uri, neo4j_uri, neo4j_username, neo4j_password, console=sub_console
     )
-    print("Loading entity resolver")
+    console.print("Loading entity resolver")
     load(force=True)
 
 
@@ -104,6 +124,11 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
+    sub_console = None
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
+        sub_console = Console()
+
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
     neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
@@ -112,7 +137,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
-    handle = domain.make_handler(driver, milvus_uri, verbose)
+    handle = domain.make_handler(driver, milvus_uri, console=sub_console)
 
     while True:
 
@@ -124,10 +149,10 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
         else:
             q = question
 
-        print(Panel(q, title="Question"))
+        console.print(Panel(q, title="Question"))
 
         for answer in handle(q):
-            print(Panel(answer, title="Answer"))
+            console.print(Panel(answer, title="Answer"))
 
         if loop:
             question = None

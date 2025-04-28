@@ -1,6 +1,7 @@
 from typing import Optional
 import logging
 
+from rich.console import Console
 from langchain_core.documents.base import Document
 from neo4j import Driver
 
@@ -33,6 +34,7 @@ def load_entity_resolver(
     driver: Driver,
     resolvers: list[Resolver],
     milvus_uri: str,
+    console: Optional[Console] = None,
 ) -> None:
 
     vector_db_client = vector_db(milvus_uri, overwrite=True)
@@ -41,7 +43,7 @@ def load_entity_resolver(
     for resolver in resolvers:
 
         embedding_fn = embedding_function(resolver.embedding_model_id)
-        logging.info("Embedding model", resolver.embedding_model_id)
+        logging.info("Embedding model %s", resolver.embedding_model_id)
 
         values = []
         with driver.session() as session:
@@ -49,15 +51,18 @@ def load_entity_resolver(
             new_values = [Document(record[resolver.field_name]) for record in result]
             values.extend(new_values)
 
-        logging.info("Loading entity resolver into vector db", resolver.collection_name)
+        logging.info(
+            "Loading entity resolver into vector db %s", resolver.collection_name
+        )
         create_collection(
             vector_db_client, embedding_fn, resolver.collection_name, overwrite=True
         )
         info = add_chunks_to_vector_db(
             vector_db_client, embedding_fn, values, resolver.collection_name
         )
-        logging.info(info["insert_count"], "chunks inserted")
-        logging.info(collection_panel(vector_db_client, resolver.collection_name))
+        logging.info("%s chunks inserted ", info["insert_count"])
+        if console is not None:
+            console.print(collection_panel(vector_db_client, resolver.collection_name))
 
     vector_db_client.close()
 

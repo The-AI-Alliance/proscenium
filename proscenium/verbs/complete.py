@@ -37,10 +37,12 @@ Valid model ids:
 - `ollama:granite3.1-dense:2b`
 """
 
+from typing import Optional
 from typing import Any
 import logging
 import json
-from rich import print
+
+from rich.console import Console
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
@@ -63,14 +65,14 @@ def complete_simple(
     model_id: str, system_prompt: str, user_prompt: str, **kwargs
 ) -> str:
 
-    rich_output = kwargs.pop("rich_output", False)
+    console = kwargs.pop("console", None)
 
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ]
 
-    if rich_output:
+    if console is not None:
 
         kwargs_text = "\n".join([str(k) + ": " + str(v) for k, v in kwargs.items()])
 
@@ -90,22 +92,20 @@ model_id: {model_id}
         call_panel = Panel(
             Group(params_text, messages_table), title="complete_simple call"
         )
-        print(call_panel)
+        console.print(call_panel)
 
     response = client.chat.completions.create(
         model=model_id, messages=messages, **kwargs
     )
     response = response.choices[0].message.content
 
-    if rich_output:
-        print(Panel(response, title="Response"))
+    if console is not None:
+        console.print(Panel(response, title="Response"))
 
     return response
 
 
-def evaluate_tool_call(
-    tool_map: dict, tool_call: ChatCompletionMessageToolCall, rich_output: bool = False
-) -> Any:
+def evaluate_tool_call(tool_map: dict, tool_call: ChatCompletionMessageToolCall) -> Any:
 
     function_name = tool_call.function.name
     # TODO validate the arguments?
@@ -132,9 +132,7 @@ def tool_response_message(
     }
 
 
-def evaluate_tool_calls(
-    tool_call_message, tool_map: dict, rich_output: bool = False
-) -> list[dict]:
+def evaluate_tool_calls(tool_call_message, tool_map: dict) -> list[dict]:
 
     tool_call: ChatCompletionMessageToolCall
 
@@ -143,7 +141,7 @@ def evaluate_tool_calls(
     new_messages: list[dict] = []
 
     for tool_call in tool_call_message.tool_calls:
-        function_response = evaluate_tool_call(tool_map, tool_call, rich_output)
+        function_response = evaluate_tool_call(tool_map, tool_call)
         new_messages.append(tool_response_message(tool_call, function_response))
 
     logging.info("Tool calls evaluated")
@@ -156,10 +154,10 @@ def complete_for_tool_applications(
     messages: list,
     tool_desc_list: list,
     temperature: float,
-    rich_output: bool = False,
+    console: Optional[Console] = None,
 ):
 
-    if rich_output:
+    if console is not None:
         panel = complete_with_tools_panel(
             "complete for tool applications",
             model_id,
@@ -167,7 +165,7 @@ def complete_for_tool_applications(
             messages,
             temperature,
         )
-        print(panel)
+        console.print(panel)
 
     response = client.chat.completions.create(
         model=model_id,
@@ -186,13 +184,13 @@ def complete_with_tool_results(
     tool_evaluation_messages: list[dict],
     tool_desc_list: list,
     temperature: float,
-    rich_output: bool = False,
+    console: Optional[Console] = None,
 ):
 
     messages.append(tool_call_message)
     messages.extend(tool_evaluation_messages)
 
-    if rich_output:
+    if console is not None:
         panel = complete_with_tools_panel(
             "complete call with tool results",
             model_id,
@@ -200,7 +198,7 @@ def complete_with_tool_results(
             messages,
             temperature,
         )
-        print(panel)
+        console.print(panel)
 
     response = client.chat.completions.create(
         model=model_id,

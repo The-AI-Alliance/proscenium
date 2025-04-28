@@ -17,7 +17,7 @@ def load_knowledge_graph(
     doc_enrichments_to_graph: Callable[[Any, BaseModel], None],
 ) -> None:
 
-    logging.info("Parsing enrichments from", enrichments_jsonl_file)
+    logging.info("Parsing enrichments from %s", enrichments_jsonl_file)
 
     enrichmentss = []
     with open(enrichments_jsonl_file, "r") as f:

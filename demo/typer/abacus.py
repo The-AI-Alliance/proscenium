@@ -1,4 +1,5 @@
-from rich import print
+import logging
+from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 import typer
@@ -7,11 +8,18 @@ import demo.domains.abacus as domain
 
 app = typer.Typer(help="""Arithmetic question answering.""")
 
+console = Console()
+
 
 @app.command(help="Ask a natural langauge arithmetic question.")
-def ask():
+def ask(verbose: bool = False):
 
-    handle = domain.make_handler(verbose=True)
+    sub_console = None
+    if verbose:
+        logging.basicConfig(level=logging.INFO)
+        sub_console = Console()
+
+    handle = domain.make_handler(console=sub_console)
 
     question = Prompt.ask(
         f"What is your arithmetic question?",
@@ -19,4 +27,4 @@ def ask():
     )
 
     for message in handle(question):
-        print(Panel(message, title="Answer"))
+        console.print(Panel(message, title="Answer"))

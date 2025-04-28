@@ -7,22 +7,19 @@ MILVUS_URI=file://test-legal-milvus.db
 
 echo "Enriching documents"
 
-python -m demo.cli legal enrich \
-  --docs-per-dataset=2 \
-  --output=$JSONL_FILE
+python -m demo.cli legal enrich --docs-per-dataset=2 --output=$JSONL_FILE --verbose
 
 echo "Loading documents into Knowledge Graph"
 
-python -m demo.cli legal load-graph \
-  --input=$JSONL_FILE
+python -m demo.cli legal load-graph --input=$JSONL_FILE --verbose
 
 echo "Displaying Knowledge Graph"
 
-python -m demo.cli legal show-graph
+python -m demo.cli legal show-graph --verbose
 
 echo "Loading fields into Milvus"
 
-python -m demo.cli legal load-resolver
+python -m demo.cli legal load-resolver --verbose
 
 echo "Answer default legal question"
 

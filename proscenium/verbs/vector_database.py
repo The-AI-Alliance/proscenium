@@ -55,12 +55,11 @@ def vector_db(
         if file_path.exists():
             if overwrite:
                 file_path.unlink()
-                logging.info("Deleted existing vector db file", file_path)
+                logging.info("Deleted existing vector db file %s", file_path)
             else:
                 logging.info(
-                    "Using existing",
+                    "Using existing %s file. Use overwrite=True to replace.",
                     uri_fields[2],
-                    "file. Use overwrite=True to replace.",
                 )
         else:
             logging.info("Creating new vector db file", file_path)
@@ -101,7 +100,7 @@ def create_collection(
     client.create_index(
         collection_name=collection_name, index_params=index_params, sync=True
     )
-    logging.info("Created collection", collection_name)
+    logging.info("Created collection %s", collection_name)
 
 
 def add_chunks_to_vector_db(

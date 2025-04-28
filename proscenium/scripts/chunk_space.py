@@ -27,12 +27,12 @@ def make_vector_db_builder(
 
             documents = load_file(data_file)
             chunks = documents_to_chunks_by_characters(documents)
-            logging.info("Data file", data_file, "has", len(chunks), "chunks")
+            logging.info("Data file %s has %s chunks", data_file, len(chunks))
 
             info = add_chunks_to_vector_db(
                 vector_db_client, embedding_fn, chunks, collection_name
             )
-            logging.info(info["insert_count"], "chunks inserted")
+            logging.info("%s chunks inserted", info["insert_count"])
 
         logging.info(collection_panel(vector_db_client, collection_name))
 

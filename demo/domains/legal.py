@@ -3,7 +3,7 @@ from enum import StrEnum
 
 import logging
 import json
-from rich import print
+from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from uuid import UUID
@@ -280,7 +280,7 @@ def doc_enrichments(
         if chunk_extract.__dict__.get("company_names") is not None:
             companyrefs.extend(chunk_extract.company_names)
 
-    print(doc.metadata)
+    logging.info(doc.metadata)
 
     enrichments = LegalOpinionEnrichments(
         name=doc.metadata["name_abbreviation"],
@@ -317,11 +317,10 @@ def make_extract_from_opinion_chunks(
     chunk_extraction_template: str,
     chunk_extract_clazz: type[BaseModel],
     delay: float = 1.0,  # intra-chunk delay between inference calls
+    console: Optional[Console] = None,
 ) -> Callable[[Document, bool], List[BaseModel]]:
 
-    def extract_from_doc_chunks(
-        doc: Document, verbose: bool = False
-    ) -> List[BaseModel]:
+    def extract_from_doc_chunks(doc: Document) -> List[BaseModel]:
 
         chunk_extract_models = extract_from_document_chunks(
             doc,
@@ -330,7 +329,7 @@ def make_extract_from_opinion_chunks(
             chunk_extraction_template,
             chunk_extract_clazz,
             delay,
-            verbose,
+            console=console,
         )
 
         return chunk_extract_models
@@ -346,13 +345,13 @@ from pathlib import Path
 
 
 def make_document_enricher(
-    docs_per_dataset: int, output: Path, delay: float, verbose: bool = False
+    docs_per_dataset: int, output: Path, delay: float, console: Optional[Console] = None
 ) -> Callable[[bool], None]:
 
     def enrich(force: bool = False):
 
         if output.exists() and not force:
-            print(
+            logging.info(
                 f"Output file {output} already exists.",
             )
             return
@@ -363,6 +362,7 @@ def make_document_enricher(
             chunk_extraction_template,
             LegalOpinionChunkExtractions,
             delay=delay,
+            console=console,
         )
 
         enrich_documents(
@@ -370,7 +370,7 @@ def make_document_enricher(
             extract_from_opinion_chunks,
             doc_enrichments,
             output,
-            verbose=verbose,
+            console=console,
         )
 
     return enrich
@@ -479,7 +479,7 @@ def make_kg_loader(
     neo4j_uri: str,
     neo4j_username: str,
     neo4j_password: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> Callable[[bool], None]:
 
     def load(force: bool = False):
@@ -491,7 +491,7 @@ def make_kg_loader(
             num_nodes = session.run("MATCH (n) RETURN COUNT(n) AS cnt").single().value()
 
         if num_nodes > 0 and not force:
-            print(
+            logging.info(
                 f"Knowledge graph already exists at {neo4j_uri} and has at least one node.",
                 "Skipping its load.",
             )
@@ -515,7 +515,7 @@ def make_kg_loader(
 ###################################
 
 
-def show_knowledge_graph(driver: Driver):
+def show_knowledge_graph(driver: Driver, console: Console) -> None:
 
     with driver.session() as session:
 
@@ -527,7 +527,7 @@ def show_knowledge_graph(driver: Driver):
         ntt.add_column("Type", justify="left")
         for nt in node_types:
             ntt.add_row(nt)
-        print(ntt)
+        console.print(ntt)
 
         relations_types_result = session.run("MATCH ()-[r]->() RETURN type(r) AS rel")
         relation_types = [record["rel"] for record in relations_types_result]
@@ -536,53 +536,54 @@ def show_knowledge_graph(driver: Driver):
         rtt.add_column("Type", justify="left")
         for rt in unique_relations:
             rtt.add_row(rt)
-        print(rtt)
+        console.print(rtt)
 
         cases_result = session.run("MATCH (n:Case) RETURN properties(n) AS p")
         cases_table = Table(title="Cases", show_lines=False)
         cases_table.add_column("Properties", justify="left")
         for case_record in cases_result:
             cases_table.add_row(str(case_record["p"]))
-        print(cases_table)
+        console.print(cases_table)
 
         judgerefs_result = session.run("MATCH (n:JudgeRef) RETURN n.text AS text")
         judgerefs_table = Table(title="JudgeRefs", show_lines=False)
         judgerefs_table.add_column("Text", justify="left")
         for judgeref_record in judgerefs_result:
             judgerefs_table.add_row(judgeref_record["text"])
-        print(judgerefs_table)
+        console.print(judgerefs_table)
 
         caserefs_result = session.run("MATCH (n:CaseRef) RETURN n.text AS text")
         caserefs_table = Table(title="CaseRefs", show_lines=False)
         caserefs_table.add_column("Text", justify="left")
         for caseref_record in caserefs_result:
             caserefs_table.add_row(caseref_record["text"])
-        print(caserefs_table)
+        console.print(caserefs_table)
 
         georefs_result = session.run("MATCH (n:GeoRef) RETURN n.text AS text")
         georefs_table = Table(title="GeoRefs", show_lines=False)
         georefs_table.add_column("Text", justify="left")
         for georef_record in georefs_result:
             georefs_table.add_row(georef_record["text"])
-        print(georefs_table)
+        console.print(georefs_table)
 
         companyrefs_result = session.run("MATCH (n:CompanyRef) RETURN n.text AS text")
         companyrefs_table = Table(title="CompanyRefs", show_lines=False)
         companyrefs_table.add_column("Text", justify="left")
         for companyref_record in companyrefs_result:
             companyrefs_table.add_row(companyref_record["text"])
-        print(companyrefs_table)
+        console.print(companyrefs_table)
 
 
 def make_kg_shower(
     neo4j_uri: str,
     neo4j_username: str,
     neo4j_password: str,
+    console: Optional[Console] = None,
 ) -> Callable[[bool], None]:
 
     def show(force: bool = False):
         driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
-        show_knowledge_graph(driver)
+        show_knowledge_graph(driver, console)
         driver.close()
 
     return show
@@ -598,7 +599,7 @@ def make_entity_resolver_loader(
     neo4j_uri: str,
     neo4j_username: str,
     neo4j_password: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> Callable[[bool], None]:
 
     def load(force: bool = False):
@@ -611,6 +612,7 @@ def make_entity_resolver_loader(
             driver,
             resolvers,
             milvus_uri,
+            console=console,
         )
 
         driver.close()
@@ -631,15 +633,15 @@ def prerequisites(
     neo4j_username: str,
     neo4j_password: str,
     milvus_uri: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> List[Callable[[bool], None]]:
 
     enrich = make_document_enricher(
-        docs_per_dataset, enrichment_jsonl_file, delay, verbose
+        docs_per_dataset, enrichment_jsonl_file, delay, console
     )
 
     load_kg = make_kg_loader(
-        enrichment_jsonl_file, neo4j_uri, neo4j_username, neo4j_password, verbose
+        enrichment_jsonl_file, neo4j_uri, neo4j_username, neo4j_password, console
     )
 
     load_resolver = make_entity_resolver_loader(
@@ -647,7 +649,7 @@ def prerequisites(
         neo4j_uri,
         neo4j_username,
         neo4j_password,
-        verbose,
+        console,
     )
 
     return [
@@ -691,13 +693,13 @@ query_extraction_template = partial_formatter.format(
 
 
 def query_extract(
-    query: str, query_extraction_model_id: str, verbose: bool = False
+    query: str, query_extraction_model_id: str, console: Optional[Console] = None
 ) -> QueryExtractions:
 
     user_prompt = query_extraction_template.format(text=query)
 
-    if verbose:
-        print(Panel(user_prompt, title="Query Extraction Prompt"))
+    if console is not None:
+        console.print(Panel(user_prompt, title="Query Extraction Prompt"))
 
     extract = complete_simple(
         query_extraction_model_id,
@@ -707,11 +709,11 @@ def query_extract(
             "type": "json_object",
             "schema": QueryExtractions.model_json_schema(),
         },
-        rich_output=verbose,
+        console=console,
     )
 
-    if verbose:
-        print(Panel(str(extract), title="Query Extraction String"))
+    if console is not None:
+        console.print(Panel(str(extract), title="Query Extraction String"))
 
     try:
 
@@ -731,7 +733,6 @@ def query_extract_to_graph(
     query_id: UUID,
     qe: QueryExtractions,
     driver: Driver,
-    verbose: bool = False,
 ) -> None:
 
     with driver.session() as session:
@@ -742,9 +743,8 @@ def query_extract_to_graph(
             query_id=str(query_id),
             value=query,
         )
-        if verbose:
-            print(f"Saved query {query} with id {query_id} to the graph")
-            print(query_save_result.consume())
+        logging.info(f"Saved query {query} with id {query_id} to the graph")
+        logging.info(query_save_result.consume())
 
         for judgeref in qe.judge_names:
             session.run(
@@ -796,7 +796,7 @@ def query_extract_to_context(
     query: str,
     driver: Driver,
     milvus_uri: str,
-    verbose: bool = False,
+    console: Optional[Console] = None,
 ) -> LegalQueryContext:
 
     vector_db_client = vector_db(milvus_uri)
@@ -816,8 +816,8 @@ def query_extract_to_context(
         cypher += f"MATCH (c:Case)-[:mentions]->(:CaseRef {{text: '{caseref.matched_text()}'}})\n"
     cypher += "RETURN c.name AS name"
 
-    if verbose:
-        print(Panel(cypher, title="Cypher Query"))
+    if console is not None:
+        console.print(Panel(cypher, title="Cypher Query"))
 
     case_names = []
     with driver.session() as session:
@@ -825,7 +825,7 @@ def query_extract_to_context(
         case_names.extend([record["name"] for record in result])
 
     # TODO check for empty result
-    print("Cases with names:", str(case_names), "mention", str(caserefs))
+    logging.info("Cases with names: %s mention %s", str(case_names), str(caserefs))
 
     # TODO: take all docs -- not just head
     doc = retrieve_document(case_names[0], driver)
@@ -855,7 +855,7 @@ Question: {question}
 
 
 def context_to_prompts(
-    context: LegalQueryContext, verbose: bool = False
+    context: LegalQueryContext,
 ) -> tuple[str, str]:
 
     user_prompt = graphrag_prompt_template.format(
@@ -877,7 +877,7 @@ default_generation_model_id = default_model_id
 
 
 def make_handler(
-    driver: Driver, milvus_uri: str, verbose: bool = False
+    driver: Driver, milvus_uri: str, console: Optional[Console] = None
 ) -> Callable[[str], Generator[str, None, None]]:
 
     def handle(question: str) -> Generator[str, None, None]:
@@ -891,7 +891,6 @@ def make_handler(
             query_extract_to_graph,
             query_extract_to_context,
             context_to_prompts,
-            verbose,
         )
 
         if prompts is None:
@@ -905,10 +904,7 @@ def make_handler(
             system_prompt, user_prompt = prompts
 
             response = complete_simple(
-                default_generation_model_id,
-                system_prompt,
-                user_prompt,
-                rich_output=verbose,
+                default_generation_model_id, system_prompt, user_prompt, console=console
             )
 
             yield response

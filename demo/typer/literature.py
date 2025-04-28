@@ -1,6 +1,8 @@
 import typer
+import logging
 import os
-from rich import print
+
+from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 import demo.domains.literature as domain
@@ -17,6 +19,8 @@ app = typer.Typer(
     help="""Question answering using RAG on a text from the Gutenberg Project."""
 )
 
+console = Console()
+
 
 @app.command(
     help=f"""Build a vector DB from chunks of {len(domain.books)} books from Project Gutenberg.
@@ -25,10 +29,18 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def prepare(verbose: bool = False):
 
+    sub_console = None
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
+        sub_console = Console()
+
     build = domain.make_chunk_space_builder(
-        milvus_uri, collection_name, domain.default_embedding_model_id, verbose
+        milvus_uri,
+        collection_name,
+        domain.default_embedding_model_id,
+        console=sub_console,
     )
-    print("Building chunk space")
+    console.print("Building chunk space")
     build(force=True)
 
 
@@ -40,11 +52,16 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
+    sub_console = None
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
+        sub_console = Console()
+
     handle = domain.make_handler(
         domain.default_generator_model_id,
         milvus_uri,
         domain.default_embedding_model_id,
-        verbose,
+        console=sub_console,
     )
 
     while True:
@@ -58,7 +75,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
             q = question
 
         for answer in handle(q):
-            print(Panel(answer, title="Assistant"))
+            console.print(Panel(answer, title="Assistant"))
 
         if loop:
             question = None
