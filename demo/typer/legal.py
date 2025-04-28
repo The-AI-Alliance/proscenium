@@ -39,7 +39,7 @@ def enrich(
     enrich = domain.make_document_enricher(docs_per_dataset, output, delay, verbose)
 
     print("Enriching documents")
-    enrich()
+    enrich(force=True)
 
 
 @app.command(
@@ -59,7 +59,7 @@ def load_graph(
     )
 
     print("Loading knowledge graph")
-    load()
+    load(force=True)
 
 
 @app.command(
@@ -95,7 +95,7 @@ def load_resolver(verbose: bool = False):
         milvus_uri, neo4j_uri, neo4j_username, neo4j_password, verbose
     )
     print("Loading entity resolver")
-    load()
+    load(force=True)
 
 
 @app.command(
