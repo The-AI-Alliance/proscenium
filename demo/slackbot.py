@@ -13,7 +13,7 @@ from slack_sdk.socket_mode.response import SocketModeResponse
 
 from proscenium.verbs.display import header
 
-from demo.slack.handlers import start_handlers, stop_handlers
+from demo.slack.handlers import start_handlers, stop_handlers, prerequisites
 
 
 def make_slack_listener(
@@ -21,8 +21,6 @@ def make_slack_listener(
 ):
 
     def process(client: SocketModeClient, req: SocketModeRequest):
-
-        # pprint(req.__dict__)
 
         if req.type == "events_api":
 
@@ -112,6 +110,11 @@ if __name__ == "__main__":
 
     user_id = auth_response["user_id"]
     print("Bot id", auth_response["bot_id"])
+
+    print("Building any missing resouces...")
+    pres = prerequisites(verbose=True)
+    for pre in pres:
+        pre()
 
     print("Starting handlers...")
     channel_to_handler = start_handlers(verbose=True)

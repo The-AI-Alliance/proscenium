@@ -1,5 +1,6 @@
 from typing import Generator
 from typing import Callable
+from typing import List
 
 import asyncio
 
@@ -17,6 +18,8 @@ from demo.config import default_model_id
 default_generator_model_id = default_model_id
 
 default_embedding_model_id = "all-MiniLM-L6-v2"
+
+default_collection_name = "literature_chunks"
 
 
 class Book:
@@ -51,11 +54,25 @@ def make_chunk_space_builder(
     collection_name: str,
     embedding_model_id: str,
     verbose: bool = False,
-) -> Callable[[], None]:
+) -> Callable[[bool], None]:
 
-    def build():
+    def build(force: bool = False) -> None:
+
+        if not force:
+            vector_db_client = vector_db(milvus_uri, overwrite=False)
+            if vector_db_client.has_collection(collection_name):
+                # TODO the existence of the collection might not be strong enough proof
+                print(
+                    f"Milvus DB already exists at {milvus_uri} with collection {collection_name}.",
+                    "Skipping its build.",
+                )
+                vector_db_client.close()
+                return
+            vector_db_client.close()
+
         for book in books:
-            asyncio.run(url_to_file(book.url, book.data_file))
+            if not Path(book.data_file).exists():
+                asyncio.run(url_to_file(book.url, book.data_file))
             if verbose:
                 print(book.title, "local copy to chunk at", book.data_file)
 
@@ -74,11 +91,26 @@ def make_chunk_space_builder(
             collection_name,
         )
 
+        print("Building chunk space")
         vector_db_build()
 
         vector_db_client.close()
 
     return build
+
+
+def prerequisites(
+    milvus_uri, collection_name, embedding_model_id, verbose: bool = False
+) -> List[Callable[[bool], None]]:
+
+    build = make_chunk_space_builder(
+        milvus_uri,
+        collection_name,
+        embedding_model_id,
+        verbose=verbose,
+    )
+
+    return [build]
 
 
 def make_handler(
@@ -87,8 +119,6 @@ def make_handler(
     embedding_model_id: str,
     verbose: bool = False,
 ) -> Callable[[str], Generator[str, None, None]]:
-
-    collection_name = "literature_chunks"
 
     vector_db_client = vector_db(milvus_uri)
     print("Vector db at uri", milvus_uri)
@@ -103,7 +133,7 @@ def make_handler(
             generator_model_id,
             vector_db_client,
             embedding_fn,
-            collection_name,
+            default_collection_name,
             verbose,
         )
 
