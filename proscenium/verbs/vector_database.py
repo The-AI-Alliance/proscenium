@@ -62,7 +62,7 @@ def vector_db(
                     uri_fields[2],
                 )
         else:
-            logging.info("Creating new vector db file", file_path)
+            logging.info("Creating new vector db file %s", file_path)
 
         client = MilvusClient(uri=str(file_path))
 
