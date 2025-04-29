@@ -38,7 +38,7 @@ def prerequisites(console: Optional[Console] = None) -> List[Callable[[bool], No
     literature_pres = literature_domain.prerequisites(
         literature_milvus_uri,
         literature_domain.default_collection_name,
-        literature_domain.default_embedding_model_id,
+        legal_domain.default_embedding_model_id,
         console=console,
     )
 
@@ -50,6 +50,7 @@ def prerequisites(console: Optional[Console] = None) -> List[Callable[[bool], No
         neo4j_username,
         neo4j_password,
         legal_milvus_uri,
+        legal_domain.default_embedding_model_id,
         console=console,
     )
 
