@@ -15,7 +15,7 @@ python -m demo.cli legal load-graph --input=$JSONL_FILE --verbose
 
 echo "Displaying Knowledge Graph"
 
-python -m demo.cli legal show-graph --verbose
+python -m demo.cli legal display-graph --verbose
 
 echo "Loading fields into Milvus"
 

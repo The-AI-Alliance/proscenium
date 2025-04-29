@@ -22,17 +22,16 @@ class Resolver:
         cypher: str,
         field_name: str,
         collection_name: str,
-        embedding_model_id: str,
     ):
         self.cypher = cypher
         self.field_name = field_name
         self.collection_name = collection_name
-        self.embedding_model_id = embedding_model_id
 
 
 def load_entity_resolver(
     driver: Driver,
     resolvers: list[Resolver],
+    embedding_model_id: str,
     milvus_uri: str,
     console: Optional[Console] = None,
 ) -> None:
@@ -42,8 +41,8 @@ def load_entity_resolver(
 
     for resolver in resolvers:
 
-        embedding_fn = embedding_function(resolver.embedding_model_id)
-        logging.info("Embedding model %s", resolver.embedding_model_id)
+        embedding_fn = embedding_function(embedding_model_id)
+        logging.info("Embedding model %s", embedding_model_id)
 
         values = []
         with driver.session() as session:

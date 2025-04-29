@@ -74,10 +74,10 @@ def load_graph(
 
 
 @app.command(
-    help=f"""Show the knowledge graph as stored in the graph db.
+    help=f"""Display the knowledge graph as stored in the graph db.
 {neo4j_help}"""
 )
-def show_graph(verbose: bool = False):
+def display_graph(verbose: bool = False):
 
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
@@ -111,7 +111,12 @@ def load_resolver(verbose: bool = False):
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
     load = domain.make_entity_resolver_loader(
-        milvus_uri, neo4j_uri, neo4j_username, neo4j_password, console=sub_console
+        milvus_uri,
+        domain.default_embedding_model_id,
+        neo4j_uri,
+        neo4j_username,
+        neo4j_password,
+        console=sub_console,
     )
     console.print("Loading entity resolver")
     load(force=True)
