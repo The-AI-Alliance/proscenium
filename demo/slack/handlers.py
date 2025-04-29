@@ -13,10 +13,6 @@ from neo4j import Driver
 import demo.domains.abacus as abacus_domain
 import demo.domains.literature as literature_domain
 import demo.domains.legal as legal_domain
-import demo.domains.legal.docs as legal_docs
-import demo.domains.legal.doc_enricher as legal_doc_enricher
-import demo.domains.legal.entity_resolvers as legal_entity_resolvers
-import demo.domains.legal.query_handler as legal_query_handler
 
 literature_milvus_uri = "file:/milvus.db"
 
@@ -42,19 +38,19 @@ def prerequisites(console: Optional[Console] = None) -> List[Callable[[bool], No
     literature_pres = literature_domain.prerequisites(
         literature_milvus_uri,
         literature_domain.default_collection_name,
-        legal_entity_resolvers.default_embedding_model_id,
+        legal_domain.default_embedding_model_id,
         console=console,
     )
 
     legal_pres = legal_domain.prerequisites(
-        legal_docs.default_docs_per_dataset,
+        legal_domain.default_docs_per_dataset,
         enrichment_jsonl_file,
-        legal_doc_enricher.default_delay,
+        legal_domain.default_delay,
         neo4j_uri,
         neo4j_username,
         neo4j_password,
         legal_milvus_uri,
-        legal_entity_resolvers.default_embedding_model_id,
+        legal_domain.default_embedding_model_id,
         console=console,
     )
 
@@ -78,9 +74,7 @@ def start_handlers(
             literature_domain.default_embedding_model_id,
             console=console,
         ),
-        "legal": legal_query_handler.make_handler(
-            driver, legal_milvus_uri, console=console
-        ),
+        "legal": legal_domain.make_handler(driver, legal_milvus_uri, console=console),
     }
 
     if console is not None:

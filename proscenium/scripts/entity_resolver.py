@@ -37,7 +37,7 @@ def load_entity_resolver(
 ) -> None:
 
     vector_db_client = vector_db(milvus_uri, overwrite=True)
-    logging.info("Vector db stored at", milvus_uri)
+    logging.info("Vector db stored at %s", milvus_uri)
 
     for resolver in resolvers:
 

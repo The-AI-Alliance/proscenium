@@ -6,9 +6,15 @@ from pathlib import Path
 
 from rich.console import Console
 
-from demo.domains.legal.doc_enricher import make_document_enricher
-from demo.domains.legal.kg_loader import make_kg_loader
-from demo.domains.legal.entity_resolver_loader import make_entity_resolver_loader
+
+from .docs import default_docs_per_dataset, hf_dataset_ids
+from .doc_enricher import default_delay
+from .doc_enricher import make_document_enricher
+from .kg_loader import make_kg_loader
+from .kg_displayer import make_kg_displayer
+from .entity_resolvers import default_embedding_model_id
+from .entity_resolver_loader import make_entity_resolver_loader
+from .query_handler import make_handler, user_prompt, default_question
 
 
 def prerequisites(

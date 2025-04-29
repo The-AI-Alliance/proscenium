@@ -86,7 +86,7 @@ def display_graph(verbose: bool = False):
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    show = domain.make_kg_shower(neo4j_uri, neo4j_username, neo4j_password, console)
+    show = domain.make_kg_displayer(neo4j_uri, neo4j_username, neo4j_password, console)
 
     console.print("Showing knowledge graph")
     show()
