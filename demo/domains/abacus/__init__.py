@@ -26,10 +26,6 @@ Use the tools specified in this request to perform the arithmetic in the user's 
 Do not use any other tools.
 """
 
-###################################
-# prerequisites
-###################################
-
 
 def prerequisites(
     console: Optional[Console] = None,
