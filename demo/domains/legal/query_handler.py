@@ -138,40 +138,51 @@ def query_extract_to_context(
 
     vector_db_client = vector_db(milvus_uri)
 
-    cypher = ""
-    if qe is not None:
-        for judgeref in qe.judge_names:
-            # TODO judgeref_match = find_matching_objects(vector_db_client, judgeref, judge_resolver)
-            cypher += (
-                f"MATCH (c:Case)-[:mentions]->(:JudgeRef {{text: '{judgeref}'}})\n"
-            )
+    try:
+        caserefs = get_citations(query)
 
-    cypher = ""
-    caserefs = get_citations(query)
-    for caseref in caserefs:
-        # TODO caseref_match = find_matching_objects(vector_db_client, caseref, case_resolver)
-        cypher += f"MATCH (c:Case)-[:mentions]->(:CaseRef {{text: '{caseref.matched_text()}'}})\n"
-    cypher += "RETURN c.name AS name"
+        case_judgeref_clauses = []
+        if qe is not None:
+            case_judgeref_clauses = [
+                # TODO judgeref_match = find_matching_objects(vector_db_client, judgeref, judge_resolver)
+                f"MATCH (c:Case)-[:mentions]->(:JudgeRef {{text: '{judgeref}'}})"
+                for judgeref in qe.judge_names
+            ]
 
-    if console is not None:
-        console.print(Panel(cypher, title="Cypher Query"))
+        case_caseref_clauses = [
+            # TODO caseref_match = find_matching_objects(vector_db_client, caseref, case_resolver)
+            f"MATCH (c:Case)-[:mentions]->(:CaseRef {{text: '{caseref.matched_text()}'}})"
+            for caseref in caserefs
+        ]
 
-    case_names = []
-    with driver.session() as session:
-        result = session.run(cypher)
-        case_names.extend([record["name"] for record in result])
+        case_match_clauses = case_judgeref_clauses + case_caseref_clauses
 
-    # TODO check for empty result
-    logging.info("Cases with names: %s mention %s", str(case_names), str(caserefs))
+        if len(case_match_clauses) == 0:
+            logging.warning("No case match clauses found")
+            return None
 
-    # TODO: take all docs -- not just head
-    doc = retrieve_document(case_names[0], driver)
+        cypher = "\n".join(case_match_clauses) + "\nRETURN c.name AS name"
 
-    context = LegalQueryContext(
-        doc=doc.page_content,
-        query=query,
-    )
-    vector_db_client.close()
+        if console is not None:
+            console.print(Panel(cypher, title="Cypher Query"))
+
+        case_names = []
+        with driver.session() as session:
+            result = session.run(cypher)
+            case_names.extend([record["name"] for record in result])
+
+        # TODO check for empty result
+        logging.info("Cases with names: %s mention %s", str(case_names), str(caserefs))
+
+        # TODO: take all docs -- not just head
+        doc = retrieve_document(case_names[0], driver)
+
+        context = LegalQueryContext(
+            doc=doc.page_content,
+            query=query,
+        )
+    finally:
+        vector_db_client.close()
 
     return context
 

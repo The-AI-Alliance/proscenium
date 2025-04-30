@@ -28,7 +28,7 @@ def query_to_prompts(
         [BaseModel], tuple[str, str]
     ],  # Context -> (system_prompt, user_prompt)
     console: Optional[Console] = None,
-) -> str:
+) -> Optional[tuple[str, str]]:
 
     query_id = uuid4()
 
@@ -48,6 +48,9 @@ def query_to_prompts(
     context = query_extract_to_context(
         extract, query, driver, milvus_uri, console=console
     )
+    if context is None:
+        logging.info("Unable to form context from the extracted information")
+        return None
 
     logging.info("Context: %s", context)
 
