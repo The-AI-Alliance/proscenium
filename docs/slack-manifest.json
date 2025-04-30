@@ -1,0 +1,84 @@
+{
+    "display_information": {
+        "name": "proscenium",
+        "description": "Proscenium",
+        "background_color": "#5e8a20",
+        "long_description": "The long description of Proscenium.  Proscenium is a small, experimental library of composable glue that allows for succinct construction of enterprise AI applications. Currently, proscenium development prioritizes support for domains where the creation and use of structured data is critical."
+    },
+    "features": {
+        "app_home": {
+            "home_tab_enabled": true,
+            "messages_tab_enabled": true,
+            "messages_tab_read_only_enabled": false
+        },
+        "bot_user": {
+            "display_name": "Proscenium",
+            "always_online": true
+        },
+        "assistant_view": {
+            "assistant_description": "The Proscenium agent can help you",
+            "suggested_prompts": []
+        }
+    },
+    "oauth_config": {
+        "scopes": {
+            "user": [
+                "im:history"
+            ],
+            "bot": [
+                "app_mentions:read",
+                "channels:history",
+                "channels:join",
+                "channels:manage",
+                "channels:read",
+                "chat:write.customize",
+                "chat:write.public",
+                "chat:write",
+                "files:read",
+                "files:write",
+                "groups:history",
+                "groups:read",
+                "groups:write",
+                "im:history",
+                "im:read",
+                "im:write",
+                "links:read",
+                "links:write",
+                "mpim:history",
+                "mpim:read",
+                "mpim:write",
+                "pins:read",
+                "pins:write",
+                "reactions:read",
+                "reactions:write",
+                "reminders:read",
+                "reminders:write",
+                "team:read",
+                "usergroups:read",
+                "usergroups:write",
+                "users:read",
+                "users:write",
+                "users.profile:read",
+                "assistant:write",
+                "incoming-webhook"
+            ]
+        }
+    },
+    "settings": {
+        "event_subscriptions": {
+            "user_events": [
+                "message.im"
+            ],
+            "bot_events": [
+                "app_mention",
+                "message.channels"
+            ]
+        },
+        "interactivity": {
+            "is_enabled": true
+        },
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": true,
+        "token_rotation_enabled": false
+    }
+}
