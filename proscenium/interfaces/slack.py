@@ -7,8 +7,6 @@ import logging
 
 from rich.pretty import pprint
 from rich.console import Console
-
-
 from slack_sdk.web import WebClient
 from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.socket_mode.request import SocketModeRequest
