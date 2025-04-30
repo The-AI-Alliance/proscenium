@@ -60,8 +60,10 @@ Click "Add an OAuth Scope" and add the following:
 
 - `app_mentions:read`
 - `assistant:write`
-- `chat:write`
 - `channels:history`
+- `channels:join`
+- `channels:read`
+- `chat:write`
 - `commands`
 - `emoji:read`
 - `groups:history`
@@ -70,11 +72,11 @@ Click "Add an OAuth Scope" and add the following:
 - `im:history`
 - `im:read`
 - `im:write`
-- `channels:join`
 - `links:read`
-- `users:write`
+- `mpim:read`
 - `reactions:read`
 - `reactions:write`
+- `users:write`
 
 ## Add a bot token
 
