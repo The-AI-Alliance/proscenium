@@ -23,13 +23,16 @@ from demo.slack.handlers import start_handlers, stop_handlers, prerequisites
 app = typer.Typer(help="Proscenium Slackbot")
 
 
-def build_resources(console: Console, sub_console: Console = None):
+def build_resources(console: Console, sub_console: Console = None, force: bool = False):
 
-    console.print("Building any missing resouces...")
+    if force:
+        console.print("Forcing rebuild of resources.")
+    else:
+        console.print("Building any missing resouces...")
 
     pres = prerequisites(console=sub_console)
     for pre in pres:
-        pre()
+        pre(force)
 
 
 def connect(app_token: str, bot_token: str, console: Console) -> SocketModeClient:
@@ -177,7 +180,7 @@ def shutdown(
 
 
 @app.command(help=f"""Start the Proscenium Slackbot.""")
-def start(verbose: bool = False):
+def start(verbose: bool = False, force_rebuild: bool = False):
 
     console = Console()
     sub_console = None
@@ -191,7 +194,7 @@ def start(verbose: bool = False):
     console.print(header())
     console.print("Starting the Proscenium Slackbot.")
 
-    build_resources(console, sub_console)
+    build_resources(console, sub_console, force_rebuild)
 
     slack_app_token = os.environ.get("SLACK_APP_TOKEN")
     slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
