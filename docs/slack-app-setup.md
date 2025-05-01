@@ -7,8 +7,7 @@ in the upper right, and then "From a Manifest".
 
 Select your workspace and click "Next".
 
-Remove the default JSON and paste the contents of 
-the [Proscenium Slack App manifest.json](./slack-manifest.json)
+Remove the default JSON and paste the contents of the [Proscenium Slack App manifest.json](./slack-manifest.json)
 
 Enter "Proscenium" for App Name, and then your workspace,
 and then click "Next".
@@ -38,11 +37,11 @@ Note this as the `SLACK_APP_TOKEN`, and then click "Done".
 
 ### Add a bot token
 
-In the "OAuth Tokens" section of the page,
-click the "Install to *Your Workspace*" button.
-
-Then click the "Allow" button.
+- Scroll to the the "OAuth Tokens" section of the page.
+- Click the "Install to *Your Workspace*" button.
+- Select a channel where Proscenium can post to.
+- Click the "Allow" button.
 
 This will return to the "OAuth Tokens" section.
 
-Copy the "Bot User OAuth Token" as the `SLACK_BOT_TOKEN`.
+- Copy the "Bot User OAuth Token" as the `SLACK_BOT_TOKEN`.
