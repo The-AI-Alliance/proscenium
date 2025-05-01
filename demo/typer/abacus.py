@@ -22,7 +22,7 @@ def ask(verbose: bool = False):
     handle = domain.make_handler(console=sub_console)
 
     question = Prompt.ask(
-        f"What is your arithmetic question?",
+        "What is your arithmetic question?",
         default="What is 33312-457? And what is 3+3?",
     )
 

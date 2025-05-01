@@ -111,7 +111,7 @@ def stop_handlers(resources: Any) -> None:
 app = typer.Typer(help="Proscenium Slackbot")
 
 
-@app.command(help=f"""Start the Proscenium Slackbot.""")
+@app.command(help="""Start the Proscenium Slackbot.""")
 def start(verbose: bool = False, force_rebuild: bool = False):
 
     console = Console()

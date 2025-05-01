@@ -12,10 +12,10 @@ from proscenium.scripts.rag import answer_question
 
 from demo.config import default_model_id
 
-default_generator_model_id = default_model_id
-
 from .docs import books
 from .chunk_space import default_collection_name
+
+default_generator_model_id = default_model_id
 
 user_prompt = f"What is your question about {', '.join([b.title for b in books])}?"
 

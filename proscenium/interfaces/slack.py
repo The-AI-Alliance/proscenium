@@ -5,7 +5,6 @@ from typing import Any
 import time
 import logging
 
-from rich.pretty import pprint
 from rich.console import Console
 from slack_sdk.web import WebClient
 from slack_sdk.socket_mode import SocketModeClient
