@@ -70,17 +70,17 @@ def make_slack_listener(
                 channel_id = event.get("channel")
 
                 channel = channels_by_id.get(channel_id, None)
-                console.print(user, "in", "#" + channel["name"], "said ", f'"{text}"')
+                console.print(f'{user} in {channel_id} said "{text}"')
 
                 response = None
                 if channel is None:
                     # TODO: channels_by_id will get stale
-                    pass
+                    logging.info("Channel %s not found in channels_by_id", channel_id)
                 else:
                     channel_name = channel["name"]
                     if channel_name in channel_to_handler:
                         handle = channel_to_handler[channel_name]
-                        console.print("Handler defined for channel", channel_name)
+                        logging.info("Handler defined for channel %s", channel_name)
                         # TODO determine whether the handler has a good chance of being useful
                         for response in handle(text):
                             console.print("Sending response to channel:", response)
@@ -88,7 +88,7 @@ def make_slack_listener(
                                 channel=channel_id, text=response
                             )
                     else:
-                        logging.warning("No handler for channel", channel_name)
+                        logging.info("No handler for channel %s", channel_name)
 
         elif req.type == "interactive":
             pass
@@ -106,9 +106,13 @@ def make_slack_listener(
 
 def channel_map(socket_mode_client: SocketModeClient) -> dict:
 
-    subscribed_channels = socket_mode_client.web_client.conversations_list(
+    subscribed_channels = socket_mode_client.web_client.users_conversations(
         types="public_channel,private_channel,mpim,im",
-        limit=1000,
+        limit=100,
+    )
+    logging.info(
+        "Subscribed channels count: %s",
+        len(subscribed_channels["channels"]),
     )
 
     channels_by_id = {
