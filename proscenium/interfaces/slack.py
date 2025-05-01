@@ -112,7 +112,7 @@ def channel_map(socket_mode_client: SocketModeClient) -> dict:
     )
     logging.info(
         "Subscribed channels count: %s",
-        len(subscribed_channels),
+        len(subscribed_channels["channels"]),
     )
 
     channels_by_id = {
