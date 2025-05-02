@@ -15,14 +15,14 @@ from proscenium.scripts.document_enricher import enrich_documents
 from demo.domains.legal.docs import doc_as_rich
 from demo.domains.legal.doc_enrichments import LegalOpinionChunkExtractions
 from demo.domains.legal.doc_enrichments import LegalOpinionEnrichments
-
-
 from demo.config import default_model_id
 
 from eyecite import get_citations
 from eyecite.models import CitationBase
 
 from demo.domains.legal.docs import retriever
+
+log = logging.getLogger(__name__)
 
 # `judge` is not well captured in many of these documents,
 # so we will extract it from the text

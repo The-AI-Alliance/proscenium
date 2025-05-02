@@ -28,6 +28,12 @@ logging.basicConfig(
     level=logging.WARNING,
 )
 
+logging.basicConfig(
+    stream=sys.stdout,
+    format="%(asctime)s  %(levelname)-8s %(name)s: %(message)s",
+    level=logging.WARNING,
+)
+
 app = typer.Typer(help="Proscenium Slackbot")
 
 log = logging.getLogger(__name__)

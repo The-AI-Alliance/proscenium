@@ -7,6 +7,7 @@ from neo4j import Driver
 
 from proscenium.verbs.read import load_hugging_face_dataset
 
+log = logging.getLogger(__name__)
 
 topic = "US Caselaw"
 
@@ -35,7 +36,7 @@ def retrieve_documents(docs_per_dataset: int = None) -> List[Document]:
         if docs_per_dataset is not None:
             num_docs_to_use = min(docs_per_dataset, docs_in_dataset)
 
-        logging.info(
+        log.info(
             f"using {num_docs_to_use}/{docs_in_dataset} documents from {hf_dataset_id}"
         ),
 
@@ -63,7 +64,7 @@ def retrieve_document(id: str, driver: Driver) -> Optional[Document]:
 
         head = result.single()["c"]
         if head is None:
-            logging.error("retrieve_document: no results for id %s", id)
+            log.error("retrieve_document: no results for id %s", id)
             return None
 
         hf_dataset_id = head["hf_dataset_id"]

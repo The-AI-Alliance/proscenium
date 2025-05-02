@@ -3,6 +3,7 @@ from typing import Callable
 from typing import List
 from typing import Optional
 
+import logging
 from rich.console import Console
 
 from gofannon.basic_math.addition import Addition
@@ -16,6 +17,9 @@ from proscenium.scripts.tools import apply_tools
 import demo.domains.abacus as domain
 from demo.config import default_model_id
 
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+log = logging.getLogger(__name__)
 
 tools = [Addition, Subtraction, Multiplication, Division]
 

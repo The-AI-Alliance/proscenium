@@ -1,4 +1,7 @@
+import logging
 from proscenium.scripts.entity_resolver import Resolver
+
+log = logging.getLogger(__name__)
 
 default_embedding_model_id = "all-MiniLM-L6-v2"
 
