@@ -212,7 +212,7 @@ default_generation_model_id = default_model_id
 
 
 def make_handler(
-    driver: Driver, milvus_uri: str, console: Optional[Console] = None
+    driver: Driver, milvus_uri: str
 ) -> Callable[[str], Generator[str, None, None]]:
 
     def handle(question: str) -> Generator[str, None, None]:
@@ -239,7 +239,7 @@ def make_handler(
             system_prompt, user_prompt = prompts
 
             response = complete_simple(
-                default_generation_model_id, system_prompt, user_prompt, console=console
+                default_generation_model_id, system_prompt, user_prompt
             )
 
             yield response

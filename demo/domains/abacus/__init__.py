@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 
 import logging
+
 from rich.console import Console
 
 from gofannon.basic_math.addition import Addition
@@ -31,16 +32,12 @@ Do not use any other tools.
 """
 
 
-def prerequisites(
-    console: Optional[Console] = None,
-) -> List[Callable[[bool], None]]:
+def prerequisites(console: Optional[Console]) -> List[Callable[[bool], None]]:
 
     return []
 
 
-def make_handler(
-    console: Optional[Console] = None,
-) -> Callable[[str], Generator[str, None, None]]:
+def make_handler() -> Callable[[str], Generator[str, None, None]]:
 
     def handle(question: str) -> Generator[str, None, None]:
 
@@ -50,7 +47,6 @@ def make_handler(
             message=question,
             tool_desc_list=domain.tool_desc_list,
             tool_map=domain.tool_map,
-            console=console,
         )
 
     return handle

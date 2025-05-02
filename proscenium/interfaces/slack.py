@@ -46,7 +46,7 @@ def connect(app_token: str, bot_token: str, console: Console) -> SocketModeClien
 def make_slack_listener(
     self_user_id: str,
     channels_by_id: dict,
-    channel_to_handler: dict,
+    channel_id_to_handler: dict,
     console: Console,
 ):
 
@@ -71,25 +71,20 @@ def make_slack_listener(
                 channel_id = event.get("channel")
 
                 channel = channels_by_id.get(channel_id, None)
-                console.print(f'{user} in {channel_id} said "{text}"')
+                console.print(f"{user} in {channel_id} said something")
 
-                response = None
                 if channel is None:
                     # TODO: channels_by_id will get stale
-                    log.info("Channel %s not found in channels_by_id", channel_id)
+                    log.info("No handler for channel id %s", channel_id)
                 else:
-                    channel_name = channel["name"]
-                    if channel_name in channel_to_handler:
-                        handle = channel_to_handler[channel_name]
-                        console.print("Handler defined for channel", channel_name)
-                        # TODO determine whether the handler has a good chance of being useful
-                        for response in handle(text):
-                            console.print("Sending response to channel:", response)
-                            client.web_client.chat_postMessage(
-                                channel=channel_id, text=response
-                            )
-                    else:
-                        log.info("No handler for channel %s", channel_name)
+                    handle = channel_id_to_handler[channel_id]
+                    log.info("Handler defined for channel id %s", channel_id)
+                    # TODO determine whether the handler has a good chance of being useful
+                    for response in handle(text):
+                        client.web_client.chat_postMessage(
+                            channel=channel_id, text=response
+                        )
+                        log.info("Response sent to channel %s", channel_id)
 
         elif req.type == "interactive":
             pass
@@ -105,7 +100,7 @@ def make_slack_listener(
     return process
 
 
-def channel_map(socket_mode_client: SocketModeClient) -> dict:
+def channel_maps(socket_mode_client: SocketModeClient) -> tuple[dict, dict]:
 
     subscribed_channels = socket_mode_client.web_client.users_conversations(
         types="public_channel,private_channel,mpim,im",
@@ -147,10 +142,6 @@ def listen(
     socket_mode_client.socket_mode_request_listeners.append(slack_listener)
 
     console.print("Listening for events...")
-    socket_mode_client.web_client.chat_postMessage(
-        channel=user_id,
-        text="Starting up.",
-    )
 
     try:
         while True:
@@ -167,11 +158,6 @@ def shutdown(
     resources: Any,
     console: Console,
 ):
-
-    socket_mode_client.web_client.chat_postMessage(
-        channel=user_id,
-        text="Shutting down.",
-    )
 
     socket_mode_client.socket_mode_request_listeners.remove(slack_listener)
     socket_mode_client.disconnect()

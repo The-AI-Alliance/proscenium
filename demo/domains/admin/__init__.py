@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 
 import logging
+
 from rich.console import Console
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -15,16 +16,12 @@ You are an administrator of a chatbot.
 """
 
 
-def prerequisites(
-    console: Optional[Console] = None,
-) -> List[Callable[[bool], None]]:
+def prerequisites(console: Optional[Console]) -> List[Callable[[bool], None]]:
 
     return []
 
 
-def make_handler(
-    console: Optional[Console] = None,
-) -> Callable[[str], Generator[str, None, None]]:
+def make_handler() -> Callable[[str], Generator[str, None, None]]:
 
     def handle(question: str) -> Generator[str, None, None]:
 

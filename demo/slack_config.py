@@ -1,4 +1,6 @@
-from typing import Callable, Generator, List, Any
+from typing import Callable, Generator, List, Any, Optional
+
+import logging
 from pathlib import Path
 import os
 
@@ -7,9 +9,12 @@ from rich.console import Console
 from neo4j import GraphDatabase
 from neo4j import Driver
 
+from demo.domains import admin
 from demo.domains import abacus
 from demo.domains import literature
 from demo.domains import legal
+
+log = logging.getLogger(__name__)
 
 literature_milvus_uri = "file:/milvus.db"
 
@@ -24,8 +29,7 @@ neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
 default_neo4j_password = "password"
 neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-
-driver = None
+admin_channel_name = "deus_ex_machina"
 
 
 def prerequisites(console: Console) -> List[Callable[[bool], None]]:
@@ -54,34 +58,47 @@ def prerequisites(console: Console) -> List[Callable[[bool], None]]:
     return abacus_pres + literature_pres + legal_pres
 
 
+def start_admin_handler() -> Callable[[str], Generator[str, None, None]]:
+
+    handler = admin.make_handler()
+
+    log.info("Admin handler started.")
+
+    return handler
+
+
 def start_handlers(
-    console: Console,
+    channels_by_id: dict,
 ) -> tuple[dict[str, Callable[[str], Generator[str, None, None]]], Any]:
 
-    if console is not None:
-        console.print("Starting handlers...")
+    log.info("Starting handlers...")
+
+    channel_name_to_id = {
+        channel["name"]: channel["id"]
+        for channel in channels_by_id.values()
+        if channel.get("name")
+    }
 
     driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
-    channel_to_handler = {
-        "abacus": abacus.make_handler(console=console),
-        "literature": literature.make_handler(
+    channel_id_to_handler = {
+        channel_name_to_id["abacus"]: abacus.make_handler(),
+        channel_name_to_id["literature"]: literature.make_handler(
             literature.default_generator_model_id,
             literature_milvus_uri,
             literature.default_embedding_model_id,
-            console=console,
         ),
-        "legal": legal.make_handler(driver, legal_milvus_uri, console=console),
+        channel_name_to_id["legal"]: legal.make_handler(driver, legal_milvus_uri),
     }
 
-    if console is not None:
-        console.print(
-            "Handlers defined for channels:", ", ".join(list(channel_to_handler.keys()))
-        )
+    log.info(
+        "Handlers created for channels: %s",
+        ", ".join(list(channel_id_to_handler.keys())),
+    )
 
     resources = driver
 
-    return channel_to_handler, resources
+    return channel_id_to_handler, resources
 
 
 def stop_handlers(resources: Any) -> None:
