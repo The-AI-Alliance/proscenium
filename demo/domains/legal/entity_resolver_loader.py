@@ -11,6 +11,8 @@ from proscenium.scripts.entity_resolver import Resolver
 
 from demo.domains.legal.entity_resolvers import resolvers
 
+log = logging.getLogger(__name__)
+
 
 def make_entity_resolver_loader(
     milvus_uri: str,
@@ -38,7 +40,7 @@ def make_entity_resolver_loader(
     def load(force: bool = False):
 
         if force or already_built(milvus_uri, resolvers):
-            logging.info("Entity resolver already built.")
+            log.info("Entity resolver already built.")
             return
 
         driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))

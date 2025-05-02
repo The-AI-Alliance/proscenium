@@ -2,6 +2,7 @@ from typing import Optional
 from typing import List
 from typing import Callable
 
+import logging
 from pathlib import Path
 
 from rich.console import Console
@@ -15,6 +16,10 @@ from .kg_displayer import make_kg_displayer
 from .entity_resolvers import default_embedding_model_id
 from .entity_resolver_loader import make_entity_resolver_loader
 from .query_handler import make_handler, user_prompt, default_question
+
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+log = logging.getLogger(__name__)
 
 
 def prerequisites(

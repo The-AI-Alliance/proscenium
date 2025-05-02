@@ -1,13 +1,15 @@
 from typing import Optional, Callable
 
-from pathlib import Path
 import logging
+from pathlib import Path
 from rich.console import Console
 from neo4j import GraphDatabase
 
 from proscenium.scripts.knowledge_graph import load_knowledge_graph
 
 from demo.domains.legal.doc_enricher import LegalOpinionEnrichments
+
+log = logging.getLogger(__name__)
 
 
 def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
@@ -120,7 +122,7 @@ def make_kg_loader(
             num_nodes = session.run("MATCH (n) RETURN COUNT(n) AS cnt").single().value()
 
         if num_nodes > 0 and not force:
-            logging.info(
+            log.info(
                 f"Knowledge graph already exists at {neo4j_uri} and has at least one node.",
                 "Skipping its load.",
             )

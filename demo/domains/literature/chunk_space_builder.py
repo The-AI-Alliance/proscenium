@@ -15,6 +15,8 @@ from proscenium.scripts.chunk_space import make_vector_db_builder
 
 from .docs import books
 
+log = logging.getLogger(__name__)
+
 
 def make_chunk_space_builder(
     milvus_uri: str,
@@ -29,7 +31,7 @@ def make_chunk_space_builder(
             vector_db_client = vector_db(milvus_uri, overwrite=False)
             if vector_db_client.has_collection(collection_name):
                 # TODO the existence of the collection might not be strong enough proof
-                logging.info(
+                log.info(
                     f"Milvus DB already exists at {milvus_uri} with collection {collection_name}.",
                     "Skipping its build.",
                 )
@@ -39,13 +41,13 @@ def make_chunk_space_builder(
 
         for book in books:
             asyncio.run(url_to_file(book.url, book.data_file))
-            logging.info("%s local copy to chunk at %s", book.title, book.data_file)
+            log.info("%s local copy to chunk at %s", book.title, book.data_file)
 
         embedding_fn = embedding_function(embedding_model_id)
-        logging.info("Embedding model %s", embedding_model_id)
+        log.info("Embedding model %s", embedding_model_id)
 
         vector_db_client = vector_db(milvus_uri, overwrite=True)
-        logging.info("Vector db at uri %s", milvus_uri)
+        log.info("Vector db at uri %s", milvus_uri)
 
         vector_db_build = make_vector_db_builder(
             [str(book.data_file) for book in books],
@@ -54,7 +56,7 @@ def make_chunk_space_builder(
             collection_name,
         )
 
-        logging.info("Building chunk space")
+        log.info("Building chunk space")
         vector_db_build()
 
         vector_db_client.close()

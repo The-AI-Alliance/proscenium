@@ -1,4 +1,7 @@
+import logging
 from pydantic import BaseModel, Field
+
+log = logging.getLogger(__name__)
 
 
 class LegalOpinionChunkExtractions(BaseModel):
