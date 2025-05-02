@@ -10,21 +10,20 @@ from pydantic import BaseModel, Field
 
 from neo4j import Driver
 
+from eyecite import get_citations
+
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.vector_database import vector_db
-
 from proscenium.scripts.graph_rag import query_to_prompts
 
 from demo.config import default_model_id
-
-from eyecite import get_citations
-
 from demo.domains.legal.docs import retrieve_document
 from demo.domains.legal.docs import topic
 
+log = logging.getLogger(__name__)
 
 user_prompt = f"What is your question about {topic}?"
 
@@ -83,7 +82,7 @@ def query_extract(
 
     except Exception as e:
 
-        logging.error("query_extract: Exception: %s", e)
+        log.error("query_extract: Exception: %s", e)
 
     return None
 
@@ -103,8 +102,8 @@ def query_extract_to_graph(
             query_id=str(query_id),
             value=query,
         )
-        logging.info(f"Saved query {query} with id {query_id} to the graph")
-        logging.info(query_save_result.consume())
+        log.info(f"Saved query {query} with id {query_id} to the graph")
+        log.info(query_save_result.consume())
 
         for judgeref in qe.judge_names:
             session.run(
@@ -158,7 +157,7 @@ def query_extract_to_context(
         case_match_clauses = case_judgeref_clauses + case_caseref_clauses
 
         if len(case_match_clauses) == 0:
-            logging.warning("No case match clauses found")
+            log.warning("No case match clauses found")
             return None
 
         cypher = "\n".join(case_match_clauses) + "\nRETURN c.name AS name"
@@ -172,7 +171,7 @@ def query_extract_to_context(
             case_names.extend([record["name"] for record in result])
 
         # TODO check for empty result
-        logging.info("Cases with names: %s mention %s", str(case_names), str(caserefs))
+        log.info("Cases with names: %s mention %s", str(case_names), str(caserefs))
 
         # TODO: take all docs -- not just head
         doc = retrieve_document(case_names[0], driver)

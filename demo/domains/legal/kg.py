@@ -1,4 +1,7 @@
+import logging
 from enum import StrEnum
+
+log = logging.getLogger(__name__)
 
 
 class NodeLabel(StrEnum):

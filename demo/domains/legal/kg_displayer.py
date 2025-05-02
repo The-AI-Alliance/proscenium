@@ -1,9 +1,12 @@
 from typing import Optional, Callable
 
+import logging
 from rich.console import Console
 from rich.table import Table
 from neo4j import GraphDatabase
 from neo4j import Driver
+
+log = logging.getLogger(__name__)
 
 
 def display_knowledge_graph(driver: Driver, console: Console) -> None:
