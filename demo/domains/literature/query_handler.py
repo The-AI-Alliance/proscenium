@@ -15,6 +15,8 @@ from demo.config import default_model_id
 from .docs import books
 from .chunk_space import default_collection_name
 
+log = logging.getLogger(__name__)
+
 default_generator_model_id = default_model_id
 
 user_prompt = f"What is your question about {', '.join([b.title for b in books])}?"
@@ -30,10 +32,10 @@ def make_handler(
 ) -> Callable[[str], Generator[str, None, None]]:
 
     vector_db_client = vector_db(milvus_uri)
-    logging.info("Vector db at uri %s", milvus_uri)
+    log.info("Vector db at uri %s", milvus_uri)
 
     embedding_fn = embedding_function(embedding_model_id)
-    logging.info("Embedding model %s", embedding_model_id)
+    log.info("Embedding model %s", embedding_model_id)
 
     def handle(question: str) -> Generator[str, None, None]:
 
