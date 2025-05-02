@@ -14,6 +14,8 @@ from proscenium.verbs.vector_database import add_chunks_to_vector_db
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.display.milvus import collection_panel
 
+log = logging.getLogger(__name__)
+
 
 class Resolver:
 
@@ -37,12 +39,12 @@ def load_entity_resolver(
 ) -> None:
 
     vector_db_client = vector_db(milvus_uri, overwrite=True)
-    logging.info("Vector db stored at %s", milvus_uri)
+    log.info("Vector db stored at %s", milvus_uri)
 
     for resolver in resolvers:
 
         embedding_fn = embedding_function(embedding_model_id)
-        logging.info("Embedding model %s", embedding_model_id)
+        log.info("Embedding model %s", embedding_model_id)
 
         values = []
         with driver.session() as session:
@@ -50,16 +52,14 @@ def load_entity_resolver(
             new_values = [Document(record[resolver.field_name]) for record in result]
             values.extend(new_values)
 
-        logging.info(
-            "Loading entity resolver into vector db %s", resolver.collection_name
-        )
+        log.info("Loading entity resolver into vector db %s", resolver.collection_name)
         create_collection(
             vector_db_client, embedding_fn, resolver.collection_name, overwrite=True
         )
         info = add_chunks_to_vector_db(
             vector_db_client, embedding_fn, values, resolver.collection_name
         )
-        logging.info("%s chunks inserted ", info["insert_count"])
+        log.info("%s chunks inserted ", info["insert_count"])
         if console is not None:
             console.print(collection_panel(vector_db_client, resolver.collection_name))
 
@@ -72,10 +72,10 @@ def find_matching_objects(
     resolver: Resolver,
 ) -> Optional[str]:
 
-    logging.info("Loading collection", resolver.collection_name)
+    log.info("Loading collection", resolver.collection_name)
     vector_db_client.load_collection(resolver.collection_name)
 
-    logging.info(
+    log.info(
         "Finding entity matches for", approximate, "using", resolver.collection_name
     )
 
@@ -88,8 +88,8 @@ def find_matching_objects(
     )
     # TODO apply distance threshold
     for match in [head["entity"]["text"] for head in hits[:1]]:
-        logging.info("Closest match:", match)
+        log.info("Closest match:", match)
         return match
 
-    logging.info("No match found")
+    log.info("No match found")
     return None

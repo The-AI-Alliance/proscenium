@@ -12,6 +12,8 @@ from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
 from slack_sdk.socket_mode.listeners import SocketModeRequestListener
 
+log = logging.getLogger(__name__)
+
 
 def build_resources(
     prerequisites: Callable[[Optional[Console]], List[Callable[[bool], None]]],
@@ -74,12 +76,12 @@ def make_slack_listener(
                 response = None
                 if channel is None:
                     # TODO: channels_by_id will get stale
-                    logging.info("Channel %s not found in channels_by_id", channel_id)
+                    log.info("Channel %s not found in channels_by_id", channel_id)
                 else:
                     channel_name = channel["name"]
                     if channel_name in channel_to_handler:
                         handle = channel_to_handler[channel_name]
-                        logging.info("Handler defined for channel %s", channel_name)
+                        console.print("Handler defined for channel", channel_name)
                         # TODO determine whether the handler has a good chance of being useful
                         for response in handle(text):
                             console.print("Sending response to channel:", response)
@@ -87,7 +89,7 @@ def make_slack_listener(
                                 channel=channel_id, text=response
                             )
                     else:
-                        logging.info("No handler for channel %s", channel_name)
+                        log.info("No handler for channel %s", channel_name)
 
         elif req.type == "interactive":
             pass
@@ -109,7 +111,7 @@ def channel_map(socket_mode_client: SocketModeClient) -> dict:
         types="public_channel,private_channel,mpim,im",
         limit=100,
     )
-    logging.info(
+    log.info(
         "Subscribed channels count: %s",
         len(subscribed_channels["channels"]),
     )

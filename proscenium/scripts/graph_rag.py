@@ -9,6 +9,8 @@ from pydantic import BaseModel
 from uuid import uuid4, UUID
 from neo4j import Driver
 
+log = logging.getLogger(__name__)
+
 
 def query_to_prompts(
     query: str,
@@ -32,27 +34,27 @@ def query_to_prompts(
 
     query_id = uuid4()
 
-    logging.info("Extracting information from the question")
+    log.info("Extracting information from the question")
 
     extract = query_extract(query, query_extraction_model_id)
     if extract is None:
-        logging.info("Unable to extract information from that question")
+        log.info("Unable to extract information from that question")
         return None
 
-    logging.info("Extract: %s", extract)
+    log.info("Extract: %s", extract)
 
-    logging.info("Storing the extracted information in the graph")
+    log.info("Storing the extracted information in the graph")
     query_extract_to_graph(query, query_id, extract, driver)
 
-    logging.info("Forming context from the extracted information")
+    log.info("Forming context from the extracted information")
     context = query_extract_to_context(
         extract, query, driver, milvus_uri, console=console
     )
     if context is None:
-        logging.info("Unable to form context from the extracted information")
+        log.info("Unable to form context from the extracted information")
         return None
 
-    logging.info("Context: %s", context)
+    log.info("Context: %s", context)
 
     prompts = context_to_prompts(context)
 

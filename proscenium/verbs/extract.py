@@ -8,6 +8,8 @@ from pydantic import BaseModel
 
 from proscenium.verbs.complete import complete_simple
 
+log = logging.getLogger(__name__)
+
 extraction_system_prompt = "You are an entity extractor"
 
 
@@ -52,12 +54,12 @@ def extract_to_pydantic_model(
         console=console,
     )
 
-    logging.info("complete_to_pydantic_model: extract_str = <<<%s>>>", extract_str)
+    log.info("complete_to_pydantic_model: extract_str = <<<%s>>>", extract_str)
 
     try:
         extract_dict = json.loads(extract_str)
         return clazz.model_construct(**extract_dict)
     except Exception as e:
-        logging.error("complete_to_pydantic_model: Exception: %s", e)
+        log.error("complete_to_pydantic_model: Exception: %s", e)
 
     return None

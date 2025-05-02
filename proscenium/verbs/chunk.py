@@ -8,6 +8,8 @@ from langchain_core.documents.base import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.text_splitter import TokenTextSplitter
 
+log = logging.getLogger(__name__)
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
 

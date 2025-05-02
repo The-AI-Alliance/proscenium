@@ -3,11 +3,14 @@ from typing import Dict, List
 import logging
 from pathlib import Path
 from langchain_core.documents.base import Document
+from urllib.parse import urlsplit
 from pymilvus import MilvusClient
 from pymilvus import DataType, FieldSchema, CollectionSchema
 from pymilvus import model
 
 # See https://milvus.io/docs/quickstart.md
+
+log = logging.getLogger(__name__)
 
 
 def embedding_function(
@@ -40,9 +43,6 @@ def schema_chunks(
     return schema
 
 
-from urllib.parse import urlsplit
-
-
 def vector_db(
     uri: str,
     overwrite: bool = False,
@@ -55,14 +55,14 @@ def vector_db(
         if file_path.exists():
             if overwrite:
                 file_path.unlink()
-                logging.info("Deleted existing vector db file %s", file_path)
+                log.info("Deleted existing vector db file %s", file_path)
             else:
-                logging.info(
+                log.info(
                     "Using existing %s file. Use overwrite=True to replace.",
                     uri_fields[2],
                 )
         else:
-            logging.info("Creating new vector db file %s", file_path)
+            log.info("Creating new vector db file %s", file_path)
 
         client = MilvusClient(uri=str(file_path))
 
@@ -100,7 +100,7 @@ def create_collection(
     client.create_index(
         collection_name=collection_name, index_params=index_params, sync=True
     )
-    logging.info("Created collection %s", collection_name)
+    log.info("Created collection %s", collection_name)
 
 
 def add_chunks_to_vector_db(

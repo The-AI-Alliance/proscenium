@@ -53,6 +53,8 @@ from aisuite.framework.message import ChatCompletionMessageToolCall
 
 from proscenium.verbs.display.tools import complete_with_tools_panel
 
+log = logging.getLogger(__name__)
+
 provider_configs = {
     # TODO expose this
     "ollama": {"timeout": 180},
@@ -111,11 +113,11 @@ def evaluate_tool_call(tool_map: dict, tool_call: ChatCompletionMessageToolCall)
     # TODO validate the arguments?
     function_args = json.loads(tool_call.function.arguments)
 
-    logging.info(f"Evaluating tool call: {function_name} with args {function_args}")
+    log.info(f"Evaluating tool call: {function_name} with args {function_args}")
 
     function_response = tool_map[function_name](**function_args)
 
-    logging.info(f"   Response: {function_response}")
+    log.info(f"   Response: {function_response}")
 
     return function_response
 
@@ -136,7 +138,7 @@ def evaluate_tool_calls(tool_call_message, tool_map: dict) -> list[dict]:
 
     tool_call: ChatCompletionMessageToolCall
 
-    logging.info("Evaluating tool calls")
+    log.info("Evaluating tool calls")
 
     new_messages: list[dict] = []
 
@@ -144,7 +146,7 @@ def evaluate_tool_calls(tool_call_message, tool_map: dict) -> list[dict]:
         function_response = evaluate_tool_call(tool_map, tool_call)
         new_messages.append(tool_response_message(tool_call, function_response))
 
-    logging.info("Tool calls evaluated")
+    log.info("Tool calls evaluated")
 
     return new_messages
 
