@@ -10,6 +10,7 @@ from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.display.milvus import chunk_hits_table
 from proscenium.verbs.vector_database import closest_chunks
 
+log = logging.getLogger(__name__)
 
 rag_system_prompt = "Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer."
 
@@ -48,11 +49,11 @@ def answer_question(
 ) -> str:
 
     chunks = closest_chunks(vector_db_client, embedding_fn, query, collection_name)
-    logging.info("Found %s closest chunks", len(chunks))
-    logging.info(chunk_hits_table(chunks))
+    log.info("Found %s closest chunks", len(chunks))
+    log.info(chunk_hits_table(chunks))
 
     prompt = rag_prompt(chunks, query)
-    logging.info("RAG prompt created. Calling inference at %s", model_id)
+    log.info("RAG prompt created. Calling inference at %s", model_id)
 
     answer = complete_simple(model_id, rag_system_prompt, prompt, console=console)
 

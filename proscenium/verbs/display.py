@@ -1,4 +1,7 @@
+import logging
 from rich.text import Text
+
+log = logging.getLogger(__name__)
 
 
 def header() -> Text:

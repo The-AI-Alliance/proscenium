@@ -9,6 +9,8 @@ from proscenium.verbs.vector_database import create_collection
 from proscenium.verbs.vector_database import add_chunks_to_vector_db
 from proscenium.verbs.display.milvus import collection_panel
 
+log = logging.getLogger(__name__)
+
 
 def make_vector_db_builder(
     data_files: list[str],
@@ -27,13 +29,13 @@ def make_vector_db_builder(
 
             documents = load_file(data_file)
             chunks = documents_to_chunks_by_characters(documents)
-            logging.info("Data file %s has %s chunks", data_file, len(chunks))
+            log.info("Data file %s has %s chunks", data_file, len(chunks))
 
             info = add_chunks_to_vector_db(
                 vector_db_client, embedding_fn, chunks, collection_name
             )
-            logging.info("%s chunks inserted", info["insert_count"])
+            log.info("%s chunks inserted", info["insert_count"])
 
-        logging.info(collection_panel(vector_db_client, collection_name))
+        log.info(collection_panel(vector_db_client, collection_name))
 
     return build

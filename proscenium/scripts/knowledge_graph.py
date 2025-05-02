@@ -9,6 +9,8 @@ from rich.progress import Progress
 
 from neo4j import Driver
 
+log = logging.getLogger(__name__)
+
 
 def load_knowledge_graph(
     driver: Driver,
@@ -17,7 +19,7 @@ def load_knowledge_graph(
     doc_enrichments_to_graph: Callable[[Any, BaseModel], None],
 ) -> None:
 
-    logging.info("Parsing enrichments from %s", enrichments_jsonl_file)
+    log.info("Parsing enrichments from %s", enrichments_jsonl_file)
 
     enrichmentss = []
     with open(enrichments_jsonl_file, "r") as f:

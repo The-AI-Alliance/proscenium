@@ -11,6 +11,8 @@ from proscenium.verbs.complete import (
     complete_with_tool_results,
 )
 
+log = logging.getLogger(__name__)
+
 
 def apply_tools(
     model_id: str,
@@ -43,7 +45,7 @@ def apply_tools(
                 )
             )
 
-        logging.info("No tool applications detected")
+        log.info("No tool applications detected")
 
         return tool_call_message.content
 

@@ -1,4 +1,7 @@
+import logging
 from gofannon.base import BaseTool
+
+log = logging.getLogger(__name__)
 
 
 def process_tools(tools: list[BaseTool]) -> tuple[dict, list]:

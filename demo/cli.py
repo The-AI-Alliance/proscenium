@@ -8,8 +8,9 @@ from demo.typer.abacus import app as abacus_app
 from demo.typer.literature import app as literature_app
 from demo.typer.legal import app as legal_app
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.WARNING)
+log = logging.getLogger(__name__)
+
+logging.getLogger("proscenium").setLevel(logging.WARNING)
 
 app = typer.Typer(help="CLI Demo of Proscenium")
 

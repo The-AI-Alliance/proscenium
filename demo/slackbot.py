@@ -5,6 +5,7 @@ from typing import Callable
 from typing import Generator
 from typing import List
 import os
+import sys
 import logging
 import typer
 from pathlib import Path
@@ -108,20 +109,27 @@ def stop_handlers(resources: Any) -> None:
     driver.close()
 
 
+logging.basicConfig(
+    stream=sys.stdout,
+    format="%(asctime)s  %(levelname)-8s %(name)s: %(message)s",
+    level=logging.WARNING,
+)
+
 app = typer.Typer(help="Proscenium Slackbot")
 
+log = logging.getLogger(__name__)
 
-@app.command(help=f"""Start the Proscenium Slackbot.""")
+
+@app.command(help="""Start the Proscenium Slackbot.""")
 def start(verbose: bool = False, force_rebuild: bool = False):
 
     console = Console()
     sub_console = None
 
     if verbose:
-        logging.basicConfig(level=logging.INFO)
+        log.setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
         sub_console = console
-    else:
-        logging.basicConfig(level=logging.WARN)
 
     console.print(header())
     console.print("Starting the Proscenium Slackbot.")

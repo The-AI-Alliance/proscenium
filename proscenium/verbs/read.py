@@ -3,12 +3,17 @@ from typing import List
 import os
 import logging
 
-from langchain_core.documents.base import Document
+import httpx
+from pydantic.networks import HttpUrl
+from pathlib import Path
 
+from langchain_core.documents.base import Document
 from langchain_community.document_loaders import TextLoader
 from langchain_community.document_loaders.hugging_face_dataset import (
     HuggingFaceDatasetLoader,
 )
+
+log = logging.getLogger(__name__)
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 logging.getLogger("langchain_text_splitters.base").setLevel(logging.ERROR)
@@ -32,11 +37,6 @@ def load_hugging_face_dataset(
     documents = loader.load()
 
     return documents
-
-
-import httpx
-from pydantic.networks import HttpUrl
-from pathlib import Path
 
 
 async def url_to_file(url: HttpUrl, data_file: Path, overwrite: bool = False):

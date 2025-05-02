@@ -15,6 +15,8 @@ from langchain_core.documents.base import Document
 from proscenium.verbs.chunk import documents_to_chunks_by_tokens
 from proscenium.verbs.extract import extract_to_pydantic_model
 
+log = logging.getLogger(__name__)
+
 
 def extract_from_document_chunks(
     doc: Document,
@@ -42,7 +44,7 @@ def extract_from_document_chunks(
             chunk.page_content,
         )
 
-        logging.info("Extract model in chunk %s of %s", i + 1, len(chunks))
+        log.info("Extract model in chunk %s of %s", i + 1, len(chunks))
         if console is not None:
             console.print(Panel(str(ce)))
 
@@ -79,4 +81,4 @@ def enrich_documents(
 
                 progress.update(task_enrich, advance=1)
 
-        logging.info("Wrote document enrichments to %s", enrichments_jsonl_file)
+        log.info("Wrote document enrichments to %s", enrichments_jsonl_file)
