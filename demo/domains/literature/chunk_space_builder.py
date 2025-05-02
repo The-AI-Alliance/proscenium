@@ -32,8 +32,9 @@ def make_chunk_space_builder(
             if vector_db_client.has_collection(collection_name):
                 # TODO the existence of the collection might not be strong enough proof
                 log.info(
-                    f"Milvus DB already exists at {milvus_uri} with collection {collection_name}.",
-                    "Skipping its build.",
+                    "Milvus DB already exists at %s with collection %s. Skipping its build.",
+                    milvus_uri,
+                    collection_name,
                 )
                 vector_db_client.close()
                 return

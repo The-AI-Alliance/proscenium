@@ -123,8 +123,8 @@ def make_kg_loader(
 
         if num_nodes > 0 and not force:
             log.info(
-                f"Knowledge graph already exists at {neo4j_uri} and has at least one node.",
-                "Skipping its load.",
+                "Knowledge graph already exists at %s and has at least one node. Skipping its load.",
+                neo4j_uri,
             )
             driver.close()
             return
