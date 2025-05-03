@@ -212,7 +212,7 @@ default_generation_model_id = default_model_id
 
 
 def make_handler(
-    driver: Driver, milvus_uri: str
+    driver: Driver, milvus_uri: str, console: Optional[Console] = None
 ) -> Callable[[str], Generator[str, None, None]]:
 
     def handle(question: str) -> Generator[str, None, None]:
@@ -226,6 +226,7 @@ def make_handler(
             query_extract_to_graph,
             query_extract_to_context,
             context_to_prompts,
+            console=console,
         )
 
         if prompts is None:

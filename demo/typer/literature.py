@@ -21,6 +21,8 @@ app = typer.Typer(
 
 console = Console()
 
+log = logging.getLogger(__name__)
+
 
 @app.command(
     help=f"""Build a vector DB from chunks of {len(domain.books)} books from Project Gutenberg.
@@ -31,7 +33,8 @@ def prepare(verbose: bool = False):
 
     sub_console = None
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
     build = domain.make_chunk_space_builder(
@@ -54,7 +57,8 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     sub_console = None
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
     handle = domain.make_handler(

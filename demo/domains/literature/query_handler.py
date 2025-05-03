@@ -3,9 +3,10 @@ from typing import Callable
 
 import logging
 
+from rich.console import Console
+
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
-
 from proscenium.scripts.rag import answer_question
 
 from demo.config import default_model_id
@@ -26,6 +27,7 @@ def make_handler(
     generator_model_id: str,
     milvus_uri: str,
     embedding_model_id: str,
+    console: Console = None,
 ) -> Callable[[str], Generator[str, None, None]]:
 
     vector_db_client = vector_db(milvus_uri)
@@ -42,6 +44,7 @@ def make_handler(
             vector_db_client,
             embedding_fn,
             default_collection_name,
+            console=console,
         )
 
     return handle
