@@ -29,6 +29,8 @@ default_milvus_uri = "file:/grag-milvus.db"
 
 console = Console()
 
+log = logging.getLogger(__name__)
+
 
 @app.command(help=f"Enrich documents from {', '.join(domain.hf_dataset_ids)}.")
 def enrich(
@@ -39,7 +41,8 @@ def enrich(
 ):
     sub_console = None
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
     enrich = domain.make_document_enricher(docs_per_dataset, output, delay, sub_console)
@@ -62,7 +65,8 @@ def load_graph(
 
     sub_console = None
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
     load = domain.make_kg_loader(
@@ -80,7 +84,8 @@ def load_graph(
 def display_graph(verbose: bool = False):
 
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
 
     neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
@@ -101,7 +106,8 @@ def load_resolver(verbose: bool = False):
 
     sub_console = None
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
@@ -131,7 +137,8 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     sub_console = None
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)

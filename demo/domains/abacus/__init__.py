@@ -37,7 +37,9 @@ def prerequisites(console: Optional[Console]) -> List[Callable[[bool], None]]:
     return []
 
 
-def make_handler() -> Callable[[str], Generator[str, None, None]]:
+def make_handler(
+    console: Optional[Console] = None,
+) -> Callable[[str], Generator[str, None, None]]:
 
     def handle(question: str) -> Generator[str, None, None]:
 
@@ -47,6 +49,7 @@ def make_handler() -> Callable[[str], Generator[str, None, None]]:
             message=question,
             tool_desc_list=domain.tool_desc_list,
             tool_map=domain.tool_map,
+            console=console,
         )
 
     return handle

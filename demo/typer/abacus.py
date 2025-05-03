@@ -10,13 +10,17 @@ app = typer.Typer(help="""Arithmetic question answering.""")
 
 console = Console()
 
+log = logging.getLogger(__name__)
+
 
 @app.command(help="Ask a natural langauge arithmetic question.")
 def ask(verbose: bool = False):
 
     sub_console = None
     if verbose:
-        logging.basicConfig(level=logging.INFO)
+        log.setLevel(logging.INFO)
+        logging.getLogger("proscenium").setLevel(logging.INFO)
+        logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
     handle = domain.make_handler(console=sub_console)
