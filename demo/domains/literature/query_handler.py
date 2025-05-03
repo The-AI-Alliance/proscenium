@@ -1,6 +1,5 @@
 from typing import Generator
 from typing import Callable
-from typing import Optional
 
 import logging
 
@@ -28,7 +27,7 @@ def make_handler(
     generator_model_id: str,
     milvus_uri: str,
     embedding_model_id: str,
-    console: Optional[Console] = None,
+    console: Console = None,
 ) -> Callable[[str], Generator[str, None, None]]:
 
     vector_db_client = vector_db(milvus_uri)
@@ -45,6 +44,7 @@ def make_handler(
             vector_db_client,
             embedding_fn,
             default_collection_name,
+            console=console,
         )
 
     return handle

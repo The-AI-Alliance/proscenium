@@ -240,7 +240,7 @@ def make_handler(
             system_prompt, user_prompt = prompts
 
             response = complete_simple(
-                default_generation_model_id, system_prompt, user_prompt, console=console
+                default_generation_model_id, system_prompt, user_prompt
             )
 
             yield response
