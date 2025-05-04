@@ -45,7 +45,6 @@ def answer_question(
     vector_db_client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     collection_name: str,
-    console: Optional[Console] = None,
 ) -> str:
 
     chunks = closest_chunks(vector_db_client, embedding_fn, query, collection_name)
@@ -55,6 +54,6 @@ def answer_question(
     prompt = rag_prompt(chunks, query)
     log.info("RAG prompt created. Calling inference at %s", model_id)
 
-    answer = complete_simple(model_id, rag_system_prompt, prompt, console=console)
+    answer = complete_simple(model_id, rag_system_prompt, prompt)
 
     return answer

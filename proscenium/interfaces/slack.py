@@ -1,6 +1,7 @@
 from typing import Callable
 from typing import Optional
 from typing import List
+from typing import Generator
 from typing import Any
 import time
 import logging
@@ -44,9 +45,11 @@ def connect(app_token: str, bot_token: str, console: Console) -> SocketModeClien
 
 
 def make_slack_listener(
-    self_user_id: str,
+    proscenium_user_id: str,
     channels_by_id: dict,
-    channel_id_to_handler: dict,
+    channel_id_to_handler: dict[
+        str, Callable[[str, str, str], Generator[tuple[str, str], None, None]]
+    ],
     console: Console,
 ):
 
@@ -63,28 +66,35 @@ def make_slack_listener(
                 "message",
                 "app_mention",
             ]:
-                user = event.get("user")
-                if user == self_user_id:
+                speaker_id = event.get("user")
+                if speaker_id == proscenium_user_id:
                     return
 
                 text = event.get("text")
                 channel_id = event.get("channel")
+                console.print(f"{speaker_id} in {channel_id} said something")
 
                 channel = channels_by_id.get(channel_id, None)
-                console.print(f"{user} in {channel_id} said something")
 
                 if channel is None:
+
                     # TODO: channels_by_id will get stale
                     log.info("No handler for channel id %s", channel_id)
+
                 else:
+
                     handle = channel_id_to_handler[channel_id]
                     log.info("Handler defined for channel id %s", channel_id)
+
                     # TODO determine whether the handler has a good chance of being useful
-                    for response in handle(text):
+
+                    for receiving_channel_id, response in handle(
+                        channel_id, speaker_id, text
+                    ):
                         client.web_client.chat_postMessage(
-                            channel=channel_id, text=response
+                            channel=receiving_channel_id, text=response
                         )
-                        log.info("Response sent to channel %s", channel_id)
+                        log.info("Response sent to channel %s", receiving_channel_id)
 
         elif req.type == "interactive":
             pass
