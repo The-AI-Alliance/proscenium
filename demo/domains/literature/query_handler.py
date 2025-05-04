@@ -28,7 +28,7 @@ def make_handler(
     milvus_uri: str,
     embedding_model_id: str,
     admin_channel_id: str,
-) -> Callable[[str], Generator[tuple[str, str], None, None]]:
+) -> Callable[[tuple[str, str, str]], Generator[tuple[str, str], None, None]]:
 
     vector_db_client = vector_db(milvus_uri)
     log.info("Vector db at uri %s", milvus_uri)

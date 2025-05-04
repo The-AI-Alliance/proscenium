@@ -23,7 +23,7 @@ def prerequisites(console: Optional[Console]) -> List[Callable[[bool], None]]:
 
 def make_handler(
     admin_channel_id: str,
-) -> Callable[[tuple[str, str]], Generator[str, None, None]]:
+) -> Callable[[tuple[str, str, str]], Generator[tuple[str, str], None, None]]:
 
     def handle(
         channel_id: str,

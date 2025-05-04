@@ -213,7 +213,7 @@ default_generation_model_id = default_model_id
 
 def make_handler(
     driver: Driver, milvus_uri: str, admin_channel_id: str
-) -> Callable[[str], Generator[tuple[str, str], None, None]]:
+) -> Callable[[tuple[str, str, str]], Generator[tuple[str, str], None, None]]:
 
     def handle(
         channel_id: str, speaker_id: str, question: str
