@@ -1,7 +1,5 @@
-from typing import List, Dict, Optional
+from typing import List, Dict
 import logging
-
-from rich.console import Console
 
 from pymilvus import MilvusClient
 from pymilvus import model

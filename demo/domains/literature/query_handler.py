@@ -3,8 +3,6 @@ from typing import Callable
 
 import logging
 
-from rich.console import Console
-
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
 from proscenium.scripts.rag import answer_question
