@@ -21,10 +21,16 @@ def prerequisites(console: Optional[Console]) -> List[Callable[[bool], None]]:
     return []
 
 
-def make_handler() -> Callable[[str], Generator[str, None, None]]:
+def make_handler(
+    admin_channel_id: str,
+) -> Callable[[tuple[str, str]], Generator[str, None, None]]:
 
-    def handle(question: str) -> Generator[str, None, None]:
+    def handle(
+        channel_id: str,
+        speaker_id: str,  # pylint: disable=unused-argument
+        question: str,
+    ) -> Generator[tuple[str, str], None, None]:
 
-        yield "I am the administrator of this chat system."
+        yield channel_id, "I am the administrator of this chat system."
 
     return handle

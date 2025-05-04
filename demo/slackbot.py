@@ -87,15 +87,21 @@ def start(verbose: bool = False, force_rebuild: bool = False):
         raise ValueError(
             f"Admin channel {slack_admin_channel_id} not found in subscribed channels."
         )
-    admin_handler = start_admin_handler()
+    admin_handler = start_admin_handler(slack_admin_channel_id)
 
     user_id = bot_user_id(socket_mode_client, console)
 
-    channel_id_to_handler, resources = start_handlers(channels_by_id)
+    channel_id_to_handler, resources = start_handlers(
+        channels_by_id, slack_admin_channel_id
+    )
     channel_id_to_handler[slack_admin_channel_id] = admin_handler
 
     socket_mode_client.web_client.chat_postMessage(
-        channel=slack_admin_channel_id, text="Starting up."
+        channel=slack_admin_channel_id,
+        text="""
+https://the-ai-alliance.github.io/proscenium/
+Curtain up. 🎭""",
+        mrkdwn=True,
     )
 
     slack_listener = make_slack_listener(
@@ -110,7 +116,8 @@ def start(verbose: bool = False, force_rebuild: bool = False):
     )
 
     socket_mode_client.web_client.chat_postMessage(
-        channel=slack_admin_channel_id, text="Shutting down."
+        channel=slack_admin_channel_id,
+        text="""Curtain down. We hope you enjoyed the show!""",
     )
 
     shutdown(

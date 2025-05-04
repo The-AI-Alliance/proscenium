@@ -27,8 +27,8 @@ def make_handler(
     generator_model_id: str,
     milvus_uri: str,
     embedding_model_id: str,
-    console: Console = None,
-) -> Callable[[str], Generator[str, None, None]]:
+    admin_channel_id: str,
+) -> Callable[[str], Generator[tuple[str, str], None, None]]:
 
     vector_db_client = vector_db(milvus_uri)
     log.info("Vector db at uri %s", milvus_uri)
@@ -36,15 +36,16 @@ def make_handler(
     embedding_fn = embedding_function(embedding_model_id)
     log.info("Embedding model %s", embedding_model_id)
 
-    def handle(question: str) -> Generator[str, None, None]:
+    def handle(
+        channel_id: str, speaker_id: str, question: str
+    ) -> Generator[tuple[str, str], None, None]:
 
-        yield answer_question(
+        yield channel_id, answer_question(
             question,
             generator_model_id,
             vector_db_client,
             embedding_fn,
             default_collection_name,
-            console=console,
         )
 
     return handle

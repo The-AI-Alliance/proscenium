@@ -212,10 +212,12 @@ default_generation_model_id = default_model_id
 
 
 def make_handler(
-    driver: Driver, milvus_uri: str, console: Optional[Console] = None
-) -> Callable[[str], Generator[str, None, None]]:
+    driver: Driver, milvus_uri: str, admin_channel_id: str
+) -> Callable[[str], Generator[tuple[str, str], None, None]]:
 
-    def handle(question: str) -> Generator[str, None, None]:
+    def handle(
+        channel_id: str, speaker_id: str, question: str
+    ) -> Generator[tuple[str, str], None, None]:
 
         prompts = query_to_prompts(
             question,
@@ -226,16 +228,15 @@ def make_handler(
             query_extract_to_graph,
             query_extract_to_context,
             context_to_prompts,
-            console=console,
         )
 
         if prompts is None:
 
-            yield "Sorry, I'm not able to answer that question."
+            yield channel_id, "Sorry, I'm not able to answer that question."
 
         else:
 
-            yield "I think I can help with that..."
+            yield channel_id, "I think I can help with that..."
 
             system_prompt, user_prompt = prompts
 
@@ -243,6 +244,6 @@ def make_handler(
                 default_generation_model_id, system_prompt, user_prompt
             )
 
-            yield response
+            yield channel_id, response
 
     return handle
