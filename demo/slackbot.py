@@ -99,13 +99,11 @@ def start(verbose: bool = False, force_rebuild: bool = False):
     socket_mode_client.web_client.chat_postMessage(
         channel=slack_admin_channel_id,
         text="""
-https://the-ai-alliance.github.io/proscenium/
-Curtain up. 🎭""",
-        mrkdwn=True,
+Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
     )
 
     slack_listener = make_slack_listener(
-        user_id, channels_by_id, channel_id_to_handler, console
+        user_id, slack_admin_channel_id, channels_by_id, channel_id_to_handler, console
     )
 
     listen(
