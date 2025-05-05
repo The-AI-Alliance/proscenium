@@ -6,6 +6,7 @@ import logging
 import typer
 from rich.console import Console
 
+from proscenium import admin
 from proscenium.interfaces.slack import (
     build_resources,
     bot_user_id,
@@ -20,7 +21,6 @@ from proscenium.verbs.display import header
 
 from demo.slack_config import (
     prerequisites,
-    start_admin_handler,
     start_handlers,
     stop_handlers,
 )
@@ -87,9 +87,9 @@ def start(verbose: bool = False, force_rebuild: bool = False):
         raise ValueError(
             f"Admin channel {slack_admin_channel_id} not found in subscribed channels."
         )
-    admin_handler = start_admin_handler(slack_admin_channel_id)
 
-    user_id = bot_user_id(socket_mode_client, console)
+    admin_handler = admin.make_handler(slack_admin_channel_id)
+    log.info("Admin handler started.")
 
     channel_id_to_handler, resources = start_handlers(
         channels_by_id, slack_admin_channel_id
@@ -101,6 +101,8 @@ def start(verbose: bool = False, force_rebuild: bool = False):
         text="""
 Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
     )
+
+    user_id = bot_user_id(socket_mode_client, console)
 
     slack_listener = make_slack_listener(
         user_id, slack_admin_channel_id, channels_by_id, channel_id_to_handler, console
