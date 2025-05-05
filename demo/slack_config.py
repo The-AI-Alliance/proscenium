@@ -9,7 +9,6 @@ from rich.console import Console
 from neo4j import GraphDatabase
 from neo4j import Driver
 
-from demo.domains import admin
 from demo.domains import abacus
 from demo.domains import literature
 from demo.domains import legal
@@ -54,17 +53,6 @@ def prerequisites(console: Console) -> List[Callable[[bool], None]]:
     )
 
     return abacus_pres + literature_pres + legal_pres
-
-
-def start_admin_handler(
-    admin_channel_id: str,
-) -> Callable[[str], Generator[str, None, None]]:
-
-    handler = admin.make_handler(admin_channel_id)
-
-    log.info("Admin handler started.")
-
-    return handler
 
 
 def start_handlers(
