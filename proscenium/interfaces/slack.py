@@ -46,6 +46,7 @@ def connect(app_token: str, bot_token: str, console: Console) -> SocketModeClien
 
 def make_slack_listener(
     proscenium_user_id: str,
+    admin_channel_id: str,
     channels_by_id: dict,
     channel_id_to_handler: dict[
         str, Callable[[str, str, str], Generator[tuple[str, str], None, None]]
@@ -91,10 +92,23 @@ def make_slack_listener(
                     for receiving_channel_id, response in handle(
                         channel_id, speaker_id, text
                     ):
-                        client.web_client.chat_postMessage(
+                        response_response = client.web_client.chat_postMessage(
                             channel=receiving_channel_id, text=response
                         )
-                        log.info("Response sent to channel %s", receiving_channel_id)
+                        permalink = client.web_client.chat_getPermalink(
+                            channel=receiving_channel_id,
+                            message_ts=response_response["ts"],
+                        )["permalink"]
+
+                        log.info(
+                            "Response sent to channel %s link %s",
+                            receiving_channel_id,
+                            permalink,
+                        )
+                        client.web_client.chat_postMessage(
+                            channel=admin_channel_id,
+                            text=permalink,
+                        )
 
         elif req.type == "interactive":
             pass
