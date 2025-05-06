@@ -48,7 +48,7 @@ class Scene:
     def places(self) -> dict[str, Character]:
         pass
 
-    def exit(self) -> None:
+    def curtain(self) -> None:
         pass
 
 
@@ -59,3 +59,7 @@ class Production:
 
     def scenes(self) -> list[Scene]:
         return []
+
+    def curtain(self) -> None:
+        for scene in self.scenes():
+            scene.curtain()

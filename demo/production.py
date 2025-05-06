@@ -10,6 +10,8 @@ from proscenium.core import Scene
 
 from demo.settings import abacus, literature, legal
 
+from demo.settings.legal.docs import default_docs_per_dataset
+
 log = logging.getLogger(__name__)
 
 literature_milvus_uri = "file:/milvus.db"
@@ -42,9 +44,9 @@ class Demo(Production):
         )
 
         self.law_library = legal.LawLibrary(
-            legal.default_docs_per_dataset,
+            default_docs_per_dataset,
             enrichment_jsonl_file,
-            legal.default_delay,
+            legal.doc_enrichments.default_delay,
             neo4j_uri,
             neo4j_username,
             neo4j_password,
@@ -63,24 +65,16 @@ class Demo(Production):
 
     def places(
         self,
-        channels_by_id: dict,
+        channel_name_to_id: dict,
     ) -> dict[str, Character]:
 
-        channel_name_to_id = {
-            channel["name"]: channel["id"]
-            for channel in channels_by_id.values()
-            if channel.get("name")
-        }
-
-        channel_id_to_handler = {
-            channel_name_to_id["abacus"]: self.elementary_school_math_class.abacus,
-            channel_name_to_id[
-                "literature"
-            ]: self.high_school_english_class.literature_expert,
-            channel_name_to_id["legal"]: self.law_library.law_librarian,
-        }
+        channel_id_to_handler = {}
+        for scene in self.scenes():
+            channel_id_to_handler.update(scene.places(channel_name_to_id))
 
         return channel_id_to_handler
 
 
-production = Demo()
+def make_production(admin_channel_id: str, console: Console) -> Demo:
+
+    return Demo(admin_channel_id, console)

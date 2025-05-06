@@ -84,9 +84,6 @@ class LegalOpinionEnrichments(BaseModel):
     hf_dataset_index: int = Field(description="index of the document in the HF dataset")
 
 
-# `judge` is not well captured in many of these documents,
-# so we will extract it from the text
-
 default_chunk_extraction_model_id = default_model_id
 
 default_delay = 1.0  # intra-chunk delay between inference calls

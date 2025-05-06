@@ -58,17 +58,26 @@ def start(
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = console
 
+    slack_admin_channel_id = os.environ.get("SLACK_ADMIN_CHANNEL_ID")
+    if slack_admin_channel_id is None:
+        raise ValueError(
+            "SLACK_ADMIN_CHANNEL_ID environment variable not set. "
+            "Please set it to the channel ID of the Proscenium admin channel."
+        )
+
     console.print(header())
 
     production_module = importlib.import_module(production_module_name, package=None)
+
+    production = production_module.make_production(slack_admin_channel_id, sub_console)
 
     if force_rebuild:
         console.print("Forcing rebuild of all props.")
     else:
         console.print("Building any missing props...")
 
-    for scene in production_module.production.scenes(console=sub_console):
-        for prop in scene.props:
+    for scene in production.scenes():
+        for prop in scene.props():
             prop.build(force_rebuild)
 
     slack_app_token = os.environ.get("SLACK_APP_TOKEN")
@@ -87,12 +96,6 @@ def start(
     socket_mode_client = connect(slack_app_token, slack_bot_token)
 
     channels_by_id = channel_maps(socket_mode_client)
-    slack_admin_channel_id = os.environ.get("SLACK_ADMIN_CHANNEL_ID")
-    if slack_admin_channel_id is None:
-        raise ValueError(
-            "SLACK_ADMIN_CHANNEL_ID environment variable not set. "
-            "Please set it to the channel ID of the Proscenium admin channel."
-        )
 
     if slack_admin_channel_id not in channels_by_id:
         console.print("Subscribed channels:", channels_by_id)
@@ -104,9 +107,12 @@ def start(
     log.info("Admin handler started.")
 
     log.info("Places, please!")
-    channel_id_to_handler, resources = production_module.production.places(
-        channels_by_id
-    )
+    channel_name_to_id = {
+        channel["name"]: channel["id"]
+        for channel in channels_by_id.values()
+        if channel.get("name")
+    }
+    channel_id_to_handler = production.places(channel_name_to_id)
     channel_id_to_handler[slack_admin_channel_id] = admin
     log.info(
         "Characters in place in channels: %s",
@@ -142,8 +148,7 @@ Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
         socket_mode_client,
         slack_listener,
         user_id,
-        production_module.production,
-        resources,
+        production,
         console,
     )
 

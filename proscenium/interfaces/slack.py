@@ -1,7 +1,6 @@
 from typing import Callable
 
 from typing import Generator
-from typing import Any
 import time
 import logging
 from rich.console import Console
@@ -163,7 +162,6 @@ def shutdown(
     slack_listener: SocketModeRequestListener,
     user_id: str,
     production: Production,
-    resources: Any,
     console: Console,
 ):
 
@@ -171,5 +169,6 @@ def shutdown(
     socket_mode_client.disconnect()
     console.print("Disconnected from Slack.")
 
-    production.exit(resources)
+    production.curtain()
+
     console.print("Handlers stopped.")

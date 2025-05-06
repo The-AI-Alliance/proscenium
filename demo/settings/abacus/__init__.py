@@ -64,3 +64,10 @@ class ElementarySchoolMathClass(Scene):
         return [
             self.abacus,
         ]
+
+    def places(
+        self,
+        channel_name_to_id: dict,
+    ) -> dict[str, Character]:
+
+        return {channel_name_to_id["abacus"]: self.abacus}

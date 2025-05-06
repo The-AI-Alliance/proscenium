@@ -69,9 +69,11 @@ class LawLibrary(Scene):
             self.console,
         )
 
-        driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
+        self.driver = GraphDatabase.driver(
+            neo4j_uri, auth=(neo4j_username, neo4j_password)
+        )
 
-        self.law_librarian = LawLibrarian(driver, milvus_uri, admin_channel_id)
+        self.law_librarian = LawLibrarian(self.driver, milvus_uri, admin_channel_id)
 
     def props(self) -> list[Prop]:
 
@@ -87,6 +89,13 @@ class LawLibrary(Scene):
             self.law_librarian,
         ]
 
-    def exit(self) -> None:
+    def places(
+        self,
+        channel_name_to_id: dict,
+    ) -> dict[str, Character]:
+
+        return {channel_name_to_id["legal"]: self.law_librarian}
+
+    def curtain(self) -> None:
         self.driver.close()
         self.driver = None

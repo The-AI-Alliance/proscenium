@@ -47,3 +47,10 @@ class HighSchoolEnglishClass(Scene):
     def characters(self) -> List[Character]:
 
         return [self.literature_expert]
+
+    def places(
+        self,
+        channel_name_to_id: dict,
+    ) -> dict[str, Character]:
+
+        return {channel_name_to_id["literature"]: self.literature_expert}
