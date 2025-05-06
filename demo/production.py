@@ -29,6 +29,9 @@ neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
 
 class Demo(Production):
+    """
+    A demonstration of Proscenium Scenes (with Characters and Props)
+    interacting with an audience."""
 
     def __init__(self, admin_channel_id: str, console: Console) -> None:
 

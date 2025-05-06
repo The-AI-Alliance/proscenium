@@ -25,6 +25,9 @@ class Prop:
     def description(self) -> str:
         return self.__doc__ or ""
 
+    def curtain_up_message(self) -> str:
+        return f"- {self.name()}, {self.description().strip()}"
+
     def already_built(self) -> bool:
         return False
 
@@ -46,6 +49,9 @@ class Character:
     def description(self) -> str:
         return self.__doc__ or ""
 
+    def curtain_up_message(self) -> str:
+        return f"- {self.name()}, {self.description().strip()}"
+
     def handle(
         channel_id: str, speaker_id: str, utterance: str
     ) -> Generator[tuple[str, str], None, None]:
@@ -66,6 +72,17 @@ class Scene:
 
     def description(self) -> str:
         return self.__doc__ or ""
+
+    def curtain_up_message(self) -> str:
+        return f"""
+Scene: {self.name()}, {self.description().strip()}
+
+Characters:
+{"\n".join([character.curtain_up_message() for character in self.characters()])}
+
+Props:
+{"\n".join([prop.curtain_up_message() for prop in self.props()])}
+"""
 
     def props(self) -> list[Prop]:
         return []
@@ -92,6 +109,11 @@ class Production:
 
     def description(self) -> str:
         return self.__doc__ or ""
+
+    def curtain_up_message(self) -> str:
+        return f"""Production: {self.name()}, {self.description().strip()}
+
+{"\n\n".join([scene.curtain_up_message() for scene in self.scenes()])}"""
 
     def scenes(self) -> list[Scene]:
         return []

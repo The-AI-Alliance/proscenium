@@ -28,6 +28,8 @@ judge_resolver = Resolver(
 
 
 class EntityResolvers(Prop):
+    """
+    An entity resolver for resolving case and judge references in legal documents."""
 
     def __init__(
         self,

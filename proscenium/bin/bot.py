@@ -37,36 +37,6 @@ app = typer.Typer(help="Proscenium Bot")
 log = logging.getLogger(__name__)
 
 
-def prop_message(prop) -> str:
-    return f"""
-  - {prop.name()}, {prop.description().strip()}
-"""
-
-
-def character_message(character) -> str:
-    return f"""
-  - {character.name()}, {character.description().strip()}
-"""
-
-
-def scene_message(scene) -> str:
-    return f"""
-Scene: {scene.name()}, {scene.description().strip()}
-
-Characters:
-{"\n".join([character_message(character) for character in scene.characters()])}
-
-Props:
-{"\n".join([prop_message(prop) for prop in scene.props()])}
-"""
-
-
-def production_message(production) -> str:
-    return f"""Production: {production.name()} -- {production.description()}
-
-{"\n\n".join([scene_message(scene) for scene in production.scenes()])}"""
-
-
 @app.command(help="""Start the Proscenium Bot.""")
 def start(
     verbose: bool = False,
@@ -155,13 +125,13 @@ def start(
         user_id, slack_admin_channel_id, channels_by_id, channel_id_to_handler, console
     )
 
-    for scene in production.scenes():
-        pass
-
     curtain_up_message = f"""
 Proscenium 🎭 https://the-ai-alliance.github.io/proscenium/
 
-{production_message(production)}
+```
+{production.curtain_up_message()}
+```
+
 Curtain up.
 """
 

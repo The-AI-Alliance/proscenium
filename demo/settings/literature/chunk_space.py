@@ -23,6 +23,7 @@ default_collection_name = "literature_chunks"
 
 
 class ChunkSpace(Prop):
+    """Small chunks of literature text stored in a vector database."""
 
     def __init__(
         self,
