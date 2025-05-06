@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 
-import demo.settings.literature as domain
+from demo.settings import literature
 
 default_milvus_uri = "file:/milvus.db"
 # milvus_uri = "http://localhost:19530"
@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 
 
 @app.command(
-    help=f"""Build a vector DB from chunks of {len(domain.books)} books from Project Gutenberg.
+    help=f"""Build a vector DB from chunks of {len(literature.books)} books from Project Gutenberg.
 Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 """
 )
@@ -38,10 +38,10 @@ def prepare(verbose: bool = False):
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    build = domain.make_chunk_space_builder(
+    build = literature.make_chunk_space_builder(
         milvus_uri,
         collection_name,
-        domain.default_embedding_model_id,
+        literature.default_embedding_model_id,
         console=sub_console,
     )
     console.print("Building chunk space")
@@ -56,25 +56,23 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
-    sub_console = None
     if verbose:
         logging.getLogger("proscenium").setLevel(logging.INFO)
         logging.getLogger("demo").setLevel(logging.INFO)
-        sub_console = Console()
 
-    literature_expert = domain.LiteratureExpert(
-        domain.default_generator_model_id,
+    literature_expert = literature.LiteratureExpert(
+        literature.default_generator_model_id,
         milvus_uri,
-        domain.default_embedding_model_id,
-        console=sub_console,
+        literature.default_embedding_model_id,
+        None,
     )
 
     while True:
 
         if question is None:
             q = Prompt.ask(
-                domain.user_prompt,
-                default=domain.default_question,
+                literature.user_prompt,
+                default=literature.default_question,
             )
         else:
             q = question

@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from neo4j import GraphDatabase
 
-import demo.settings.legal as domain
+from demo.settings import legal
 
 app = typer.Typer(
     help="""
@@ -32,11 +32,11 @@ console = Console()
 log = logging.getLogger(__name__)
 
 
-@app.command(help=f"Enrich documents from {', '.join(domain.hf_dataset_ids)}.")
+@app.command(help=f"Enrich documents from {', '.join(legal.docs.hf_dataset_ids)}.")
 def enrich(
-    docs_per_dataset: int = domain.default_docs_per_dataset,
+    docs_per_dataset: int = legal.docs.default_docs_per_dataset,
     output: Path = default_enrichment_jsonl_file,
-    delay: float = domain.default_delay,
+    delay: float = legal.doc_enrichments.default_delay,
     verbose: bool = False,
 ):
     sub_console = None
@@ -45,7 +45,9 @@ def enrich(
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    enrich = domain.make_document_enricher(docs_per_dataset, output, delay, sub_console)
+    enrich = legal.doc_enrichments.make_document_enricher(
+        docs_per_dataset, output, delay, sub_console
+    )
 
     console.print("Enriching documents")
     enrich(force=True)
@@ -69,7 +71,7 @@ def load_graph(
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    load = domain.make_kg_loader(
+    load = legal.make_kg_loader(
         input, neo4j_uri, neo4j_username, neo4j_password, sub_console
     )
 
@@ -91,7 +93,7 @@ def display_graph(verbose: bool = False):
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    show = domain.make_kg_displayer(neo4j_uri, neo4j_username, neo4j_password, console)
+    show = legal.make_kg_displayer(neo4j_uri, neo4j_username, neo4j_password, console)
 
     console.print("Showing knowledge graph")
     show()
@@ -116,9 +118,9 @@ def load_resolver(verbose: bool = False):
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    load = domain.make_entity_resolver_loader(
+    load = legal.make_entity_resolver_loader(
         milvus_uri,
-        domain.default_embedding_model_id,
+        legal.default_embedding_model_id,
         neo4j_uri,
         neo4j_username,
         neo4j_password,
@@ -135,11 +137,9 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
-    sub_console = None
     if verbose:
         logging.getLogger("proscenium").setLevel(logging.INFO)
         logging.getLogger("demo").setLevel(logging.INFO)
-        sub_console = Console()
 
     milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 
@@ -149,21 +149,21 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
-    case_law_expert = domain.CaseLawExpert(driver, milvus_uri, console=sub_console)
+    law_librarian = legal.query_handler.LawLibrarian(driver, milvus_uri, None)
 
     while True:
 
         if question is None:
             q = Prompt.ask(
-                domain.user_prompt,
-                default=domain.default_question,
+                legal.query_handler.user_prompt,
+                default=legal.query_handler.default_question,
             )
         else:
             q = question
 
         console.print(Panel(q, title="Question"))
 
-        for answer in case_law_expert.handle(q):
+        for answer in law_librarian.handle(q):
             console.print(Panel(answer, title="Answer"))
 
         if loop:

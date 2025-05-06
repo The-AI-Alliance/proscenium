@@ -7,6 +7,7 @@ from proscenium.core import Prop
 from proscenium.core import Character
 from proscenium.core import Scene
 
+from .docs import books
 from .chunk_space import default_collection_name, default_embedding_model_id, ChunkSpace
 from .query_handler import default_generator_model_id
 from .query_handler import LiteratureExpert

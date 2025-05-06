@@ -8,7 +8,8 @@ from proscenium.core import Prop
 from proscenium.core import Character
 from proscenium.core import Scene
 
-from .doc_enrichments import DocumentEnrichments
+from .docs import default_docs_per_dataset
+from .doc_enrichments import DocumentEnrichments, default_delay
 from .kg import CaseLawKnowledgeGraph
 from .entity_resolvers import EntityResolvers
 from .entity_resolvers import default_embedding_model_id
