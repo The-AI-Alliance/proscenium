@@ -209,7 +209,7 @@ def context_to_prompts(
 default_generation_model_id = default_model_id
 
 
-class CaseLawExpert(Character):
+class LawLibrarian(Character):
 
     def __init__(self, driver: Driver, milvus_uri: str, admin_channel_id: str):
         super().__init__(admin_channel_id=admin_channel_id)

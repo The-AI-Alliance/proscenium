@@ -1,5 +1,4 @@
 from typing import Generator
-from typing import List
 from typing import Optional
 
 import logging
@@ -12,7 +11,7 @@ from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
 from proscenium.core import Character
-from proscenium.core import Prop
+from proscenium.core import Scene
 from proscenium.verbs.invoke import process_tools
 from proscenium.patterns.tools import apply_tools
 
@@ -33,11 +32,6 @@ Do not use any other tools.
 """
 
 
-def props(console: Optional[Console]) -> List[Prop]:
-
-    return []
-
-
 class Abacus(Character):
 
     def __init__(self, admin_channel_id: str):
@@ -54,3 +48,19 @@ class Abacus(Character):
             tool_desc_list=domain.tool_desc_list,
             tool_map=domain.tool_map,
         )
+
+
+class ElementarySchoolMathClass(Scene):
+
+    def __init__(self, admin_channel_id: str, console: Optional[Console] = None):
+        super().__init__()
+
+        self.admin_channel_id = admin_channel_id
+        self.console = console
+
+        self.abacus = Abacus(admin_channel_id=admin_channel_id)
+
+    def characters(self) -> list[Character]:
+        return [
+            self.abacus,
+        ]

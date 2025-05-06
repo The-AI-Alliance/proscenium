@@ -39,17 +39,23 @@ class Scene:
     def __init__(self):
         pass
 
+    def props(self) -> list[Prop]:
+        return []
+
+    def characters(self) -> list[Character]:
+        return []
+
+    def places(self) -> dict[str, Character]:
+        pass
+
+    def exit(self) -> None:
+        pass
+
 
 class Production:
 
     def __init__(self):
         pass
 
-    def props(self) -> list[Prop]:
+    def scenes(self) -> list[Scene]:
         return []
-
-    def places(self) -> None:
-        pass
-
-    def exit(self) -> None:
-        pass

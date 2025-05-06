@@ -1,17 +1,12 @@
-from typing import List, Any
-
 import logging
 from pathlib import Path
 import os
 
 from rich.console import Console
 
-from neo4j import GraphDatabase
-from neo4j import Driver
-
 from proscenium.core import Production
-from proscenium.core import Prop
 from proscenium.core import Character
+from proscenium.core import Scene
 
 from demo.settings import abacus, literature, legal
 
@@ -33,21 +28,20 @@ neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
 class Demo(Production):
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, admin_channel_id: str, console: Console) -> None:
 
-    def props(self, console: Console) -> List[Prop]:
-
-        abacus_pres = abacus.props(console)
-
-        literature_pres = literature.props(
-            literature_milvus_uri,
-            literature.default_collection_name,
-            legal.default_embedding_model_id,
+        self.elementary_school_math_class = abacus.ElementarySchoolMathClass(
+            admin_channel_id,
             console,
         )
 
-        legal_pres = legal.props(
+        self.high_school_english_class = literature.HighSchoolEnglishClass(
+            literature_milvus_uri,
+            admin_channel_id,
+            console=console,
+        )
+
+        self.law_library = legal.LawLibrary(
             legal.default_docs_per_dataset,
             enrichment_jsonl_file,
             legal.default_delay,
@@ -55,19 +49,22 @@ class Demo(Production):
             neo4j_username,
             neo4j_password,
             legal_milvus_uri,
-            legal.default_embedding_model_id,
-            console,
+            admin_channel_id,
+            console=console,
         )
 
-        return abacus_pres + literature_pres + legal_pres
+    def scenes(self) -> list[Scene]:
+
+        return [
+            self.elementary_school_math_class,
+            self.high_school_english_class,
+            self.law_library,
+        ]
 
     def places(
         self,
         channels_by_id: dict,
-        admin_channel_id: str,
-    ) -> tuple[dict[str, Character], Any]:
-
-        log.info("Demo characters take places")
+    ) -> dict[str, Character]:
 
         channel_name_to_id = {
             channel["name"]: channel["id"]
@@ -75,35 +72,15 @@ class Demo(Production):
             if channel.get("name")
         }
 
-        driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
-
         channel_id_to_handler = {
-            channel_name_to_id["abacus"]: abacus.Abacus(admin_channel_id),
-            channel_name_to_id["literature"]: literature.query_handler.LiteratureExpert(
-                literature.default_generator_model_id,
-                literature_milvus_uri,
-                literature.default_embedding_model_id,
-                admin_channel_id,
-            ),
-            channel_name_to_id["legal"]: legal.query_handler.CaseLawExpert(
-                driver, legal_milvus_uri, admin_channel_id
-            ),
+            channel_name_to_id["abacus"]: self.elementary_school_math_class.abacus,
+            channel_name_to_id[
+                "literature"
+            ]: self.high_school_english_class.literature_expert,
+            channel_name_to_id["legal"]: self.law_library.law_librarian,
         }
 
-        log.info(
-            "Characters in place in channels: %s",
-            ", ".join(list(channel_id_to_handler.keys())),
-        )
-
-        resources = driver
-
-        return channel_id_to_handler, resources
-
-    def exit(self, resources: Any) -> None:
-
-        driver: Driver = resources
-
-        driver.close()
+        return channel_id_to_handler
 
 
 production = Demo()

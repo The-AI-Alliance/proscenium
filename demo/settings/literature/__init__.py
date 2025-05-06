@@ -4,26 +4,46 @@ import logging
 from rich.console import Console
 
 from proscenium.core import Prop
+from proscenium.core import Character
+from proscenium.core import Scene
 
-from .docs import books
 from .chunk_space import default_collection_name, default_embedding_model_id, ChunkSpace
-from .query_handler import user_prompt, default_question
 from .query_handler import default_generator_model_id
+from .query_handler import LiteratureExpert
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 log = logging.getLogger(__name__)
 
 
-def props(
-    milvus_uri, collection_name, embedding_model_id, console: Optional[Console] = None
-) -> List[Prop]:
+class HighSchoolEnglishClass(Scene):
 
-    chunk_space = ChunkSpace(
+    def __init__(
+        self,
         milvus_uri,
-        collection_name,
-        embedding_model_id,
-        console=console,
-    )
+        admin_channel_id: str,
+        collection_name: str = default_collection_name,
+        embedding_model_id: str = default_embedding_model_id,
+        generator_model_id: str = default_generator_model_id,
+        console: Optional[Console] = None,
+    ):
+        super().__init__()
 
-    return [chunk_space]
+        self.chunk_space = ChunkSpace(
+            milvus_uri,
+            collection_name,
+            embedding_model_id,
+            console=console,
+        )
+
+        self.literature_expert = LiteratureExpert(
+            generator_model_id, milvus_uri, embedding_model_id, admin_channel_id
+        )
+
+    def props(self) -> List[Prop]:
+
+        return [self.chunk_space]
+
+    def characters(self) -> List[Character]:
+
+        return [self.literature_expert]

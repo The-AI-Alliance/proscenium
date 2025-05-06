@@ -59,18 +59,17 @@ def start(
         sub_console = console
 
     console.print(header())
-    console.print("Starting the Proscenium Bot.")
 
     production_module = importlib.import_module(production_module_name, package=None)
 
-    props = production_module.production.props(sub_console)
     if force_rebuild:
         console.print("Forcing rebuild of all props.")
     else:
         console.print("Building any missing props...")
 
-    for prop in props:
-        prop.build(force_rebuild)
+    for scene in production_module.production.scenes(console=sub_console):
+        for prop in scene.props:
+            prop.build(force_rebuild)
 
     slack_app_token = os.environ.get("SLACK_APP_TOKEN")
     if slack_app_token is None:
@@ -104,15 +103,14 @@ def start(
     admin = Admin(slack_admin_channel_id)
     log.info("Admin handler started.")
 
+    log.info("Places, please!")
     channel_id_to_handler, resources = production_module.production.places(
-        channels_by_id, slack_admin_channel_id
+        channels_by_id
     )
     channel_id_to_handler[slack_admin_channel_id] = admin
-
-    socket_mode_client.web_client.chat_postMessage(
-        channel=slack_admin_channel_id,
-        text="""
-Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
+    log.info(
+        "Characters in place in channels: %s",
+        ", ".join(list(channel_id_to_handler.keys())),
     )
 
     user_id = bot_user_id(socket_mode_client, console)
@@ -121,6 +119,13 @@ Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
         user_id, slack_admin_channel_id, channels_by_id, channel_id_to_handler, console
     )
 
+    socket_mode_client.web_client.chat_postMessage(
+        channel=slack_admin_channel_id,
+        text="""
+Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
+    )
+
+    console.print("Starting the show.")
     listen(
         socket_mode_client,
         slack_listener,
