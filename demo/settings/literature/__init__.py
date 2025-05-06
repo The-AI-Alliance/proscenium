@@ -18,6 +18,10 @@ log = logging.getLogger(__name__)
 
 
 class HighSchoolEnglishClass(Scene):
+    """
+    A high school English class setting where students can ask questions about
+    literature and receive answers from a literature expert.
+    """
 
     def __init__(
         self,

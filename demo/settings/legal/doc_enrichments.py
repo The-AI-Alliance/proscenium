@@ -165,6 +165,9 @@ def make_extract_from_opinion_chunks(
 
 
 class DocumentEnrichments(Prop):
+    """
+    Enrichments of case law documents from CAP, produced from by open-source libraries and large language models.
+    """
 
     def __init__(
         self,

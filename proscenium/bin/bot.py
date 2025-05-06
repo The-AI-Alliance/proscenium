@@ -125,10 +125,19 @@ def start(
         user_id, slack_admin_channel_id, channels_by_id, channel_id_to_handler, console
     )
 
+    curtain_up_message = f"""
+Proscenium 🎭 https://the-ai-alliance.github.io/proscenium/
+
+```
+{production.curtain_up_message()}
+```
+
+Curtain up.
+"""
+
     socket_mode_client.web_client.chat_postMessage(
         channel=slack_admin_channel_id,
-        text="""
-Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
+        text=curtain_up_message,
     )
 
     console.print("Starting the show.")

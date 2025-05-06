@@ -22,6 +22,7 @@ log = logging.getLogger(__name__)
 
 
 class LawLibrary(Scene):
+    """A law library where a law librarian can answer questions about case law."""
 
     def __init__(
         self,

@@ -11,7 +11,7 @@ from proscenium.verbs.read import url_to_file
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
 
-from proscenium.patterns.chunk_space import make_vector_db_builder
+from proscenium.patterns.chunk_space import load_chunks
 
 from .docs import books
 
@@ -23,6 +23,7 @@ default_collection_name = "literature_chunks"
 
 
 class ChunkSpace(Prop):
+    """Small chunks of literature text stored in a vector database."""
 
     def __init__(
         self,
@@ -61,14 +62,12 @@ class ChunkSpace(Prop):
         vector_db_client = vector_db(self.milvus_uri, overwrite=True)
         log.info("Vector db at uri %s", self.milvus_uri)
 
-        vector_db_build = make_vector_db_builder(
+        log.info("Building chunk space")
+        load_chunks(
             [str(book.data_file) for book in books],
             vector_db_client,
             embedding_fn,
             self.collection_name,
         )
-
-        log.info("Building chunk space")
-        vector_db_build()
 
         vector_db_client.close()

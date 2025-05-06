@@ -157,6 +157,8 @@ def doc_enrichments_to_graph(tx, enrichments: LegalOpinionEnrichments) -> None:
 
 
 class CaseLawKnowledgeGraph(Prop):
+    """
+    A knowledge graph for case law documents, built from enriched case law documents."""
 
     def __init__(
         self,
