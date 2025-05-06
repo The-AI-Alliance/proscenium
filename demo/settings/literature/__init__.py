@@ -21,7 +21,7 @@ class HighSchoolEnglishClass(Scene):
 
     def __init__(
         self,
-        milvus_uri,
+        milvus_uri: str,
         admin_channel_id: str,
         collection_name: str = default_collection_name,
         embedding_model_id: str = default_embedding_model_id,

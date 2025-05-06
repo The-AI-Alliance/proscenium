@@ -38,14 +38,15 @@ def prepare(verbose: bool = False):
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    build = literature.make_chunk_space_builder(
+    english_class = literature.HighSchoolEnglishClass(
         milvus_uri,
+        None,
         collection_name,
-        literature.default_embedding_model_id,
         console=sub_console,
     )
+
     console.print("Building chunk space")
-    build(force=True)
+    english_class.chunk_space.build(force=True)
 
 
 @app.command(
@@ -56,28 +57,30 @@ Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 )
 def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
+    sub_console = None
     if verbose:
         logging.getLogger("proscenium").setLevel(logging.INFO)
         logging.getLogger("demo").setLevel(logging.INFO)
+        sub_console = Console()
 
-    literature_expert = literature.LiteratureExpert(
-        literature.default_generator_model_id,
+    english_class = literature.HighSchoolEnglishClass(
         milvus_uri,
-        literature.default_embedding_model_id,
         None,
+        collection_name,
+        console=sub_console,
     )
 
     while True:
 
         if question is None:
             q = Prompt.ask(
-                literature.user_prompt,
-                default=literature.default_question,
+                literature.query_handler.user_prompt,
+                default=literature.query_handler.default_question,
             )
         else:
             q = question
 
-        for answer in literature_expert.handle(q):
+        for channel_id, answer in english_class.literature_expert.handle(None, None, q):
             console.print(Panel(answer, title="Assistant"))
 
         if loop:
