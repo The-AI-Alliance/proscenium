@@ -4,11 +4,12 @@ import os
 import sys
 import logging
 import typer
+import importlib
 from rich.console import Console
 
-from proscenium import admin
+from proscenium.admin import Admin
+
 from proscenium.interfaces.slack import (
-    build_resources,
     bot_user_id,
     channel_maps,
     make_slack_listener,
@@ -19,12 +20,6 @@ from proscenium.interfaces.slack import (
 
 from proscenium.verbs.display import header
 
-from demo.slack_config import (
-    prerequisites,
-    start_handlers,
-    stop_handlers,
-)
-
 logging.basicConfig(
     stream=sys.stdout,
     format="%(asctime)s  %(levelname)-8s %(name)s: %(message)s",
@@ -37,13 +32,22 @@ logging.basicConfig(
     level=logging.WARNING,
 )
 
-app = typer.Typer(help="Proscenium Slackbot")
+app = typer.Typer(help="Proscenium Bot")
 
 log = logging.getLogger(__name__)
 
 
-@app.command(help="""Start the Proscenium Slackbot.""")
-def start(verbose: bool = False, force_rebuild: bool = False):
+@app.command(help="""Start the Proscenium Bot.""")
+def start(
+    verbose: bool = False,
+    production_module_name: str = typer.Option(
+        "demo.slack_config",
+        "-p",
+        "--production",
+        help="The name of the python module in PYTHONPATH in which the variable production of type proscenium.core.Production is defined.",
+    ),
+    force_rebuild: bool = False,
+):
 
     console = Console()
     sub_console = None
@@ -55,9 +59,18 @@ def start(verbose: bool = False, force_rebuild: bool = False):
         sub_console = console
 
     console.print(header())
-    console.print("Starting the Proscenium Slackbot.")
+    console.print("Starting the Proscenium Bot.")
 
-    build_resources(prerequisites, console, sub_console, force_rebuild)
+    production_module = importlib.import_module(production_module_name, package=None)
+
+    props = production_module.production.props(sub_console)
+    if force_rebuild:
+        console.print("Forcing rebuild of all props.")
+    else:
+        console.print("Building any missing props...")
+
+    for prop in props:
+        prop.build(force_rebuild)
 
     slack_app_token = os.environ.get("SLACK_APP_TOKEN")
     if slack_app_token is None:
@@ -72,7 +85,7 @@ def start(verbose: bool = False, force_rebuild: bool = False):
             "Please set it to the bot token of the Proscenium Slack app."
         )
 
-    socket_mode_client = connect(slack_app_token, slack_bot_token, console)
+    socket_mode_client = connect(slack_app_token, slack_bot_token)
 
     channels_by_id = channel_maps(socket_mode_client)
     slack_admin_channel_id = os.environ.get("SLACK_ADMIN_CHANNEL_ID")
@@ -88,13 +101,13 @@ def start(verbose: bool = False, force_rebuild: bool = False):
             f"Admin channel {slack_admin_channel_id} not found in subscribed channels."
         )
 
-    admin_handler = admin.make_handler(slack_admin_channel_id)
+    admin = Admin(slack_admin_channel_id)
     log.info("Admin handler started.")
 
-    channel_id_to_handler, resources = start_handlers(
+    channel_id_to_handler, resources = production_module.production.places(
         channels_by_id, slack_admin_channel_id
     )
-    channel_id_to_handler[slack_admin_channel_id] = admin_handler
+    channel_id_to_handler[slack_admin_channel_id] = admin
 
     socket_mode_client.web_client.chat_postMessage(
         channel=slack_admin_channel_id,
@@ -121,7 +134,12 @@ Curtain up. 🎭 https://the-ai-alliance.github.io/proscenium/""",
     )
 
     shutdown(
-        socket_mode_client, slack_listener, user_id, stop_handlers, resources, console
+        socket_mode_client,
+        slack_listener,
+        user_id,
+        production_module.production,
+        resources,
+        console,
     )
 
 

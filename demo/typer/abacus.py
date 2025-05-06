@@ -23,12 +23,12 @@ def ask(verbose: bool = False):
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    handle = domain.make_handler(console=sub_console)
+    abacus = domain.Abacus(console=sub_console)
 
     question = Prompt.ask(
         "What is your arithmetic question?",
         default="What is 33312-457? And what is 3+3?",
     )
 
-    for message in handle(question):
+    for message in abacus.handle(question):
         console.print(Panel(message, title="Answer"))

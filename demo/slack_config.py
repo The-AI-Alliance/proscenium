@@ -1,4 +1,4 @@
-from typing import Callable, Generator, List, Any
+from typing import List, Any
 
 import logging
 from pathlib import Path
@@ -9,9 +9,16 @@ from rich.console import Console
 from neo4j import GraphDatabase
 from neo4j import Driver
 
+from proscenium.core import Production
+from proscenium.core import Prop
+from proscenium.core import Character
+
 from demo.domains import abacus
+from demo.domains.abacus import Abacus
 from demo.domains import literature
+from demo.domains.literature.query_handler import LiteratureExpert
 from demo.domains import legal
+from demo.domains.legal.query_handler import CaseLawExpert
 
 log = logging.getLogger(__name__)
 
@@ -29,72 +36,79 @@ default_neo4j_password = "password"
 neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
 
-def prerequisites(console: Console) -> List[Callable[[bool], None]]:
+class Demo(Production):
 
-    abacus_pres = abacus.prerequisites(console=console)
+    def __init__(self) -> None:
+        pass
 
-    literature_pres = literature.prerequisites(
-        literature_milvus_uri,
-        literature.default_collection_name,
-        legal.default_embedding_model_id,
-        console=console,
-    )
+    def props(self, console: Console) -> List[Prop]:
 
-    legal_pres = legal.prerequisites(
-        legal.default_docs_per_dataset,
-        enrichment_jsonl_file,
-        legal.default_delay,
-        neo4j_uri,
-        neo4j_username,
-        neo4j_password,
-        legal_milvus_uri,
-        legal.default_embedding_model_id,
-        console=console,
-    )
+        abacus_pres = abacus.props(console)
 
-    return abacus_pres + literature_pres + legal_pres
-
-
-def start_handlers(
-    channels_by_id: dict,
-    admin_channel_id: str,
-) -> tuple[dict[str, Callable[[str], Generator[tuple[str, str], None, None]]], Any]:
-
-    log.info("Starting handlers...")
-
-    channel_name_to_id = {
-        channel["name"]: channel["id"]
-        for channel in channels_by_id.values()
-        if channel.get("name")
-    }
-
-    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
-
-    channel_id_to_handler = {
-        channel_name_to_id["abacus"]: abacus.make_handler(admin_channel_id),
-        channel_name_to_id["literature"]: literature.make_handler(
-            literature.default_generator_model_id,
+        literature_pres = literature.props(
             literature_milvus_uri,
-            literature.default_embedding_model_id,
-            admin_channel_id,
-        ),
-        channel_name_to_id["legal"]: legal.make_handler(
-            driver, legal_milvus_uri, admin_channel_id
-        ),
-    }
+            literature.default_collection_name,
+            legal.default_embedding_model_id,
+            console,
+        )
 
-    log.info(
-        "Handlers created for channels: %s",
-        ", ".join(list(channel_id_to_handler.keys())),
-    )
+        legal_pres = legal.props(
+            legal.default_docs_per_dataset,
+            enrichment_jsonl_file,
+            legal.default_delay,
+            neo4j_uri,
+            neo4j_username,
+            neo4j_password,
+            legal_milvus_uri,
+            legal.default_embedding_model_id,
+            console,
+        )
 
-    resources = driver
+        return abacus_pres + literature_pres + legal_pres
 
-    return channel_id_to_handler, resources
+    def places(
+        self,
+        channels_by_id: dict,
+        admin_channel_id: str,
+    ) -> tuple[dict[str, Character], Any]:
+
+        log.info("Demo characters take places")
+
+        channel_name_to_id = {
+            channel["name"]: channel["id"]
+            for channel in channels_by_id.values()
+            if channel.get("name")
+        }
+
+        driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
+
+        channel_id_to_handler = {
+            channel_name_to_id["abacus"]: Abacus(admin_channel_id),
+            channel_name_to_id["literature"]: LiteratureExpert(
+                literature.default_generator_model_id,
+                literature_milvus_uri,
+                literature.default_embedding_model_id,
+                admin_channel_id,
+            ),
+            channel_name_to_id["legal"]: CaseLawExpert(
+                driver, legal_milvus_uri, admin_channel_id
+            ),
+        }
+
+        log.info(
+            "Characters in place in channels: %s",
+            ", ".join(list(channel_id_to_handler.keys())),
+        )
+
+        resources = driver
+
+        return channel_id_to_handler, resources
+
+    def exit(self, resources: Any) -> None:
+
+        driver: Driver = resources
+
+        driver.close()
 
 
-def stop_handlers(resources: Any) -> None:
-
-    driver: Driver = resources
-
-    driver.close()
+production = Demo()

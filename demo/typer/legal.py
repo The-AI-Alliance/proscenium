@@ -149,7 +149,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
     driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
-    handle = domain.make_handler(driver, milvus_uri, console=sub_console)
+    case_law_expert = domain.CaseLawExpert(driver, milvus_uri, console=sub_console)
 
     while True:
 
@@ -163,7 +163,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
         console.print(Panel(q, title="Question"))
 
-        for answer in handle(q):
+        for answer in case_law_expert.handle(q):
             console.print(Panel(answer, title="Answer"))
 
         if loop:

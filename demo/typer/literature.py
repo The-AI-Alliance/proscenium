@@ -5,6 +5,7 @@ import os
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
+
 import demo.domains.literature as domain
 
 default_milvus_uri = "file:/milvus.db"
@@ -61,7 +62,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    handle = domain.make_handler(
+    literature_expert = domain.LiteratureExpert(
         domain.default_generator_model_id,
         milvus_uri,
         domain.default_embedding_model_id,
@@ -78,7 +79,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
         else:
             q = question
 
-        for answer in handle(q):
+        for answer in literature_expert.handle(q):
             console.print(Panel(answer, title="Assistant"))
 
         if loop:

@@ -1,5 +1,4 @@
 from typing import Generator
-from typing import Callable
 from typing import List
 from typing import Optional
 
@@ -12,6 +11,8 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
+from proscenium.core import Character
+from proscenium.core import Prop
 from proscenium.verbs.invoke import process_tools
 from proscenium.scripts.tools import apply_tools
 
@@ -32,25 +33,24 @@ Do not use any other tools.
 """
 
 
-def prerequisites(console: Optional[Console]) -> List[Callable[[bool], None]]:
+def props(console: Optional[Console]) -> List[Prop]:
 
     return []
 
 
-def make_handler(
-    admin_channel_id: str,
-) -> Callable[[tuple[str, str, str]], Generator[tuple[str, str], None, None]]:
+class Abacus(Character):
+
+    def __init__(self, admin_channel_id: str):
+        super().__init__(admin_channel_id=admin_channel_id)
 
     def handle(
-        channel_id: str, speaker_id: str, question: str
+        self, channel_id: str, speaker_id: str, utterance: str
     ) -> Generator[tuple[str, str], None, None]:
 
         yield channel_id, apply_tools(
             model_id=default_model_id,
             system_message=domain.system_message,
-            message=question,
+            message=utterance,
             tool_desc_list=domain.tool_desc_list,
             tool_map=domain.tool_map,
         )
-
-    return handle

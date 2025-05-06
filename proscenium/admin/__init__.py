@@ -1,10 +1,11 @@
 from typing import Generator
-from typing import Callable
 from typing import List
 from typing import Optional
 
 import logging
 
+from proscenium.core import Prop
+from proscenium.core import Character
 from rich.console import Console
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -16,21 +17,21 @@ You are an administrator of a chatbot.
 """
 
 
-def prerequisites(console: Optional[Console]) -> List[Callable[[bool], None]]:
+def props(console: Optional[Console]) -> List[Prop]:
 
     return []
 
 
-def make_handler(
-    admin_channel_id: str,
-) -> Callable[[tuple[str, str, str]], Generator[tuple[str, str], None, None]]:
+class Admin(Character):
+
+    def __init__(self, admin_channel_id: str):
+        super().__init__(admin_channel_id)
+        self.admin_channel_id = admin_channel_id
 
     def handle(
         channel_id: str,
-        speaker_id: str,  # pylint: disable=unused-argument
+        speaker_id: str,
         question: str,
     ) -> Generator[tuple[str, str], None, None]:
 
         yield channel_id, "I am the administrator of this chat system."
-
-    return handle
