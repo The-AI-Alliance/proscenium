@@ -79,13 +79,13 @@ class Demo(Production):
 
         channel_id_to_handler = {
             channel_name_to_id["abacus"]: abacus.Abacus(admin_channel_id),
-            channel_name_to_id["literature"]: literature.LiteratureExpert(
+            channel_name_to_id["literature"]: literature.query_handler.LiteratureExpert(
                 literature.default_generator_model_id,
                 literature_milvus_uri,
                 literature.default_embedding_model_id,
                 admin_channel_id,
             ),
-            channel_name_to_id["legal"]: legal.CaseLawExpert(
+            channel_name_to_id["legal"]: legal.query_handler.CaseLawExpert(
                 driver, legal_milvus_uri, admin_channel_id
             ),
         }
