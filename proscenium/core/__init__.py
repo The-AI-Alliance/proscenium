@@ -74,14 +74,21 @@ class Scene:
         return self.__doc__ or ""
 
     def curtain_up_message(self) -> str:
+
+        characters_msg = "\n".join(
+            [character.curtain_up_message() for character in self.characters()]
+        )
+
+        props_msg = "\n".join([prop.curtain_up_message() for prop in self.props()])
+
         return f"""
 Scene: {self.name()}, {self.description().strip()}
 
 Characters:
-{"\n".join([character.curtain_up_message() for character in self.characters()])}
+{characters_msg}
 
 Props:
-{"\n".join([prop.curtain_up_message() for prop in self.props()])}
+{props_msg}
 """
 
     def props(self) -> list[Prop]:
