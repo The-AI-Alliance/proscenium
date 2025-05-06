@@ -118,9 +118,14 @@ class Production:
         return self.__doc__ or ""
 
     def curtain_up_message(self) -> str:
+
+        scenes_msg = "\n\n".join(
+            [scene.curtain_up_message() for scene in self.scenes()]
+        )
+
         return f"""Production: {self.name()}, {self.description().strip()}
 
-{"\n\n".join([scene.curtain_up_message() for scene in self.scenes()])}"""
+{scenes_msg}"""
 
     def scenes(self) -> list[Scene]:
         return []
