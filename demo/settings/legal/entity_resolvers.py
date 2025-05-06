@@ -63,7 +63,7 @@ class EntityResolvers(Prop):
 
     def build(self, force: bool = False):
 
-        if force or self.already_built():
+        if not force and self.already_built():
             log.info("Entity resolver already built.")
             return
 

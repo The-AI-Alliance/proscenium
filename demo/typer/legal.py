@@ -11,6 +11,11 @@ from demo.settings import legal
 
 from demo.settings.legal.doc_enrichments import DocumentEnrichments
 from demo.settings.legal.kg import CaseLawKnowledgeGraph
+from demo.settings.legal.entity_resolvers import (
+    EntityResolvers,
+    default_embedding_model_id,
+)
+
 
 app = typer.Typer(
     help="""
@@ -123,16 +128,17 @@ def load_resolver(verbose: bool = False):
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    load = legal.make_entity_resolver_loader(
+    entity_resolvers = EntityResolvers(
         milvus_uri,
-        legal.default_embedding_model_id,
+        default_embedding_model_id,
         neo4j_uri,
         neo4j_username,
         neo4j_password,
         console=sub_console,
     )
+
     console.print("Loading entity resolver")
-    load(force=True)
+    entity_resolvers.build(force=True)
 
 
 @app.command(
