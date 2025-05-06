@@ -1,27 +1,25 @@
-from typing import Optional, Callable, Generator
+from typing import Optional, Generator
 
 import logging
 import json
 from rich.console import Console
 from rich.panel import Panel
 from uuid import UUID
-
 from pydantic import BaseModel, Field
-
 from neo4j import Driver
-
 from eyecite import get_citations
 
+from proscenium.core import Character
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.vector_database import vector_db
-from proscenium.scripts.graph_rag import query_to_prompts
+from proscenium.patterns.graph_rag import query_to_prompts
 
 from demo.config import default_model_id
-from demo.domains.legal.docs import retrieve_document
-from demo.domains.legal.docs import topic
+from demo.settings.legal.docs import retrieve_document
+from demo.settings.legal.docs import topic
 
 log = logging.getLogger(__name__)
 
@@ -211,19 +209,22 @@ def context_to_prompts(
 default_generation_model_id = default_model_id
 
 
-def make_handler(
-    driver: Driver, milvus_uri: str, admin_channel_id: str
-) -> Callable[[tuple[str, str, str]], Generator[tuple[str, str], None, None]]:
+class LawLibrarian(Character):
+
+    def __init__(self, driver: Driver, milvus_uri: str, admin_channel_id: str):
+        super().__init__(admin_channel_id=admin_channel_id)
+        self.driver = driver
+        self.milvus_uri = milvus_uri
 
     def handle(
-        channel_id: str, speaker_id: str, question: str
+        self, channel_id: str, speaker_id: str, utterance: str
     ) -> Generator[tuple[str, str], None, None]:
 
         prompts = query_to_prompts(
-            question,
+            utterance,
             default_query_extraction_model_id,
-            milvus_uri,
-            driver,
+            self.milvus_uri,
+            self.driver,
             query_extract,
             query_extract_to_graph,
             query_extract_to_context,
@@ -245,5 +246,3 @@ def make_handler(
             )
 
             yield channel_id, response
-
-    return handle

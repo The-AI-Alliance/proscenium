@@ -30,6 +30,9 @@ slack_sdk = "^3.35.0"
 [tool.poetry.extras]
 testing = ["pytest"]
 
+[tool.poetry.scripts]
+proscenium-bot = "proscenium.bin.bot:app"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

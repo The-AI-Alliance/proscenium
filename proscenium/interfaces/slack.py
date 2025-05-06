@@ -1,12 +1,12 @@
 from typing import Callable
-from typing import Optional
-from typing import List
+
 from typing import Generator
-from typing import Any
 import time
 import logging
-
 from rich.console import Console
+
+from proscenium.core import Production
+
 from slack_sdk.web import WebClient
 from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.socket_mode.request import SocketModeRequest
@@ -16,30 +16,13 @@ from slack_sdk.socket_mode.listeners import SocketModeRequestListener
 log = logging.getLogger(__name__)
 
 
-def build_resources(
-    prerequisites: Callable[[Optional[Console]], List[Callable[[bool], None]]],
-    console: Console,
-    sub_console: Console = None,
-    force: bool = False,
-):
-
-    if force:
-        console.print("Forcing rebuild of resources.")
-    else:
-        console.print("Building any missing resouces...")
-
-    pres = prerequisites(console=sub_console)
-    for pre in pres:
-        pre(force)
-
-
-def connect(app_token: str, bot_token: str, console: Console) -> SocketModeClient:
+def connect(app_token: str, bot_token: str) -> SocketModeClient:
 
     web_client = WebClient(token=bot_token)
     socket_mode_client = SocketModeClient(app_token=app_token, web_client=web_client)
 
     socket_mode_client.connect()
-    console.print("Connected.")
+    log.info("Connected to Slack.")
 
     return socket_mode_client
 
@@ -84,12 +67,12 @@ def make_slack_listener(
 
                 else:
 
-                    handle = channel_id_to_handler[channel_id]
+                    character = channel_id_to_handler[channel_id]
                     log.info("Handler defined for channel id %s", channel_id)
 
                     # TODO determine whether the handler has a good chance of being useful
 
-                    for receiving_channel_id, response in handle(
+                    for receiving_channel_id, response in character.handle(
                         channel_id, speaker_id, text
                     ):
                         response_response = client.web_client.chat_postMessage(
@@ -178,14 +161,14 @@ def shutdown(
     socket_mode_client: SocketModeClient,
     slack_listener: SocketModeRequestListener,
     user_id: str,
-    stop_handlers: Callable[[Any], None],
-    resources: Any,
+    production: Production,
     console: Console,
 ):
 
     socket_mode_client.socket_mode_request_listeners.remove(slack_listener)
     socket_mode_client.disconnect()
-    console.print("Disconnected.")
+    console.print("Disconnected from Slack.")
 
-    stop_handlers(resources)
+    production.curtain()
+
     console.print("Handlers stopped.")

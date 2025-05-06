@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 import typer
 
-import demo.domains.abacus as domain
+from demo.settings import abacus
 
 app = typer.Typer(help="""Arithmetic question answering.""")
 
@@ -16,19 +16,17 @@ log = logging.getLogger(__name__)
 @app.command(help="Ask a natural langauge arithmetic question.")
 def ask(verbose: bool = False):
 
-    sub_console = None
     if verbose:
         log.setLevel(logging.INFO)
         logging.getLogger("proscenium").setLevel(logging.INFO)
         logging.getLogger("demo").setLevel(logging.INFO)
-        sub_console = Console()
 
-    handle = domain.make_handler(console=sub_console)
+    character = abacus.Abacus(None)
 
     question = Prompt.ask(
         "What is your arithmetic question?",
         default="What is 33312-457? And what is 3+3?",
     )
 
-    for message in handle(question):
+    for channel_id, message in character.handle(None, None, question):
         console.print(Panel(message, title="Answer"))

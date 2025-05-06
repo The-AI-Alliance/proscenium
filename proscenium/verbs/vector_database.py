@@ -48,6 +48,7 @@ def vector_db(
     overwrite: bool = False,
 ) -> MilvusClient:
 
+    log.info("Connecting to vector db %s", uri)
     uri_fields = urlsplit(uri)
     client = None
     if uri_fields[0] == "file":
@@ -64,10 +65,12 @@ def vector_db(
         else:
             log.info("Creating new vector db file %s", file_path)
 
+        log.info("Connecting to file uri file part %s", file_path)
         client = MilvusClient(uri=str(file_path))
 
     else:
 
+        log.info("Connecting to vector db at non-file uri %s", uri)
         client = MilvusClient(uri=uri)
 
     return client

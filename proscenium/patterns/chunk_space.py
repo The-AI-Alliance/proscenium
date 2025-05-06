@@ -24,8 +24,11 @@ def make_vector_db_builder(
         create_collection(
             vector_db_client, embedding_fn, collection_name, overwrite=True
         )
+        log.info("Created collection %s", collection_name)
 
         for data_file in data_files:
+
+            log.info("Loading data file %s", data_file)
 
             documents = load_file(data_file)
             chunks = documents_to_chunks_by_characters(documents)
