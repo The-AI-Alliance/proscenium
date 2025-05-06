@@ -15,7 +15,7 @@ from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.vector_database import vector_db
-from proscenium.scripts.graph_rag import query_to_prompts
+from proscenium.patterns.graph_rag import query_to_prompts
 
 from demo.config import default_model_id
 from demo.domains.legal.docs import retrieve_document

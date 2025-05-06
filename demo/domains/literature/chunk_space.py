@@ -11,7 +11,7 @@ from proscenium.verbs.read import url_to_file
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
 
-from proscenium.scripts.chunk_space import make_vector_db_builder
+from proscenium.patterns.chunk_space import make_vector_db_builder
 
 from .docs import books
 

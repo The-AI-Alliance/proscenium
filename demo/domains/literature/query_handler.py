@@ -4,7 +4,7 @@ import logging
 
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
-from proscenium.scripts.rag import answer_question
+from proscenium.patterns.rag import answer_question
 
 from proscenium.core import Character
 

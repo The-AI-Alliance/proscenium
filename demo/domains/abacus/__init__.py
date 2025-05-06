@@ -14,7 +14,7 @@ from gofannon.basic_math.division import Division
 from proscenium.core import Character
 from proscenium.core import Prop
 from proscenium.verbs.invoke import process_tools
-from proscenium.scripts.tools import apply_tools
+from proscenium.patterns.tools import apply_tools
 
 import demo.domains.abacus as domain
 from demo.config import default_model_id

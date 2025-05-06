@@ -5,6 +5,8 @@ from rich.console import Console
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
+log = logging.getLogger(__name__)
+
 
 class Prop:
 
@@ -13,6 +15,9 @@ class Prop:
         console: Optional[Console] = None,
     ):
         self.console = console
+
+    def already_built(self) -> bool:
+        return False
 
     def build(self, force: bool = False) -> None:
         pass

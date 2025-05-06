@@ -8,7 +8,7 @@ from rich.table import Table
 from neo4j import GraphDatabase
 from neo4j import Driver
 
-from proscenium.scripts.knowledge_graph import load_knowledge_graph
+from proscenium.patterns.knowledge_graph import load_knowledge_graph
 from demo.domains.legal.doc_enrichments import LegalOpinionEnrichments
 
 from proscenium.core import Prop
@@ -30,7 +30,7 @@ class RelationLabel(StrEnum):
     references = "references"
 
 
-# TODO `ReferenceSchema` may move to `proscenium.scripts.knowledge_graph`
+# TODO `ReferenceSchema` may move to `proscenium.patterns.knowledge_graph`
 # depending on how much potentially resuable behavior is built around it
 
 

@@ -4,9 +4,9 @@ import logging
 from rich.console import Console
 from neo4j import GraphDatabase
 
-from proscenium.scripts.entity_resolver import load_entity_resolver
-from proscenium.scripts.entity_resolver import vector_db
-from proscenium.scripts.entity_resolver import Resolver
+from proscenium.patterns.entity_resolver import load_entity_resolver
+from proscenium.patterns.entity_resolver import vector_db
+from proscenium.patterns.entity_resolver import Resolver
 
 from proscenium.core import Prop
 

@@ -12,8 +12,8 @@ from eyecite.models import CitationBase
 
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import raw_extraction_template
-from proscenium.scripts.document_enricher import extract_from_document_chunks
-from proscenium.scripts.document_enricher import enrich_documents
+from proscenium.patterns.document_enricher import extract_from_document_chunks
+from proscenium.patterns.document_enricher import enrich_documents
 
 from proscenium.core import Prop
 
