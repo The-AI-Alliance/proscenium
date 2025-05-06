@@ -163,7 +163,7 @@ def ask(loop: bool = False, question: str = None, verbose: bool = False):
 
         console.print(Panel(q, title="Question"))
 
-        for answer in law_librarian.handle(q):
+        for channel_id, answer in law_librarian.handle(None, None, q):
             console.print(Panel(answer, title="Answer"))
 
         if loop:
