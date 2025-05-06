@@ -210,6 +210,8 @@ default_generation_model_id = default_model_id
 
 
 class LawLibrarian(Character):
+    """
+    A law librarian that can answer questions about case law."""
 
     def __init__(self, driver: Driver, milvus_uri: str, admin_channel_id: str):
         super().__init__(admin_channel_id=admin_channel_id)

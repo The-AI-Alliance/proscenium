@@ -33,6 +33,9 @@ Do not use any other tools.
 
 
 class Abacus(Character):
+    """
+    A character that can perform basic arithmetic operations using arithmetic.
+    """
 
     def __init__(self, admin_channel_id: str):
         super().__init__(admin_channel_id=admin_channel_id)
@@ -51,6 +54,9 @@ class Abacus(Character):
 
 
 class ElementarySchoolMathClass(Scene):
+    """
+    An elementary school math class setting where students can ask questions about arithmetic.
+    """
 
     def __init__(self, admin_channel_id: str, console: Optional[Console] = None):
         super().__init__()

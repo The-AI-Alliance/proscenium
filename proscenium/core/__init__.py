@@ -9,12 +9,21 @@ log = logging.getLogger(__name__)
 
 
 class Prop:
+    """
+    A `Prop` is a resource available to the `Character`s in a `Scene`.
+    """
 
     def __init__(
         self,
         console: Optional[Console] = None,
     ):
         self.console = console
+
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    def description(self) -> str:
+        return self.__doc__ or ""
 
     def already_built(self) -> bool:
         return False
@@ -24,9 +33,18 @@ class Prop:
 
 
 class Character:
+    """
+    A `Character` is a participant in a `Scene` that `handle`s utterances from the
+    scene by producing its own utterances."""
 
     def __init__(self, admin_channel_id: str):
         self.admin_channel_id = admin_channel_id
+
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    def description(self) -> str:
+        return self.__doc__ or ""
 
     def handle(
         channel_id: str, speaker_id: str, utterance: str
@@ -35,9 +53,19 @@ class Character:
 
 
 class Scene:
+    """
+    A `Scene` is a setting in which `Character`s interact with each other and
+    with `Prop`s. It is a container for `Character`s and `Prop`s.
+    """
 
     def __init__(self):
         pass
+
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    def description(self) -> str:
+        return self.__doc__ or ""
 
     def props(self) -> list[Prop]:
         return []
@@ -53,9 +81,17 @@ class Scene:
 
 
 class Production:
+    """
+    A `Production` is a collection of `Scene`s."""
 
     def __init__(self):
         pass
+
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    def description(self) -> str:
+        return self.__doc__ or ""
 
     def scenes(self) -> list[Scene]:
         return []

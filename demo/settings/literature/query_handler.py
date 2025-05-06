@@ -22,6 +22,8 @@ default_question = "What did Hermes say to Prometheus about giving fire to human
 
 
 class LiteratureExpert(Character):
+    """
+    A literature expert character that can answer questions about literature."""
 
     def __init__(
         self,
