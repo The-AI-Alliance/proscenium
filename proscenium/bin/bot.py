@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 def start(
     verbose: bool = False,
     production_module_name: str = typer.Option(
-        "demo.slack_config",
+        "demo.production",
         "-p",
         "--production",
         help="The name of the python module in PYTHONPATH in which the variable production of type proscenium.core.Production is defined.",
