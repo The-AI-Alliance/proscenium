@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from neo4j import GraphDatabase
 
-import demo.domains.legal as domain
+import demo.settings.legal as domain
 
 app = typer.Typer(
     help="""

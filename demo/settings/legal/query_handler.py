@@ -18,8 +18,8 @@ from proscenium.verbs.vector_database import vector_db
 from proscenium.patterns.graph_rag import query_to_prompts
 
 from demo.config import default_model_id
-from demo.domains.legal.docs import retrieve_document
-from demo.domains.legal.docs import topic
+from demo.settings.legal.docs import retrieve_document
+from demo.settings.legal.docs import topic
 
 log = logging.getLogger(__name__)
 

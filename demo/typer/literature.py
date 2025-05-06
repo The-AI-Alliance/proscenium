@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 
-import demo.domains.literature as domain
+import demo.settings.literature as domain
 
 default_milvus_uri = "file:/milvus.db"
 # milvus_uri = "http://localhost:19530"

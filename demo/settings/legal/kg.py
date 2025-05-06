@@ -9,7 +9,7 @@ from neo4j import GraphDatabase
 from neo4j import Driver
 
 from proscenium.patterns.knowledge_graph import load_knowledge_graph
-from demo.domains.legal.doc_enrichments import LegalOpinionEnrichments
+from demo.settings.legal.doc_enrichments import LegalOpinionEnrichments
 
 from proscenium.core import Prop
 

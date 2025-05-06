@@ -17,10 +17,10 @@ from proscenium.patterns.document_enricher import enrich_documents
 
 from proscenium.core import Prop
 
-from demo.domains.legal.docs import doc_as_rich
+from demo.settings.legal.docs import doc_as_rich
 from demo.config import default_model_id
 
-from demo.domains.legal.docs import retriever
+from demo.settings.legal.docs import retriever
 
 log = logging.getLogger(__name__)
 

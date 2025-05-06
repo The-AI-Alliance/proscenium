@@ -13,12 +13,7 @@ from proscenium.core import Production
 from proscenium.core import Prop
 from proscenium.core import Character
 
-from demo.domains import abacus
-from demo.domains.abacus import Abacus
-from demo.domains import literature
-from demo.domains.literature.query_handler import LiteratureExpert
-from demo.domains import legal
-from demo.domains.legal.query_handler import CaseLawExpert
+from demo.settings import abacus, literature, legal
 
 log = logging.getLogger(__name__)
 
@@ -83,14 +78,14 @@ class Demo(Production):
         driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
         channel_id_to_handler = {
-            channel_name_to_id["abacus"]: Abacus(admin_channel_id),
-            channel_name_to_id["literature"]: LiteratureExpert(
+            channel_name_to_id["abacus"]: abacus.Abacus(admin_channel_id),
+            channel_name_to_id["literature"]: literature.LiteratureExpert(
                 literature.default_generator_model_id,
                 literature_milvus_uri,
                 literature.default_embedding_model_id,
                 admin_channel_id,
             ),
-            channel_name_to_id["legal"]: CaseLawExpert(
+            channel_name_to_id["legal"]: legal.CaseLawExpert(
                 driver, legal_milvus_uri, admin_channel_id
             ),
         }
