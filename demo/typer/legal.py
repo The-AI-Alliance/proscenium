@@ -9,6 +9,9 @@ from neo4j import GraphDatabase
 
 from demo.settings import legal
 
+from demo.settings.legal.doc_enrichments import DocumentEnrichments
+from demo.settings.legal.kg import CaseLawKnowledgeGraph
+
 app = typer.Typer(
     help="""
 Graph extraction and question answering with GraphRAG on caselaw.
@@ -45,12 +48,10 @@ def enrich(
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    enrich = legal.doc_enrichments.make_document_enricher(
-        docs_per_dataset, output, delay, sub_console
-    )
+    doc_enrichments = DocumentEnrichments(docs_per_dataset, output, delay, sub_console)
 
     console.print("Enriching documents")
-    enrich(force=True)
+    doc_enrichments.build(force=True)
 
 
 @app.command(
@@ -71,12 +72,16 @@ def load_graph(
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = Console()
 
-    load = legal.make_kg_loader(
-        input, neo4j_uri, neo4j_username, neo4j_password, sub_console
+    case_law_knowledge_graph = CaseLawKnowledgeGraph(
+        input,
+        neo4j_uri,
+        neo4j_username,
+        neo4j_password,
+        console=sub_console,
     )
 
     console.print("Loading knowledge graph")
-    load(force=True)
+    case_law_knowledge_graph.build(force=True)
 
 
 @app.command(

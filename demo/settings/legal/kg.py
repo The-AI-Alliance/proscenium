@@ -160,14 +160,14 @@ class CaseLawKnowledgeGraph(Prop):
 
     def __init__(
         self,
-        input: Path,
+        input_path: Path,
         neo4j_uri: str,
         neo4j_username: str,
         neo4j_password: str,
         console: Optional[Console] = None,
     ) -> None:
         super().__init__(console=console)
-        self.input = input
+        self.input_path = input_path
         self.neo4j_uri = neo4j_uri
         self.neo4j_username = neo4j_username
         self.neo4j_password = neo4j_password
@@ -192,7 +192,7 @@ class CaseLawKnowledgeGraph(Prop):
 
         load_knowledge_graph(
             driver,
-            input,
+            self.input_path,
             LegalOpinionEnrichments,
             doc_enrichments_to_graph,
         )
