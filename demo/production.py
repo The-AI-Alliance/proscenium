@@ -26,6 +26,10 @@ neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
 default_neo4j_password = "password"
 neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
+channel_id_legal = "legal"
+channel_id_literature = "literature"
+channel_id_abacus = "abacus"
+
 
 class Demo(Production):
     """
@@ -35,17 +39,20 @@ class Demo(Production):
     def __init__(self, admin_channel_id: str, console: Console) -> None:
 
         self.elementary_school_math_class = abacus.ElementarySchoolMathClass(
+            channel_id_abacus,
             admin_channel_id,
             console,
         )
 
         self.high_school_english_class = literature.HighSchoolEnglishClass(
+            channel_id_literature,
             literature_milvus_uri,
             admin_channel_id,
             console=console,
         )
 
         self.law_library = legal.LawLibrary(
+            channel_id_legal,
             default_docs_per_dataset,
             enrichment_jsonl_file,
             legal.doc_enrichments.default_delay,

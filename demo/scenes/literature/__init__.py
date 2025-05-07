@@ -25,6 +25,7 @@ class HighSchoolEnglishClass(Scene):
 
     def __init__(
         self,
+        channel_id_literature: str,
         milvus_uri: str,
         admin_channel_id: str,
         collection_name: str = default_collection_name,
@@ -33,6 +34,8 @@ class HighSchoolEnglishClass(Scene):
         console: Optional[Console] = None,
     ):
         super().__init__()
+
+        self.channel_id_literature = channel_id_literature
 
         self.chunk_space = ChunkSpace(
             milvus_uri,
@@ -58,4 +61,4 @@ class HighSchoolEnglishClass(Scene):
         channel_name_to_id: dict,
     ) -> dict[str, Character]:
 
-        return {channel_name_to_id["literature"]: self.literature_expert}
+        return {channel_name_to_id[self.channel_id_literature]: self.literature_expert}

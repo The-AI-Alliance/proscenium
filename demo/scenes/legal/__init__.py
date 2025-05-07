@@ -26,6 +26,7 @@ class LawLibrary(Scene):
 
     def __init__(
         self,
+        channel_id_legal: str,
         docs_per_dataset: int,
         enrichment_jsonl_file: Path,
         delay: float,
@@ -39,6 +40,7 @@ class LawLibrary(Scene):
         console: Optional[Console] = None,
     ) -> None:
         super().__init__()
+        self.channel_id_legal = channel_id_legal
         self.docs_per_dataset = docs_per_dataset
         self.enrichment_jsonl_file = enrichment_jsonl_file
         self.delay = delay
@@ -96,7 +98,7 @@ class LawLibrary(Scene):
         channel_name_to_id: dict,
     ) -> dict[str, Character]:
 
-        return {channel_name_to_id["legal"]: self.law_librarian}
+        return {channel_name_to_id[self.channel_id_legal]: self.law_librarian}
 
     def curtain(self) -> None:
         self.driver.close()
