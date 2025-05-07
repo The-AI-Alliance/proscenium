@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 
-from demo.settings import literature
+from demo.scenes import literature
 
 default_milvus_uri = "file:/milvus.db"
 # milvus_uri = "http://localhost:19530"

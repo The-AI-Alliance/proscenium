@@ -7,11 +7,11 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from neo4j import GraphDatabase
 
-from demo.settings import legal
+from demo.scenes import legal
 
-from demo.settings.legal.doc_enrichments import DocumentEnrichments
-from demo.settings.legal.kg import CaseLawKnowledgeGraph
-from demo.settings.legal.entity_resolvers import (
+from demo.scenes.legal.doc_enrichments import DocumentEnrichments
+from demo.scenes.legal.kg import CaseLawKnowledgeGraph
+from demo.scenes.legal.entity_resolvers import (
     EntityResolvers,
     default_embedding_model_id,
 )

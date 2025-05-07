@@ -17,10 +17,9 @@ from proscenium.patterns.document_enricher import enrich_documents
 
 from proscenium.core import Prop
 
-from demo.settings.legal.docs import doc_as_rich
 from demo.config import default_model_id
-
-from demo.settings.legal.docs import retriever
+from demo.scenes.legal.docs import doc_as_rich
+from demo.scenes.legal.docs import retriever
 
 log = logging.getLogger(__name__)
 

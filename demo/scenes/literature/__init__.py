@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 class HighSchoolEnglishClass(Scene):
     """
-    A high school English class setting where students can ask questions about
+    A high school English class where students can ask questions about
     literature and receive answers from a literature expert.
     """
 

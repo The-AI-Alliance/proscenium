@@ -8,9 +8,8 @@ from proscenium.core import Production
 from proscenium.core import Character
 from proscenium.core import Scene
 
-from demo.settings import abacus, literature, legal
-
-from demo.settings.legal.docs import default_docs_per_dataset
+from demo.scenes import abacus, literature, legal
+from demo.scenes.legal.docs import default_docs_per_dataset
 
 log = logging.getLogger(__name__)
 
