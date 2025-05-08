@@ -105,8 +105,6 @@ def make_slack_listener(
                         )
                         if receiving_channel_id == admin_channel_id:
                             continue
-                        if speaker_id == proscenium_user_id:
-                            continue
 
                         permalink = client.web_client.chat_getPermalink(
                             channel=receiving_channel_id,
