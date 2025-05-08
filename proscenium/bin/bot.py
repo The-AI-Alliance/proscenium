@@ -6,12 +6,13 @@ import logging
 import typer
 import importlib
 from rich.console import Console
-from rich.table import Table
 
 from proscenium.admin import Admin
 
 from proscenium.interfaces.slack import (
+    channel_table,
     bot_user_id,
+    places_table,
     channel_maps,
     make_slack_listener,
     connect,
@@ -102,15 +103,7 @@ def start(
 
     channels_by_id = channel_maps(socket_mode_client)
 
-    channel_table = Table(title="Subscribed channels")
-    channel_table.add_column("Channel ID", justify="left")
-    channel_table.add_column("Name", justify="left")
-    for channel_id, channel in channels_by_id.items():
-        channel_table.add_row(
-            channel_id,
-            channel.get("name", "-"),
-        )
-    console.print(channel_table)
+    console.print(channel_table(channels_by_id))
     console.print()
 
     if slack_admin_channel_id is None:
@@ -134,14 +127,8 @@ def start(
     }
     channel_id_to_character = production.places(channel_name_to_id)
     channel_id_to_character[slack_admin_channel_id] = admin
-    character_table = Table(title="Characters in place")
-    character_table.add_column("Channel ID", justify="left")
-    character_table.add_column("Channel Name", justify="left")
-    character_table.add_column("Character", justify="left")
-    for channel_id, character in channel_id_to_character.items():
-        channel = channels_by_id[channel_id]
-        character_table.add_row(channel_id, channel["name"], character.name())
-    console.print(character_table)
+
+    console.print(places_table(channel_id_to_character, channels_by_id))
     console.print()
 
     slack_listener = make_slack_listener(

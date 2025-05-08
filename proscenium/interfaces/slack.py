@@ -4,14 +4,16 @@ from typing import Generator
 import time
 import logging
 from rich.console import Console
-
-from proscenium.core import Production
+from rich.table import Table
 
 from slack_sdk.web import WebClient
 from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
 from slack_sdk.socket_mode.listeners import SocketModeRequestListener
+
+from proscenium.core import Production
+from proscenium.core import Character
 
 log = logging.getLogger(__name__)
 
@@ -107,7 +109,7 @@ def make_slack_listener(
     return process
 
 
-def channel_maps(socket_mode_client: SocketModeClient) -> tuple[dict, dict]:
+def channel_maps(socket_mode_client: SocketModeClient) -> dict[str, dict]:
 
     subscribed_channels = socket_mode_client.web_client.users_conversations(
         types="public_channel,private_channel,mpim,im",
@@ -125,6 +127,18 @@ def channel_maps(socket_mode_client: SocketModeClient) -> tuple[dict, dict]:
     return channels_by_id
 
 
+def channel_table(channels_by_id) -> Table:
+    channel_table = Table(title="Subscribed channels")
+    channel_table.add_column("Channel ID", justify="left")
+    channel_table.add_column("Name", justify="left")
+    for channel_id, channel in channels_by_id.items():
+        channel_table.add_row(
+            channel_id,
+            channel.get("name", "-"),
+        )
+    return channel_table
+
+
 def bot_user_id(socket_mode_client: SocketModeClient, console: Console):
 
     auth_response = socket_mode_client.web_client.auth_test()
@@ -138,6 +152,21 @@ def bot_user_id(socket_mode_client: SocketModeClient, console: Console):
     console.print("Bot id", auth_response["bot_id"])
 
     return user_id
+
+
+def places_table(
+    channel_id_to_character: dict[str, Character], channels_by_id: dict[str, dict]
+) -> Table:
+
+    table = Table(title="Characters in place")
+    table.add_column("Channel ID", justify="left")
+    table.add_column("Channel Name", justify="left")
+    table.add_column("Character", justify="left")
+    for channel_id, character in channel_id_to_character.items():
+        channel = channels_by_id[channel_id]
+        table.add_row(channel_id, channel["name"], character.name())
+
+    return table
 
 
 def listen(
