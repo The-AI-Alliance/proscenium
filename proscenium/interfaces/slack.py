@@ -99,11 +99,19 @@ def make_slack_listener(
                         response_response = client.web_client.chat_postMessage(
                             channel=receiving_channel_id, text=response
                         )
+                        log.info(
+                            "Response sent to channel %s",
+                            receiving_channel_id,
+                        )
+                        if receiving_channel_id == admin_channel_id:
+                            continue
+                        if speaker_id == proscenium_user_id:
+                            continue
+
                         permalink = client.web_client.chat_getPermalink(
                             channel=receiving_channel_id,
                             message_ts=response_response["ts"],
                         )["permalink"]
-
                         log.info(
                             "Response sent to channel %s link %s",
                             receiving_channel_id,
