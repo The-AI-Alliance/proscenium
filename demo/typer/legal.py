@@ -10,7 +10,7 @@ from neo4j import GraphDatabase
 from demo.scenes import legal
 
 from demo.scenes.legal.doc_enrichments import DocumentEnrichments
-from demo.scenes.legal.kg import CaseLawKnowledgeGraph
+from demo.scenes.legal.kg import CaseLawKnowledgeGraph, display_knowledge_graph
 from demo.scenes.legal.entity_resolvers import (
     EntityResolvers,
     default_embedding_model_id,
@@ -103,10 +103,10 @@ def display_graph(verbose: bool = False):
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    show = legal.make_kg_displayer(neo4j_uri, neo4j_username, neo4j_password, console)
+    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
     console.print("Showing knowledge graph")
-    show()
+    display_knowledge_graph(driver, console)
 
 
 @app.command(
