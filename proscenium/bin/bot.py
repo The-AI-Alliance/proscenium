@@ -6,6 +6,7 @@ import logging
 import typer
 import importlib
 from rich.console import Console
+from rich.table import Table
 
 from proscenium.admin import Admin
 
@@ -59,11 +60,6 @@ def start(
         sub_console = console
 
     slack_admin_channel_id = os.environ.get("SLACK_ADMIN_CHANNEL_ID")
-    if slack_admin_channel_id is None:
-        raise ValueError(
-            "SLACK_ADMIN_CHANNEL_ID environment variable not set. "
-            "Please set it to the channel ID of the Proscenium admin channel."
-        )
 
     console.print(header())
 
@@ -101,10 +97,28 @@ def start(
 
     socket_mode_client = connect(slack_app_token, slack_bot_token)
 
+    user_id = bot_user_id(socket_mode_client, console)
+    console.print()
+
     channels_by_id = channel_maps(socket_mode_client)
 
+    channel_table = Table(title="Subscribed channels")
+    channel_table.add_column("Channel ID", justify="left")
+    channel_table.add_column("Name", justify="left")
+    for channel_id, channel in channels_by_id.items():
+        channel_table.add_row(
+            channel_id,
+            channel.get("name", "-"),
+        )
+    console.print(channel_table)
+    console.print()
+
+    if slack_admin_channel_id is None:
+        raise ValueError(
+            "SLACK_ADMIN_CHANNEL_ID environment variable not set. "
+            "Please set it to the channel ID of the Proscenium admin channel."
+        )
     if slack_admin_channel_id not in channels_by_id:
-        console.print("Subscribed channels:", channels_by_id)
         raise ValueError(
             f"Admin channel {slack_admin_channel_id} not found in subscribed channels."
         )
@@ -118,17 +132,24 @@ def start(
         for channel in channels_by_id.values()
         if channel.get("name")
     }
-    channel_id_to_handler = production.places(channel_name_to_id)
-    channel_id_to_handler[slack_admin_channel_id] = admin
-    log.info(
-        "Characters in place in channels: %s",
-        ", ".join(list(channel_id_to_handler.keys())),
-    )
-
-    user_id = bot_user_id(socket_mode_client, console)
+    channel_id_to_character = production.places(channel_name_to_id)
+    channel_id_to_character[slack_admin_channel_id] = admin
+    character_table = Table(title="Characters in place")
+    character_table.add_column("Channel ID", justify="left")
+    character_table.add_column("Channel Name", justify="left")
+    character_table.add_column("Character", justify="left")
+    for channel_id, character in channel_id_to_character.items():
+        channel = channels_by_id[channel_id]
+        character_table.add_row(channel_id, channel["name"], character.name())
+    console.print(character_table)
+    console.print()
 
     slack_listener = make_slack_listener(
-        user_id, slack_admin_channel_id, channels_by_id, channel_id_to_handler, console
+        user_id,
+        slack_admin_channel_id,
+        channels_by_id,
+        channel_id_to_character,
+        console,
     )
 
     curtain_up_message = f"""
@@ -146,7 +167,7 @@ Curtain up.
         text=curtain_up_message,
     )
 
-    console.print("Starting the show.")
+    console.print("Starting the show. Listening for events...")
     listen(
         socket_mode_client,
         slack_listener,

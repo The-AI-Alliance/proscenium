@@ -148,8 +148,6 @@ def listen(
 ):
     socket_mode_client.socket_mode_request_listeners.append(slack_listener)
 
-    console.print("Listening for events...")
-
     try:
         while True:
             time.sleep(1)
