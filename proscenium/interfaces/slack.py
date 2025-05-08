@@ -3,6 +3,7 @@ from typing import Callable
 from typing import Generator
 import time
 import logging
+import os
 from rich.console import Console
 from rich.table import Table
 
@@ -16,6 +17,24 @@ from proscenium.core import Production
 from proscenium.core import Character
 
 log = logging.getLogger(__name__)
+
+
+def get_slack_auth() -> tuple[str, str]:
+
+    slack_app_token = os.environ.get("SLACK_APP_TOKEN")
+    if slack_app_token is None:
+        raise ValueError(
+            "SLACK_APP_TOKEN environment variable not set. "
+            "Please set it to the app token of the Proscenium Slack app."
+        )
+    slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
+    if slack_bot_token is None:
+        raise ValueError(
+            "SLACK_BOT_TOKEN environment variable not set. "
+            "Please set it to the bot token of the Proscenium Slack app."
+        )
+
+    return slack_app_token, slack_bot_token
 
 
 def connect(app_token: str, bot_token: str) -> SocketModeClient:
@@ -109,7 +128,9 @@ def make_slack_listener(
     return process
 
 
-def channel_maps(socket_mode_client: SocketModeClient) -> dict[str, dict]:
+def channel_maps(
+    socket_mode_client: SocketModeClient,
+) -> tuple[dict[str, dict], dict[str, str]]:
 
     subscribed_channels = socket_mode_client.web_client.users_conversations(
         types="public_channel,private_channel,mpim,im",
@@ -124,7 +145,13 @@ def channel_maps(socket_mode_client: SocketModeClient) -> dict[str, dict]:
         channel["id"]: channel for channel in subscribed_channels["channels"]
     }
 
-    return channels_by_id
+    channel_name_to_id = {
+        channel["name"]: channel["id"]
+        for channel in channels_by_id.values()
+        if channel.get("name")
+    }
+
+    return channels_by_id, channel_name_to_id
 
 
 def channel_table(channels_by_id) -> Table:
@@ -169,6 +196,28 @@ def places_table(
     return table
 
 
+def send_curtain_up(
+    socket_mode_client: SocketModeClient,
+    production: Production,
+    slack_admin_channel_id: str,
+) -> None:
+
+    curtain_up_message = f"""
+Proscenium 🎭 https://the-ai-alliance.github.io/proscenium/
+
+```
+{production.curtain_up_message()}
+```
+
+Curtain up.
+"""
+
+    socket_mode_client.web_client.chat_postMessage(
+        channel=slack_admin_channel_id,
+        text=curtain_up_message,
+    )
+
+
 def listen(
     socket_mode_client: SocketModeClient,
     slack_listener: SocketModeRequestListener,
@@ -182,6 +231,15 @@ def listen(
             time.sleep(1)
     except KeyboardInterrupt:
         console.print("Exiting...")
+
+
+def send_curtain_down(
+    socket_mode_client: SocketModeClient, slack_admin_channel_id: str
+) -> None:
+    socket_mode_client.web_client.chat_postMessage(
+        channel=slack_admin_channel_id,
+        text="""Curtain down. We hope you enjoyed the show!""",
+    )
 
 
 def shutdown(
