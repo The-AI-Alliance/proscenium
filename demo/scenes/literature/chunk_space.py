@@ -37,20 +37,21 @@ class ChunkSpace(Prop):
         self.collection_name = collection_name
         self.embedding_model_id = embedding_model_id
 
-    def build(self, force: bool = False) -> None:
+    def already_built(self) -> bool:
 
-        if not force:
-            vector_db_client = vector_db(self.milvus_uri, overwrite=False)
-            if vector_db_client.has_collection(self.collection_name):
-                # TODO the existence of the collection might not be strong enough proof
-                log.info(
-                    "Milvus DB already exists at %s with collection %s. Skipping its build.",
-                    self.milvus_uri,
-                    self.collection_name,
-                )
-                vector_db_client.close()
-                return
+        vector_db_client = vector_db(self.milvus_uri, overwrite=False)
+        if vector_db_client.has_collection(self.collection_name):
+            log.info(
+                "Milvus DB already exists at %s with collection %s. Skipping its build.",
+                self.milvus_uri,
+                self.collection_name,
+            )
             vector_db_client.close()
+            return True
+        vector_db_client.close()
+        return False
+
+    def build(self) -> None:
 
         for book in books:
             asyncio.run(url_to_file(book.url, book.data_file))

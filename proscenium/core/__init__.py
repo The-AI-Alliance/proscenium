@@ -31,7 +31,7 @@ class Prop:
     def already_built(self) -> bool:
         return False
 
-    def build(self, force: bool = False) -> None:
+    def build(self) -> None:
         pass
 
 

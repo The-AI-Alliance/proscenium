@@ -63,22 +63,19 @@ class EntityResolvers(Prop):
 
         return True
 
-    def build(self, force: bool = False):
-
-        if not force and self.already_built():
-            log.info("Entity resolver already built.")
-            return
+    def build(self) -> None:
 
         driver = GraphDatabase.driver(
             self.neo4j_uri, auth=(self.neo4j_username, self.neo4j_password)
         )
 
-        load_entity_resolver(
-            driver,
-            self.resolvers,
-            self.embedding_model_id,
-            self.milvus_uri,
-            console=self.console,
-        )
-
-        driver.close()
+        try:
+            load_entity_resolver(
+                driver,
+                self.resolvers,
+                self.embedding_model_id,
+                self.milvus_uri,
+                console=self.console,
+            )
+        finally:
+            driver.close()

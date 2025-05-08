@@ -78,7 +78,13 @@ def start(
 
     for scene in production.scenes():
         for prop in scene.props():
-            prop.build(force_rebuild)
+            if force_rebuild:
+                prop.build()
+            elif not prop.already_built():
+                log.info("Prop %s not built. Building it now.", prop.name())
+                prop.build()
+
+    log.info("Props are up-to-date.")
 
     slack_app_token = os.environ.get("SLACK_APP_TOKEN")
     if slack_app_token is None:
