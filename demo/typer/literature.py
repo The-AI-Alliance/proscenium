@@ -46,7 +46,7 @@ def prepare(verbose: bool = False):
     )
 
     console.print("Building chunk space")
-    english_class.chunk_space.build(force=True)
+    english_class.chunk_space.build()
 
 
 @app.command(

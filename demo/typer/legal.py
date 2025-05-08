@@ -56,7 +56,7 @@ def enrich(
     doc_enrichments = DocumentEnrichments(docs_per_dataset, output, delay, sub_console)
 
     console.print("Enriching documents")
-    doc_enrichments.build(force=True)
+    doc_enrichments.build()
 
 
 @app.command(
@@ -86,7 +86,7 @@ def load_graph(
     )
 
     console.print("Loading knowledge graph")
-    case_law_knowledge_graph.build(force=True)
+    case_law_knowledge_graph.build()
 
 
 @app.command(
@@ -138,7 +138,7 @@ def load_resolver(verbose: bool = False):
     )
 
     console.print("Loading entity resolver")
-    entity_resolvers.build(force=True)
+    entity_resolvers.build()
 
 
 @app.command(
