@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 import typer
 
-from demo.settings import abacus
+from demo.scenes import abacus
 
 app = typer.Typer(help="""Arithmetic question answering.""")
 

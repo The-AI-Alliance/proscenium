@@ -31,7 +31,7 @@ class Prop:
     def already_built(self) -> bool:
         return False
 
-    def build(self, force: bool = False) -> None:
+    def build(self) -> None:
         pass
 
 
@@ -94,6 +94,14 @@ Props:
     def props(self) -> list[Prop]:
         return []
 
+    def prepare_props(self, force_rebuild: bool = False) -> None:
+        for prop in self.props():
+            if force_rebuild:
+                prop.build()
+            elif not prop.already_built():
+                log.info("Prop %s not built. Building it now.", prop.name())
+                prop.build()
+
     def characters(self) -> list[Character]:
         return []
 
@@ -116,6 +124,15 @@ class Production:
 
     def description(self) -> str:
         return self.__doc__ or ""
+
+    def prepare_props(self, force_rebuild: bool = False) -> None:
+        if force_rebuild:
+            log.info("Forcing rebuild of all props.")
+        else:
+            log.info("Building any missing props...")
+
+        for scene in self.scenes():
+            scene.prepare_props(force_rebuild=force_rebuild)
 
     def curtain_up_message(self) -> str:
 

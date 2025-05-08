@@ -10,11 +10,16 @@ from rich.console import Console
 from proscenium.admin import Admin
 
 from proscenium.interfaces.slack import (
+    get_slack_auth,
+    channel_table,
     bot_user_id,
+    places_table,
     channel_maps,
     make_slack_listener,
     connect,
+    send_curtain_up,
     listen,
+    send_curtain_down,
     shutdown,
 )
 
@@ -58,47 +63,37 @@ def start(
         logging.getLogger("demo").setLevel(logging.INFO)
         sub_console = console
 
+    console.print(header())
+
+    production_module = importlib.import_module(production_module_name, package=None)
+
     slack_admin_channel_id = os.environ.get("SLACK_ADMIN_CHANNEL_ID")
+    # Note that the checking of the existence of the admin channel id is delayed
+    # until after the subscribed channels are shown.
+
+    production = production_module.make_production(slack_admin_channel_id, sub_console)
+
+    console.print("Preparing props...")
+    production.prepare_props()
+    console.print("Props are up-to-date.")
+
+    slack_app_token, slack_bot_token = get_slack_auth()
+
+    socket_mode_client = connect(slack_app_token, slack_bot_token)
+
+    user_id = bot_user_id(socket_mode_client, console)
+    console.print()
+
+    channels_by_id, channel_name_to_id = channel_maps(socket_mode_client)
+    console.print(channel_table(channels_by_id))
+    console.print()
+
     if slack_admin_channel_id is None:
         raise ValueError(
             "SLACK_ADMIN_CHANNEL_ID environment variable not set. "
             "Please set it to the channel ID of the Proscenium admin channel."
         )
-
-    console.print(header())
-
-    production_module = importlib.import_module(production_module_name, package=None)
-
-    production = production_module.make_production(slack_admin_channel_id, sub_console)
-
-    if force_rebuild:
-        console.print("Forcing rebuild of all props.")
-    else:
-        console.print("Building any missing props...")
-
-    for scene in production.scenes():
-        for prop in scene.props():
-            prop.build(force_rebuild)
-
-    slack_app_token = os.environ.get("SLACK_APP_TOKEN")
-    if slack_app_token is None:
-        raise ValueError(
-            "SLACK_APP_TOKEN environment variable not set. "
-            "Please set it to the app token of the Proscenium Slack app."
-        )
-    slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
-    if slack_bot_token is None:
-        raise ValueError(
-            "SLACK_BOT_TOKEN environment variable not set. "
-            "Please set it to the bot token of the Proscenium Slack app."
-        )
-
-    socket_mode_client = connect(slack_app_token, slack_bot_token)
-
-    channels_by_id = channel_maps(socket_mode_client)
-
     if slack_admin_channel_id not in channels_by_id:
-        console.print("Subscribed channels:", channels_by_id)
         raise ValueError(
             f"Admin channel {slack_admin_channel_id} not found in subscribed channels."
         )
@@ -107,40 +102,23 @@ def start(
     log.info("Admin handler started.")
 
     log.info("Places, please!")
-    channel_name_to_id = {
-        channel["name"]: channel["id"]
-        for channel in channels_by_id.values()
-        if channel.get("name")
-    }
-    channel_id_to_handler = production.places(channel_name_to_id)
-    channel_id_to_handler[slack_admin_channel_id] = admin
-    log.info(
-        "Characters in place in channels: %s",
-        ", ".join(list(channel_id_to_handler.keys())),
-    )
+    channel_id_to_character = production.places(channel_name_to_id)
+    channel_id_to_character[slack_admin_channel_id] = admin
 
-    user_id = bot_user_id(socket_mode_client, console)
+    console.print(places_table(channel_id_to_character, channels_by_id))
+    console.print()
 
     slack_listener = make_slack_listener(
-        user_id, slack_admin_channel_id, channels_by_id, channel_id_to_handler, console
+        user_id,
+        slack_admin_channel_id,
+        channels_by_id,
+        channel_id_to_character,
+        console,
     )
 
-    curtain_up_message = f"""
-Proscenium 🎭 https://the-ai-alliance.github.io/proscenium/
+    send_curtain_up(socket_mode_client, production, slack_admin_channel_id)
 
-```
-{production.curtain_up_message()}
-```
-
-Curtain up.
-"""
-
-    socket_mode_client.web_client.chat_postMessage(
-        channel=slack_admin_channel_id,
-        text=curtain_up_message,
-    )
-
-    console.print("Starting the show.")
+    console.print("Starting the show. Listening for events...")
     listen(
         socket_mode_client,
         slack_listener,
@@ -148,10 +126,7 @@ Curtain up.
         console,
     )
 
-    socket_mode_client.web_client.chat_postMessage(
-        channel=slack_admin_channel_id,
-        text="""Curtain down. We hope you enjoyed the show!""",
-    )
+    send_curtain_down(socket_mode_client, slack_admin_channel_id)
 
     shutdown(
         socket_mode_client,

@@ -9,7 +9,7 @@ from neo4j import GraphDatabase
 from neo4j import Driver
 
 from proscenium.patterns.knowledge_graph import load_knowledge_graph
-from demo.settings.legal.doc_enrichments import LegalOpinionEnrichments
+from demo.scenes.legal.doc_enrichments import LegalOpinionEnrichments
 
 from proscenium.core import Prop
 
@@ -174,32 +174,44 @@ class CaseLawKnowledgeGraph(Prop):
         self.neo4j_username = neo4j_username
         self.neo4j_password = neo4j_password
 
-    def build(self, force: bool = False):
+    def already_built(self) -> bool:
+
+        num_nodes = 0
+        driver = GraphDatabase.driver(
+            self.neo4j_uri, auth=(self.neo4j_username, self.neo4j_password)
+        )
+        try:
+            with driver.session() as session:
+                num_nodes = (
+                    session.run("MATCH (n) RETURN COUNT(n) AS cnt").single().value()
+                )
+        finally:
+            driver.close()
+
+        if num_nodes > 0:
+            log.info(
+                "Knowledge graph already exists at %s and has at least one node. Considering it built.",
+                self.neo4j_uri,
+            )
+            return True
+
+        return False
+
+    def build(self) -> None:
 
         driver = GraphDatabase.driver(
             self.neo4j_uri, auth=(self.neo4j_username, self.neo4j_password)
         )
 
-        num_nodes = 0
-        with driver.session() as session:
-            num_nodes = session.run("MATCH (n) RETURN COUNT(n) AS cnt").single().value()
-
-        if num_nodes > 0 and not force:
-            log.info(
-                "Knowledge graph already exists at %s and has at least one node. Skipping its load.",
-                self.neo4j_uri,
+        try:
+            load_knowledge_graph(
+                driver,
+                self.input_path,
+                LegalOpinionEnrichments,
+                doc_enrichments_to_graph,
             )
+        finally:
             driver.close()
-            return
-
-        load_knowledge_graph(
-            driver,
-            self.input_path,
-            LegalOpinionEnrichments,
-            doc_enrichments_to_graph,
-        )
-
-        driver.close()
 
 
 def display_knowledge_graph(driver: Driver, console: Console) -> None:

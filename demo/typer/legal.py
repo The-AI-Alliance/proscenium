@@ -7,11 +7,11 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from neo4j import GraphDatabase
 
-from demo.settings import legal
+from demo.scenes import legal
 
-from demo.settings.legal.doc_enrichments import DocumentEnrichments
-from demo.settings.legal.kg import CaseLawKnowledgeGraph
-from demo.settings.legal.entity_resolvers import (
+from demo.scenes.legal.doc_enrichments import DocumentEnrichments
+from demo.scenes.legal.kg import CaseLawKnowledgeGraph, display_knowledge_graph
+from demo.scenes.legal.entity_resolvers import (
     EntityResolvers,
     default_embedding_model_id,
 )
@@ -56,7 +56,7 @@ def enrich(
     doc_enrichments = DocumentEnrichments(docs_per_dataset, output, delay, sub_console)
 
     console.print("Enriching documents")
-    doc_enrichments.build(force=True)
+    doc_enrichments.build()
 
 
 @app.command(
@@ -86,7 +86,7 @@ def load_graph(
     )
 
     console.print("Loading knowledge graph")
-    case_law_knowledge_graph.build(force=True)
+    case_law_knowledge_graph.build()
 
 
 @app.command(
@@ -103,10 +103,10 @@ def display_graph(verbose: bool = False):
     neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
     neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
 
-    show = legal.make_kg_displayer(neo4j_uri, neo4j_username, neo4j_password, console)
+    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
 
     console.print("Showing knowledge graph")
-    show()
+    display_knowledge_graph(driver, console)
 
 
 @app.command(
@@ -138,7 +138,7 @@ def load_resolver(verbose: bool = False):
     )
 
     console.print("Loading entity resolver")
-    entity_resolvers.build(force=True)
+    entity_resolvers.build()
 
 
 @app.command(

@@ -15,7 +15,7 @@ from proscenium.core import Scene
 from proscenium.verbs.invoke import process_tools
 from proscenium.patterns.tools import apply_tools
 
-import demo.settings.abacus as domain
+import demo.scenes.abacus as domain
 from demo.config import default_model_id
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -55,11 +55,18 @@ class Abacus(Character):
 
 class ElementarySchoolMathClass(Scene):
     """
-    An elementary school math class setting where students can ask questions about arithmetic.
+    An elementary school math class where students can ask questions about arithmetic.
     """
 
-    def __init__(self, admin_channel_id: str, console: Optional[Console] = None):
+    def __init__(
+        self,
+        channel_id_abacus: str,
+        admin_channel_id: str,
+        console: Optional[Console] = None,
+    ):
         super().__init__()
+
+        self.channel_id_abacus = channel_id_abacus
 
         self.admin_channel_id = admin_channel_id
         self.console = console
@@ -76,4 +83,4 @@ class ElementarySchoolMathClass(Scene):
         channel_name_to_id: dict,
     ) -> dict[str, Character]:
 
-        return {channel_name_to_id["abacus"]: self.abacus}
+        return {channel_name_to_id[self.channel_id_abacus]: self.abacus}
