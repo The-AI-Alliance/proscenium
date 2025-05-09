@@ -52,6 +52,9 @@ class Character:
     def curtain_up_message(self) -> str:
         return f"- {self.name()}, {self.description().strip()}"
 
+    def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
+        return False
+
     def handle(
         channel_id: str, speaker_id: str, utterance: str
     ) -> Generator[tuple[str, str], None, None]:

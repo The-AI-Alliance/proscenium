@@ -43,6 +43,9 @@ class LiteratureExpert(Character):
         self.embedding_fn = embedding_function(embedding_model_id)
         log.info("Embedding model %s", embedding_model_id)
 
+    def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
+        return True
+
     def handle(
         self, channel_id: str, speaker_id: str, utterance: str
     ) -> Generator[tuple[str, str], None, None]:
