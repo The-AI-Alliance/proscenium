@@ -38,13 +38,13 @@ def load_entity_resolver(
     console: Optional[Console] = None,
 ) -> None:
 
-    vector_db_client = vector_db(milvus_uri, overwrite=True)
+    vector_db_client = vector_db(milvus_uri)
     log.info("Vector db stored at %s", milvus_uri)
 
-    for resolver in resolvers:
+    embedding_fn = embedding_function(embedding_model_id)
+    log.info("Embedding model %s", embedding_model_id)
 
-        embedding_fn = embedding_function(embedding_model_id)
-        log.info("Embedding model %s", embedding_model_id)
+    for resolver in resolvers:
 
         values = []
         with driver.session() as session:
@@ -53,9 +53,7 @@ def load_entity_resolver(
             values.extend(new_values)
 
         log.info("Loading entity resolver into vector db %s", resolver.collection_name)
-        create_collection(
-            vector_db_client, embedding_fn, resolver.collection_name, overwrite=True
-        )
+        create_collection(vector_db_client, embedding_fn, resolver.collection_name)
         info = add_chunks_to_vector_db(
             vector_db_client, embedding_fn, values, resolver.collection_name
         )

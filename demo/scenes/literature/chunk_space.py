@@ -1,16 +1,12 @@
 from typing import Optional
-
 import logging
-
 import asyncio
-
 from rich.console import Console
 
 from proscenium.core import Prop
 from proscenium.verbs.read import url_to_file
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
-
 from proscenium.patterns.chunk_space import load_chunks
 
 from .docs import books
@@ -39,7 +35,7 @@ class ChunkSpace(Prop):
 
     def already_built(self) -> bool:
 
-        vector_db_client = vector_db(self.milvus_uri, overwrite=False)
+        vector_db_client = vector_db(self.milvus_uri)
         if vector_db_client.has_collection(self.collection_name):
             log.info(
                 "Milvus DB already exists at %s with collection %s. Skipping its build.",
@@ -60,15 +56,11 @@ class ChunkSpace(Prop):
         embedding_fn = embedding_function(self.embedding_model_id)
         log.info("Embedding model %s", self.embedding_model_id)
 
-        vector_db_client = vector_db(self.milvus_uri, overwrite=True)
-        log.info("Vector db at uri %s", self.milvus_uri)
-
         log.info("Building chunk space")
         load_chunks(
             [str(book.data_file) for book in books],
-            vector_db_client,
+            self.milvus_uri,
             embedding_fn,
             self.collection_name,
+            console=self.console,
         )
-
-        vector_db_client.close()

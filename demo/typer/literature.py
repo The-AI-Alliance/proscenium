@@ -8,21 +8,21 @@ from rich.prompt import Prompt
 
 from demo.scenes import literature
 
-default_milvus_uri = "file:/milvus.db"
-# milvus_uri = "http://localhost:19530"
-milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
+log = logging.getLogger(__name__)
+
+console = Console()
 
 collection_name = "literature_chunks"
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+default_milvus_uri = "file:/milvus3.db"
+# milvus_uri = "http://localhost:19530"
+milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
+
 app = typer.Typer(
     help="""Question answering using RAG on a text from the Gutenberg Project."""
 )
-
-console = Console()
-
-log = logging.getLogger(__name__)
 
 
 @app.command(
@@ -39,6 +39,7 @@ def prepare(verbose: bool = False):
         sub_console = Console()
 
     english_class = literature.HighSchoolEnglishClass(
+        None,
         milvus_uri,
         None,
         collection_name,
