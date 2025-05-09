@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "proscenium"
-version = "0.0.2"
+version = "0.0.3"
 description = "Frame AI Agents"
 authors = ["Adam Pingel <oss@pingel.org>"]
 license = "ASFv2"
