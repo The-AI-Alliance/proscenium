@@ -7,7 +7,7 @@ from proscenium.core import Prop
 from proscenium.verbs.read import url_to_file
 from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
-from proscenium.patterns.chunk_space import load_chunks
+from proscenium.patterns.chunk_space import load_chunks_from_files
 
 from .docs import books
 
@@ -57,7 +57,7 @@ class ChunkSpace(Prop):
         log.info("Embedding model %s", self.embedding_model_id)
 
         log.info("Building chunk space")
-        load_chunks(
+        load_chunks_from_files(
             [str(book.data_file) for book in books],
             self.milvus_uri,
             embedding_fn,

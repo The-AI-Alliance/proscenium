@@ -13,7 +13,7 @@ from proscenium.verbs.vector_database import add_chunks_to_vector_db
 log = logging.getLogger(__name__)
 
 
-def load_chunks(
+def load_chunks_from_files(
     data_files: list[str],
     milvus_uri: str,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
