@@ -16,7 +16,7 @@ collection_name = "literature_chunks"
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-default_milvus_uri = "file:/milvus.db"
+default_milvus_uri = "file:/milvus3.db"
 # milvus_uri = "http://localhost:19530"
 milvus_uri = os.environ.get("MILVUS_URI", default_milvus_uri)
 

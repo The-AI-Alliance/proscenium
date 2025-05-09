@@ -45,7 +45,6 @@ def schema_chunks(
 
 def vector_db(
     uri: str,
-    overwrite: bool = False,
 ) -> MilvusClient:
 
     log.info("Connecting to vector db %s", uri)
@@ -54,18 +53,13 @@ def vector_db(
     if uri_fields[0] == "file":
         file_path = Path(uri_fields[2][1:])
         if file_path.exists():
-            if overwrite:
-                file_path.unlink()
-                log.info("Deleted existing vector db file %s", file_path)
-            else:
-                log.info(
-                    "Using existing %s file. Use overwrite=True to replace.",
-                    uri_fields[2],
-                )
+            log.info(
+                "Using existing %s file.",
+                uri_fields[2],
+            )
         else:
             log.info("Creating new vector db file %s", file_path)
 
-        log.info("Connecting to file uri file part %s", file_path)
         client = MilvusClient(uri=str(file_path))
 
     else:
@@ -80,11 +74,7 @@ def create_collection(
     client: MilvusClient,
     embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
     collection_name: str,
-    overwrite: bool = True,
 ) -> None:
-
-    if overwrite and client.has_collection(collection_name):
-        client.drop_collection(collection_name)
 
     client.create_collection(
         collection_name=collection_name,
