@@ -50,7 +50,7 @@ class EntityResolvers(Prop):
         self.resolvers = [case_resolver, judge_resolver]
 
     def already_built(self) -> bool:
-        client = vector_db(self.milvus_uri, overwrite=False)
+        client = vector_db(self.milvus_uri)
         collections = client.list_collections()
         try:
             for resolver in self.resolvers:
