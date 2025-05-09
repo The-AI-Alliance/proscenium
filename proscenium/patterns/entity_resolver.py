@@ -54,10 +54,12 @@ def load_entity_resolver(
 
         log.info("Loading entity resolver into vector db %s", resolver.collection_name)
         create_collection(vector_db_client, embedding_fn, resolver.collection_name)
+
         info = add_chunks_to_vector_db(
             vector_db_client, embedding_fn, values, resolver.collection_name
         )
         log.info("%s chunks inserted ", info["insert_count"])
+
         if console is not None:
             console.print(collection_panel(vector_db_client, resolver.collection_name))
 
