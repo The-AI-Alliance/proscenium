@@ -28,6 +28,9 @@ class Admin(Character):
         super().__init__(admin_channel_id)
         self.admin_channel_id = admin_channel_id
 
+    def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
+        return False
+
     def handle(
         channel_id: str,
         speaker_id: str,
