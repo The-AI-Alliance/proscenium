@@ -4,7 +4,6 @@ from typing import Optional
 import logging
 import json
 
-from pydantic import BaseModel, Field
 from rich.console import Console
 
 from gofannon.basic_math.addition import Addition
@@ -14,6 +13,8 @@ from gofannon.basic_math.division import Division
 
 from proscenium.core import Character
 from proscenium.core import Scene
+from proscenium.core import control_flow_system_prompt
+from proscenium.core import WantsToHandleResponse
 from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.invoke import process_tools
 from proscenium.patterns.tools import apply_tools
@@ -33,10 +34,6 @@ Use the tools specified in this request to perform the arithmetic in the user's 
 Do not use any other tools.
 """
 
-control_flow_system_prompt = """
-You control the workflow of an AI assistant.  You evaluate user-posted messages and decide what the next step is.
-"""
-
 wants_to_handle_template = """\
 The text below is a user-posted message to a chat channel.
 Determine if you, the AI assistant equipped with tools for arithmetic,
@@ -49,16 +46,6 @@ The user-posted message is:
 
 {text}
 """
-
-
-class WantsToHandleResponse(BaseModel):
-    """
-    The response to whether the Character wants to handle the provided utterance.
-    """
-
-    wants_to_handle: bool = Field(
-        description="A boolean indicating whether the Character wants to handle the provided utterance.",
-    )
 
 
 class Abacus(Character):
