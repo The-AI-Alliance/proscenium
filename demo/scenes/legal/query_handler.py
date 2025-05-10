@@ -10,6 +10,8 @@ from neo4j import Driver
 from eyecite import get_citations
 
 from proscenium.core import Character
+from proscenium.core import control_flow_system_prompt
+from proscenium.core import WantsToHandleResponse
 from proscenium.verbs.extract import partial_formatter
 from proscenium.verbs.extract import extraction_system_prompt
 from proscenium.verbs.extract import raw_extraction_template
@@ -30,6 +32,21 @@ default_question = "How has 291 A.2d 605 been used in NH caselaw?"
 
 
 default_query_extraction_model_id = default_model_id
+
+# TODO include the graph schema in `wants_to_handle_template`
+
+wants_to_handle_template = """\
+The text below is a user-posted message to a chat channel.
+Determine if you, the AI assistant equipped with a knowledge graph derived U.S. case law
+might be able to find an answer to the user's question.
+State a boolean value for whether you want to handle the message,
+expressed in the specified JSON response format.
+Only answer in JSON.
+
+The user-posted message is:
+
+{text}
+"""
 
 
 class QueryExtractions(BaseModel):
@@ -217,6 +234,30 @@ class LawLibrarian(Character):
         super().__init__(admin_channel_id=admin_channel_id)
         self.driver = driver
         self.milvus_uri = milvus_uri
+
+    def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
+
+        log.info("handle? channel_id = %s, speaker_id = %s", channel_id, speaker_id)
+
+        response = complete_simple(
+            model_id=default_model_id,
+            system_prompt=control_flow_system_prompt,
+            user_prompt=wants_to_handle_template.format(text=utterance),
+            response_format={
+                "type": "json_object",
+                "schema": WantsToHandleResponse.model_json_schema(),
+            },
+        )
+
+        try:
+            response_json = json.loads(response)
+            result_message = WantsToHandleResponse(**response_json)
+            log.info("wants_to_handle: result = %s", result_message.wants_to_handle)
+            return result_message.wants_to_handle
+
+        except Exception as e:
+
+            log.error("Exception: %s", e)
 
     def handle(
         self, channel_id: str, speaker_id: str, utterance: str

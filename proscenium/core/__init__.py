@@ -1,11 +1,27 @@
 from typing import Generator
 from typing import Optional
 import logging
+
+from pydantic import BaseModel, Field
 from rich.console import Console
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 log = logging.getLogger(__name__)
+
+control_flow_system_prompt = """
+You control the workflow of an AI assistant.  You evaluate user-posted messages and decide what the next step is.
+"""
+
+
+class WantsToHandleResponse(BaseModel):
+    """
+    The response to whether the Character wants to handle the provided utterance.
+    """
+
+    wants_to_handle: bool = Field(
+        description="A boolean indicating whether the Character wants to handle the provided utterance.",
+    )
 
 
 class Prop:
@@ -51,6 +67,9 @@ class Character:
 
     def curtain_up_message(self) -> str:
         return f"- {self.name()}, {self.description().strip()}"
+
+    def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
+        return False
 
     def handle(
         channel_id: str, speaker_id: str, utterance: str

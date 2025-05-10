@@ -93,31 +93,45 @@ def make_slack_listener(
 
                     # TODO determine whether the handler has a good chance of being useful
 
-                    for receiving_channel_id, response in character.handle(
-                        channel_id, speaker_id, text
-                    ):
-                        response_response = client.web_client.chat_postMessage(
-                            channel=receiving_channel_id, text=response
-                        )
-                        log.info(
-                            "Response sent to channel %s",
-                            receiving_channel_id,
-                        )
-                        if receiving_channel_id == admin_channel_id:
-                            continue
+                    if character.wants_to_handle(channel_id, speaker_id, text):
 
-                        permalink = client.web_client.chat_getPermalink(
-                            channel=receiving_channel_id,
-                            message_ts=response_response["ts"],
-                        )["permalink"]
                         log.info(
-                            "Response sent to channel %s link %s",
-                            receiving_channel_id,
-                            permalink,
+                            "Handler %s in channel %s wants to handle it",
+                            character.name(),
+                            channel_id,
                         )
-                        client.web_client.chat_postMessage(
-                            channel=admin_channel_id,
-                            text=permalink,
+
+                        for receiving_channel_id, response in character.handle(
+                            channel_id, speaker_id, text
+                        ):
+                            response_response = client.web_client.chat_postMessage(
+                                channel=receiving_channel_id, text=response
+                            )
+                            log.info(
+                                "Response sent to channel %s",
+                                receiving_channel_id,
+                            )
+                            if receiving_channel_id == admin_channel_id:
+                                continue
+
+                            permalink = client.web_client.chat_getPermalink(
+                                channel=receiving_channel_id,
+                                message_ts=response_response["ts"],
+                            )["permalink"]
+                            log.info(
+                                "Response sent to channel %s link %s",
+                                receiving_channel_id,
+                                permalink,
+                            )
+                            client.web_client.chat_postMessage(
+                                channel=admin_channel_id,
+                                text=permalink,
+                            )
+                    else:
+                        log.info(
+                            "Handler %s in channel %s does not want to handle it",
+                            character.name(),
+                            channel_id,
                         )
 
         elif req.type == "interactive":
