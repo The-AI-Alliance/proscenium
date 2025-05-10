@@ -92,34 +92,10 @@ including:
 
 <img src="./assets/images/kg_diagram.png" width="600px" alt="kg diagram"/>
 
-## Demonstrations in the Legal Domain
+## Use Cases
 
-Legal use cases rely heavily on deriving structured data from unstructured data, so this is an ideal domain to demonstrate several related subsystems.
+### Bartlebot
 
-### Federal Caselaw and Statute Research
+For federal case law and statute research.
 
-The first use case in the legal domain is question-answering related to
-large, public-domain legal datasets including U.S. federal case law and statutes.
-
-<img src="./assets/images/enrich.png" width="600px" alt="legal kg"/>
-
-The questions chosen highlight categories of questions where the ability to traverse a
-Knowledge Graph provides advantages over a naive RAG approach.
-
-<img src="./assets/images/legal_kg.png" width="600px" alt="legal kg"/>
-
-### Email Generation with Context from Matter Management System
-
-The second use case in development is a email authoring capability that
-integrates with a Matter Management system.
-
-### Common Features and Requirements
-
-Demo applications will be demonstrated as Slack integrations as well as Python notebooks.
-
-They will use Llama 4 models hosted by Together.AI, and make use of
-a Neo4j graph database.
-
-These applications will also demonstrate the creation and tuning of custom
-benchmarks.  Existing legal benchmarks today are very narrow and/or do not map
-well to customer value.
+See the [website](https://the-ai-alliance.github.io/bartlebot/) and [repo](https://github.com/The-AI-Alliance/bartlebot)
