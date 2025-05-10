@@ -8,8 +8,7 @@ from proscenium.core import Production
 from proscenium.core import Character
 from proscenium.core import Scene
 
-from demo.scenes import abacus, literature, legal
-from demo.scenes.legal.docs import default_docs_per_dataset
+from demo.scenes import abacus, literature
 
 log = logging.getLogger(__name__)
 
@@ -51,25 +50,11 @@ class Demo(Production):
             console=console,
         )
 
-        self.law_library = legal.LawLibrary(
-            channel_id_legal,
-            default_docs_per_dataset,
-            enrichment_jsonl_file,
-            legal.doc_enrichments.default_delay,
-            neo4j_uri,
-            neo4j_username,
-            neo4j_password,
-            legal_milvus_uri,
-            admin_channel_id,
-            console=console,
-        )
-
     def scenes(self) -> list[Scene]:
 
         return [
             self.elementary_school_math_class,
             self.high_school_english_class,
-            self.law_library,
         ]
 
     def places(
