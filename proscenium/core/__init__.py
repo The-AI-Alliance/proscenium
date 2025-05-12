@@ -135,8 +135,9 @@ class Production:
     """
     A `Production` is a collection of `Scene`s."""
 
-    def __init__(self):
-        pass
+    def __init__(self, admin_channel_id: str, console: Optional[Console] = None):
+        self.admin_channel_id = admin_channel_id
+        self.console = console
 
     def name(self) -> str:
         return self.__class__.__name__
