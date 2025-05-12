@@ -192,8 +192,8 @@ def bot_user_id(socket_mode_client: SocketModeClient, console: Console):
 
     console.print(auth_response["url"])
     console.print()
-    console.print(f"Team '{auth_response["team"]}' ({auth_response["team_id"]})")
-    console.print(f"User '{auth_response["user"]}' ({auth_response["user_id"]})")
+    console.print("Team", auth_response["team"], auth_response["team_id"])
+    console.print("User", auth_response["user"], auth_response["user_id"])
 
     user_id = auth_response["user_id"]
     console.print("Bot id", auth_response["bot_id"])
