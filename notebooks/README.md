@@ -17,6 +17,6 @@ and using those chunks to form a context for LLM inference based on a user quest
 
 [Abacus.ipynb](./Abacus.ipynb)
 
-<a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Abacus-Tools.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Abacus.ipynb">
 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
