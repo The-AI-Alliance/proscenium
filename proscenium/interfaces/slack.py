@@ -1,6 +1,6 @@
-from typing import Callable, Optional
-
+from typing import Callable
 from typing import Generator
+
 import time
 import logging
 import os
