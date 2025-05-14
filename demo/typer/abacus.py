@@ -12,16 +12,22 @@ console = Console()
 
 log = logging.getLogger(__name__)
 
+default_model = "together:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+
 
 @app.command(help="Ask a natural langauge arithmetic question.")
-def ask(verbose: bool = False):
+def ask(
+    generator_model: str = default_model,
+    control_flow_model: str = default_model,
+    verbose: bool = False,
+):
 
     if verbose:
         log.setLevel(logging.INFO)
         logging.getLogger("proscenium").setLevel(logging.INFO)
         logging.getLogger("demo").setLevel(logging.INFO)
 
-    character = abacus.Abacus(None)
+    character = abacus.Abacus(None, generator_model, control_flow_model)
 
     question = Prompt.ask(
         "What is your arithmetic question?",

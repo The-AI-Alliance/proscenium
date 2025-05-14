@@ -1,6 +1,5 @@
+from typing import Callable
 import logging
-from pathlib import Path
-import os
 
 from rich.console import Console
 
@@ -12,41 +11,41 @@ from demo.scenes import abacus, literature
 
 log = logging.getLogger(__name__)
 
-literature_milvus_uri = "file:/milvus.db"
-
-enrichment_jsonl_file = Path("enrichments.jsonl")
-
-legal_milvus_uri = "file:/grag-milvus.db"
-
-default_neo4j_uri = "bolt://localhost:7687"
-neo4j_uri = os.environ.get("NEO4J_URI", default_neo4j_uri)
-default_neo4j_username = "neo4j"
-neo4j_username = os.environ.get("NEO4J_USERNAME", default_neo4j_username)
-default_neo4j_password = "password"
-neo4j_password = os.environ.get("NEO4J_PASSWORD", default_neo4j_password)
-
-channel_id_legal = "legal"
-channel_id_literature = "literature"
-channel_id_abacus = "abacus"
-
 
 class Demo(Production):
     """
     A demonstration of Proscenium Scenes (with Characters and Props)
     interacting with an audience."""
 
-    def __init__(self, admin_channel_id: str, console: Console) -> None:
+    def __init__(
+        self,
+        admin_channel_id: str,
+        elementary_school_math_class_channel: str,
+        high_school_english_class_channel: str,
+        literature_chunk_collection_name: str,
+        milvus_uri: str,
+        embedding_model: str,
+        generator_model: str,
+        control_flow_model: str,
+        console: Console,
+    ) -> None:
 
         self.elementary_school_math_class = abacus.ElementarySchoolMathClass(
-            channel_id_abacus,
+            elementary_school_math_class_channel,
             admin_channel_id,
+            generator_model,
+            control_flow_model,
             console,
         )
 
         self.high_school_english_class = literature.HighSchoolEnglishClass(
-            channel_id_literature,
-            literature_milvus_uri,
+            high_school_english_class_channel,
+            milvus_uri,
             admin_channel_id,
+            literature_chunk_collection_name,
+            embedding_model,
+            generator_model,
+            control_flow_model,
             console=console,
         )
 
@@ -69,6 +68,27 @@ class Demo(Production):
         return channel_id_to_handler
 
 
-def make_production(admin_channel_id: str, console: Console) -> Demo:
+def make_production(
+    config: dict, get_secret: Callable[[str, str], str], console: Console
+) -> tuple[Demo, dict]:
 
-    return Demo(admin_channel_id, console)
+    production_config = config.get("production", {})
+    scenes_config = production_config.get("scenes", {})
+    elementary_school_math_class = scenes_config.get("elementary_school_math_class", {})
+    high_school_english_class = scenes_config.get("high_school_english_class", {})
+
+    inference_config = config.get("inference", {})
+    vectors_config = config.get("vectors", {})
+    slack_config = config.get("slack", {})
+
+    return Demo(
+        slack_config.get("admin_channel", get_secret("SLACK_ADMIN_CHANNEL")),
+        elementary_school_math_class["channel"],
+        high_school_english_class["channel"],
+        high_school_english_class["chunk_collection"],
+        vectors_config["milvus_uri"],
+        vectors_config["embedding_model"],
+        inference_config["generator_model"],
+        inference_config["control_flow_model"],
+        console,
+    )

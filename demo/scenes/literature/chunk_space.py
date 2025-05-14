@@ -13,10 +13,6 @@ from .docs import books
 
 log = logging.getLogger(__name__)
 
-default_embedding_model_id = "all-MiniLM-L6-v2"
-
-default_collection_name = "literature_chunks"
-
 
 class ChunkSpace(Prop):
     """Small chunks of literature text stored in a vector database."""

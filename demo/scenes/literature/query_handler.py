@@ -11,14 +11,9 @@ from proscenium.verbs.vector_database import embedding_function
 from proscenium.verbs.vector_database import vector_db
 from proscenium.patterns.rag import answer_question
 
-from demo.config import default_model_id
-
 from .docs import books
-from .chunk_space import default_collection_name
 
 log = logging.getLogger(__name__)
-
-default_generator_model_id = default_model_id
 
 user_prompt = f"What is your question about {', '.join([b.title for b in books])}?"
 
@@ -45,28 +40,32 @@ class LiteratureExpert(Character):
 
     def __init__(
         self,
-        generator_model_id: str,
+        generator_model: str,
+        control_flow_model: str,
         milvus_uri: str,
-        embedding_model_id: str,
+        embedding_model: str,
+        collection_name: str,
         admin_channel_id: str,
     ):
         super().__init__(admin_channel_id=admin_channel_id)
-        self.generator_model_id = generator_model_id
+        self.generator_model = generator_model
+        self.control_flow_model = control_flow_model
         self.milvus_uri = milvus_uri
-        self.embedding_model_id = embedding_model_id
+        self.embedding_model = embedding_model
+        self.collection_name = collection_name
 
         self.vector_db_client = vector_db(self.milvus_uri)
         log.info("Vector db at uri %s", milvus_uri)
 
-        self.embedding_fn = embedding_function(embedding_model_id)
-        log.info("Embedding model %s", embedding_model_id)
+        self.embedding_fn = embedding_function(embedding_model)
+        log.info("Embedding model %s", embedding_model)
 
     def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
 
         log.info("handle? channel_id = %s, speaker_id = %s", channel_id, speaker_id)
 
         response = complete_simple(
-            model_id=default_model_id,
+            model_id=self.control_flow_model,
             system_prompt=control_flow_system_prompt,
             user_prompt=wants_to_handle_template.format(
                 book_titles=", ".join([f'"{b.title}' for b in books]), text=utterance
@@ -93,8 +92,8 @@ class LiteratureExpert(Character):
 
         yield channel_id, answer_question(
             utterance,
-            self.generator_model_id,
+            self.generator_model,
             self.vector_db_client,
             self.embedding_fn,
-            default_collection_name,
+            self.collection_name,
         )

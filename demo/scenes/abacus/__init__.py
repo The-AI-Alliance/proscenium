@@ -19,8 +19,6 @@ from proscenium.verbs.complete import complete_simple
 from proscenium.verbs.invoke import process_tools
 from proscenium.patterns.tools import apply_tools
 
-from demo.config import default_model_id
-
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 log = logging.getLogger(__name__)
@@ -50,18 +48,22 @@ The user-posted message is:
 
 class Abacus(Character):
     """
-    A character that can perform basic arithmetic operations using arithmetic.
+    A character that can perform basic arithmetic operations.
     """
 
-    def __init__(self, admin_channel_id: str):
+    def __init__(
+        self, admin_channel_id: str, generator_model: str, control_flow_model: str
+    ):
         super().__init__(admin_channel_id=admin_channel_id)
+        self.generator_model = generator_model
+        self.control_flow_model = control_flow_model
 
     def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
 
         log.info("handle? channel_id = %s, speaker_id = %s", channel_id, speaker_id)
 
         response = complete_simple(
-            model_id=default_model_id,
+            model_id=self.control_flow_model,
             system_prompt=control_flow_system_prompt,
             user_prompt=wants_to_handle_template.format(text=utterance),
             response_format={
@@ -85,7 +87,7 @@ class Abacus(Character):
     ) -> Generator[tuple[str, str], None, None]:
 
         yield channel_id, apply_tools(
-            model_id=default_model_id,
+            model_id=self.generator_model,
             system_message=abacus_system_message,
             message=utterance,
             tool_desc_list=tool_desc_list,
@@ -100,18 +102,17 @@ class ElementarySchoolMathClass(Scene):
 
     def __init__(
         self,
-        channel_id_abacus: str,
+        channel_abacus: str,
         admin_channel_id: str,
+        generator_model: str,
+        control_flow_model: str,
         console: Optional[Console] = None,
     ):
         super().__init__()
-
-        self.channel_id_abacus = channel_id_abacus
-
+        self.channel_abacus = channel_abacus
         self.admin_channel_id = admin_channel_id
         self.console = console
-
-        self.abacus = Abacus(admin_channel_id=admin_channel_id)
+        self.abacus = Abacus(admin_channel_id, generator_model, control_flow_model)
 
     def characters(self) -> list[Character]:
         return [
@@ -123,4 +124,4 @@ class ElementarySchoolMathClass(Scene):
         channel_name_to_id: dict,
     ) -> dict[str, Character]:
 
-        return {channel_name_to_id[self.channel_id_abacus]: self.abacus}
+        return {channel_name_to_id[self.channel_abacus]: self.abacus}

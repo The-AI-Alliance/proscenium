@@ -1,0 +1,20 @@
+production:
+  module: demo.production
+  class: Demo
+  scenes:
+    elementary_school_math_class:
+      channel: abacus
+    high_school_english_class:
+      channel: literature
+      chunk_collection: literature
+
+inference:
+  generator_model: "together:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+  control_flow_model: "together:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+
+slack:
+  admin_channel: "deus-ex-machina"
+
+vectors:
+  embedding_model: "all-MiniLM-L6-v2"
+  milvus_uri: "file:/demo-milvus.db"
