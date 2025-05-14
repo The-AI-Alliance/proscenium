@@ -5,14 +5,21 @@ title: Proscenium
 
 ## Proscenium
 
-<img src="./assets/images/logo.png" align="left" width="200px" alt="proscenium logo"/>
+<img src="./assets/images/logo.png" align="left" width="180px" alt="proscenium logo"/>
 
-Proscenium is an emerging library of composable glue that allows for succinct construction of enterprise AI applications.
-It emphasizes support for domains where the creation and use of structured data is critical.
+Proscenium is an emerging library for building enterprise AI applications.
+Chat systems such as Slack are the first class of supported integrations.
+Sticking with the implied theater analogy,
+the highest-level building block is a Production.
+Productions are composed of Scenes.
+Scenes are composed of Characters and Props.
 
 <br clear="left"/>
 
+## Repository
+
 See the [repository](https://github.com/The-AI-Alliance/proscenium) on GitHub.
+[new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
 
 [![CI](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml/badge.svg)](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml)
 [![PyPI](https://img.shields.io/pypi/v/proscenium)](https://pypi.org/project/proscenium/)
@@ -20,15 +27,15 @@ See the [repository](https://github.com/The-AI-Alliance/proscenium) on GitHub.
 [![Issues](https://img.shields.io/github/issues/The-AI-Alliance/proscenium)](https://github.com/The-AI-Alliance/proscenium/issues)
 [![GitHub stars](https://img.shields.io/github/stars/The-AI-Alliance/proscenium?style=social)](https://github.com/The-AI-Alliance/proscenium/stargazers)
 
-## Demos / Quickstart
+## Colab Demos
 
-The Proscenium repository includes a set of simple applications that demonstrate key features of the library.
-
-There are two ways to get started quickly:
-
-- [Notebooks](https://github.com/The-AI-Alliance/proscenium/tree/main/notebooks)
-
-- [Command Line Interface](https://github.com/The-AI-Alliance/proscenium/blob/main/CLI.md) to demos, ither from a local repo clone or in a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+- "Abacus" to use simple tools to repond to user questions. <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Abacus.ipynb">
+<img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+- "Literature" to use a vector database to store chunks of two books, and using those chunks to form a context for LLM inference based on a user question <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Literature.ipynb">
+<img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+- "Slack" to attach Proscenium Productions (Scenes of Characters and Props) to Slack channels using a custom app. <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Slack.ipynb">
+<img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 ## Resources
 
@@ -36,52 +43,27 @@ For more background and future plans, see the [wiki](https://github.com/The-AI-A
 
 To find the Proscenium community, see the [discussions](https://github.com/The-AI-Alliance/proscenium/discussions)
 
-## Motivation
+## Use Cases
 
-Enterprise AI applications share many challenges with other Generative AI applications,
-including the speed of evolution of model capabilities and the software ecosystem.
+### Bartlebot
 
-However, they also have qualities that warrant dedicated focus.
-Proscenium is a library of patterns that emerge when building enterprise
-AI applications and products for which accuracy and accountability are critical.
-
-The use cases are "big picture" systems, not just product features.
-For example they include steps such as:
-
-1. Produce high-confidence, auditable results
-2. Securely process enterprise data
-3. Evaluate and report system quality and performance
-4. Handle multi-modal user queries and data
-5. Efficiently consume relevant data and reference material
-6. Integrate with appropriate tools
-7. Guide owners and subject-matter experts through system evolution options
-
-The applications themselves are complete enough to provide insight
-into specific user interactions, in a range of settings such as
-integrations with chat systems or collaborative document editors.
-
-Although the initial development of Proscenium targets
-python notebooks (running locally or on Colab)
-and command-line tools, Proscenium ultimately must be easily
-deployable to enterprise-friendly platforms.
-The first two target platforms are AWS and Llama Stack.
-
-Finally, Proscenium is being developed with an understanding that
-details from specific enterprise application domains should be
-prioritized in the early phases of its design.
+For federal case law research.  See the [website](https://the-ai-alliance.github.io/bartlebot/) and [repo](https://github.com/The-AI-Alliance/bartlebot)
 
 ## Library Design
+
+Proscenium is being developed with an understanding that
+details from specific enterprise application domains should be
+prioritized in the early phases of its design.
 
 The AI model, software, hardware, and cloud ecosystem is evolving rapidly.
 Proscenium is designed to co-evolve with the ecosystem by keeping interfaces
 simple and loosely-coupled.
 
-It's simplest offerings are low-level "verbs" such as:
-chunk, complete (inference), extract, and invoke (tools).
-In many cases these are thin wrappers around well-known libraries.
+The highest, app-level concepts are the theater-inspired classes.
+Productions are composed of Scenes.
+Scenes are composed of Characters and Props.
 
-Those verbs are composed to form higher-level generic systems
-including:
+Under those higher-level classes are "patterns" for systems including:
 
 - Document Enrichment
 - Knowledge Graph Construction
@@ -92,10 +74,6 @@ including:
 
 <img src="./assets/images/kg_diagram.png" width="600px" alt="kg diagram"/>
 
-## Use Cases
-
-### Bartlebot
-
-For federal case law and statute research.
-
-See the [website](https://the-ai-alliance.github.io/bartlebot/) and [repo](https://github.com/The-AI-Alliance/bartlebot)
+At the lowest level are "verbs" such as:
+chunk, complete (inference), extract, and invoke (tools).
+In many cases these are thin wrappers around well-known libraries.
