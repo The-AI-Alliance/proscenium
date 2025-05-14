@@ -9,6 +9,9 @@ title: Proscenium
 
 Proscenium is an emerging library for building enterprise AI applications.
 Chat systems such as Slack are the first class of supported integrations.
+
+<img src="./assets/images/prometheus_slack.png" alt="Prometheus question on Slack">
+
 Sticking with the implied theater analogy,
 the highest-level building block is a Production.
 Productions are composed of Scenes.
