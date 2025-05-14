@@ -19,7 +19,7 @@ Scenes are composed of Characters and Props.
 ## Repository
 
 See the [repository](https://github.com/The-AI-Alliance/proscenium) on GitHub.
-[new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
+Clone locally or start a [new GitHub Codespace](https://github.com/codespaces/new/The-AI-Alliance/proscenium)
 
 [![CI](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml/badge.svg)](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml)
 [![PyPI](https://img.shields.io/pypi/v/proscenium)](https://pypi.org/project/proscenium/)
