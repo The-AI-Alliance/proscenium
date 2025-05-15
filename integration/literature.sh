@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+pip install lapidarist --upgrade
+
 echo "Literature Integration Test"
 
 python -m demo.cli literature prepare --verbose
