@@ -3,12 +3,13 @@ from typing import Generator
 import logging
 import json
 
+from lapidarist.verbs.vector_database import embedding_function
+from lapidarist.verbs.vector_database import vector_db
+
 from proscenium.core import Character
 from proscenium.core import WantsToHandleResponse
 from proscenium.core import control_flow_system_prompt
 from proscenium.verbs.complete import complete_simple
-from proscenium.verbs.vector_database import embedding_function
-from proscenium.verbs.vector_database import vector_db
 from proscenium.patterns.rag import answer_question
 
 from .docs import books

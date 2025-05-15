@@ -3,11 +3,12 @@ import logging
 import asyncio
 from rich.console import Console
 
+from lapidarist.verbs.read import url_to_file
+from lapidarist.verbs.vector_database import embedding_function
+from lapidarist.verbs.vector_database import vector_db
+from lapidarist.patterns.chunk_space import load_chunks_from_files
+
 from proscenium.core import Prop
-from proscenium.verbs.read import url_to_file
-from proscenium.verbs.vector_database import embedding_function
-from proscenium.verbs.vector_database import vector_db
-from proscenium.patterns.chunk_space import load_chunks_from_files
 
 from .docs import books
 
