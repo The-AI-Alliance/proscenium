@@ -23,6 +23,7 @@ test = [
   "pytest>=8,<9",
   "pytest-cov>=5,<6",
   "typer>=0.15.2",
+  "click>=8.2.0",
   "pytest>=8.3.5",
   "neo4j>=5.28.1",
   "gofannon>=0.25.13",
