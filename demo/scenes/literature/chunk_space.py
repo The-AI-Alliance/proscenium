@@ -3,10 +3,10 @@ import logging
 import asyncio
 from rich.console import Console
 
-from lapidary.verbs.read import url_to_file
-from lapidary.verbs.vector_database import embedding_function
-from lapidary.verbs.vector_database import vector_db
-from lapidary.patterns.chunk_space import load_chunks_from_files
+from lapidarist.verbs.read import url_to_file
+from lapidarist.verbs.vector_database import embedding_function
+from lapidarist.verbs.vector_database import vector_db
+from lapidarist.patterns.chunk_space import load_chunks_from_files
 
 from proscenium.core import Prop
 

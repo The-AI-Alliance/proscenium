@@ -3,8 +3,8 @@ from typing import Generator
 import logging
 import json
 
-from lapidary.verbs.vector_database import embedding_function
-from lapidary.verbs.vector_database import vector_db
+from lapidarist.verbs.vector_database import embedding_function
+from lapidarist.verbs.vector_database import vector_db
 
 from proscenium.core import Character
 from proscenium.core import WantsToHandleResponse
