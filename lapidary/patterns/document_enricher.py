@@ -12,8 +12,8 @@ from rich.progress import Progress
 
 from langchain_core.documents.base import Document
 
-from proscenium.verbs.chunk import documents_to_chunks_by_tokens
-from proscenium.verbs.extract import extract_to_pydantic_model
+from lapidary.verbs.chunk import documents_to_chunks_by_tokens
+from lapidary.verbs.extract import extract_to_pydantic_model
 
 log = logging.getLogger(__name__)
 

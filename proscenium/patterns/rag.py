@@ -4,9 +4,10 @@ import logging
 from pymilvus import MilvusClient
 from pymilvus import model
 
+from lapidary.verbs.display.milvus import chunk_hits_table
+from lapidary.verbs.vector_database import closest_chunks
+
 from proscenium.verbs.complete import complete_simple
-from proscenium.verbs.display.milvus import chunk_hits_table
-from proscenium.verbs.vector_database import closest_chunks
 
 log = logging.getLogger(__name__)
 

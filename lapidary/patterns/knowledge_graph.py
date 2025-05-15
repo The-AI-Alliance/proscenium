@@ -4,9 +4,7 @@ from typing import Any
 import logging
 import json
 from pydantic import BaseModel
-
 from rich.progress import Progress
-
 from neo4j import Driver
 
 log = logging.getLogger(__name__)

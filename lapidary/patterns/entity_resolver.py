@@ -7,12 +7,12 @@ from neo4j import Driver
 
 from pymilvus import MilvusClient
 
-from proscenium.verbs.vector_database import vector_db
-from proscenium.verbs.vector_database import create_collection
-from proscenium.verbs.vector_database import closest_chunks
-from proscenium.verbs.vector_database import add_chunks_to_vector_db
-from proscenium.verbs.vector_database import embedding_function
-from proscenium.verbs.display.milvus import collection_panel
+from lapidary.verbs.vector_database import vector_db
+from lapidary.verbs.vector_database import create_collection
+from lapidary.verbs.vector_database import closest_chunks
+from lapidary.verbs.vector_database import add_chunks_to_vector_db
+from lapidary.verbs.vector_database import embedding_function
+from lapidary.verbs.display.milvus import collection_panel
 
 log = logging.getLogger(__name__)
 

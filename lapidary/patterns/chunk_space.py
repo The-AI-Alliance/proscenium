@@ -3,12 +3,12 @@ import logging
 from rich.console import Console
 from pymilvus import model
 
-from proscenium.verbs.read import load_file
-from proscenium.verbs.chunk import documents_to_chunks_by_characters
-from proscenium.verbs.display.milvus import collection_panel
-from proscenium.verbs.vector_database import vector_db
-from proscenium.verbs.vector_database import create_collection
-from proscenium.verbs.vector_database import add_chunks_to_vector_db
+from lapidary.verbs.read import load_file
+from lapidary.verbs.chunk import documents_to_chunks_by_characters
+from lapidary.verbs.display.milvus import collection_panel
+from lapidary.verbs.vector_database import vector_db
+from lapidary.verbs.vector_database import create_collection
+from lapidary.verbs.vector_database import add_chunks_to_vector_db
 
 log = logging.getLogger(__name__)
 
