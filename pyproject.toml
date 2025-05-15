@@ -30,5 +30,5 @@ test = [
   "lapidarist>=0.0.1"
 ]
 
-[tool.poetry.scripts]
+[project.scripts]
 proscenium-bot = "proscenium.bin.bot:app"
