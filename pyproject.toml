@@ -29,6 +29,9 @@ slack_sdk = "^3.35.0"
 [tool.poetry.extras]
 testing = ["pytest"]
 
+[tool.poetry.group.test.dependencies]
+lapidarist = "^0.0.1"
+
 [tool.poetry.scripts]
 proscenium-bot = "proscenium.bin.bot:app"
 
