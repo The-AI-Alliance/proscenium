@@ -1,11 +1,10 @@
 from typing import List, Dict
+
 import logging
+from rich.table import Table
 
 from pymilvus import MilvusClient
 from pymilvus import model
-
-from lapidarist.verbs.display.milvus import chunk_hits_table
-from lapidarist.verbs.vector_database import closest_chunks
 
 from proscenium.verbs.complete import complete_simple
 
@@ -36,6 +35,41 @@ def rag_prompt(chunks: List[Dict], query: str) -> str:
     )
 
     return rag_prompt_template.format(context=context, query=query)
+
+
+def closest_chunks(
+    client: MilvusClient,
+    embedding_fn: model.dense.SentenceTransformerEmbeddingFunction,
+    query: str,
+    collection_name: str,
+    k: int = 4,
+) -> List[Dict]:
+
+    client.load_collection(collection_name)
+
+    result = client.search(
+        collection_name=collection_name,
+        data=embedding_fn.encode_queries([query]),
+        anns_field="vector",
+        search_params={"metric": "IP", "offset": 0},
+        output_fields=["text"],
+        limit=k,
+    )
+
+    hits = result[0]
+
+    return hits
+
+
+def chunk_hits_table(chunks: list[dict]) -> Table:
+
+    table = Table(title="Closest Chunks", show_lines=True)
+    table.add_column("id", justify="right")
+    table.add_column("distance")
+    table.add_column("entity.text", justify="right")
+    for chunk in chunks:
+        table.add_row(str(chunk["id"]), str(chunk["distance"]), chunk["entity"]["text"])
+    return table
 
 
 def answer_question(

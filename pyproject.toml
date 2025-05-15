@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "proscenium"
-version = "0.0.9"
+version = "0.0.10"
 description = "Frame AI Agents"
 authors = ["Adam Pingel <oss@pingel.org>"]
 license = "ASFv2"
@@ -9,7 +9,6 @@ packages = [{include = "proscenium"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-lapidarist = "^0.0.1"
 aisuite = {extras = ["openai,anthropic"], version = "^0.1.10"}
 rich = "^13.9.4"
 typer = "^0.15.2"
