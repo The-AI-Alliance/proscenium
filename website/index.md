@@ -7,12 +7,10 @@ title: Proscenium
 
 <img src="./assets/images/logo.png" align="left" width="180px" alt="proscenium logo"/>
 
-Proscenium is an emerging library for building enterprise AI applications.
-Chat systems such as Slack are the first class of supported integrations.
+Proscenium is an emerging library for building collaborative enterprise AI applications.
 
 Sticking with the implied theater analogy,
-the highest-level building block is a Production.
-Productions are composed of Scenes.
+the highest-level building block is a Production, which are composed of Scenes.
 Scenes are composed of Characters and Props.
 
 <img src="./assets/images/prometheus_slack.png" width="448px" alt="Prometheus question on Slack">
@@ -32,7 +30,7 @@ Clone locally or start a [new GitHub Codespace](https://github.com/codespaces/ne
 
 ## Colab Demos
 
-- "Abacus" to use simple tools to repond to user questions. <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Abacus.ipynb">
+- "Abacus" to use simple tools to respond to user questions. <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Abacus.ipynb">
 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 - "Literature" to use a vector database to store chunks of two books, and using those chunks to form a context for LLM inference based on a user question <a target="_blank" href="https://colab.research.google.com/github/The-AI-Alliance/proscenium/blob/main/notebooks/Literature.ipynb">
 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
