@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
+import typer
+import time
 import os
 import sys
 import logging
-import typer
 from pathlib import Path
 from rich.console import Console
 
 from proscenium.verbs.display import header
 from proscenium.bin import production_from_config
-from proscenium.interfaces.slack import slack_main
+from proscenium.interfaces.slack import SlackProductionProcessor
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -52,7 +53,20 @@ def start(
     production.prepare_props()
     console.print("Props are up-to-date.")
 
-    slack_main(production, config, console)
+    slack_admin_channel = config.get("slack", {}).get("admin_channel", None)
+    slack_production_processor = SlackProductionProcessor(
+        production,
+        slack_admin_channel,
+        console,
+    )
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        console.print("Exiting...")
+
+    slack_production_processor.shutdown()
 
 
 if __name__ == "__main__":
