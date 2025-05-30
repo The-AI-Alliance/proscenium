@@ -30,4 +30,7 @@ jobs:
         uv pip install pytest
 
     - name: Run tests
+      env:  
+        SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       run: uv run pytest

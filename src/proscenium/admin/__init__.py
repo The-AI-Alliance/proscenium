@@ -24,9 +24,12 @@ def props(console: Optional[Console]) -> List[Prop]:
 
 class Admin(Character):
 
-    def __init__(self, admin_channel_id: str):
-        super().__init__(admin_channel_id)
-        self.admin_channel_id = admin_channel_id
+    def __init__(self, channel_id: str, channel: str):
+        super().__init__(channel_id)
+        self.channel_id = channel_id
+        self.channel = channel
+
+        log.info("Admin handler started %s %s.", self.channel, self.channel_id)
 
     def wants_to_handle(self, channel_id: str, speaker_id: str, utterance: str) -> bool:
         return False
