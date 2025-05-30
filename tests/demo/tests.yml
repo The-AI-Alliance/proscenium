@@ -1,0 +1,13 @@
+production:
+  module: demo.test_production
+  class: Tests
+  scenes:
+    echo_scene:
+      channel: proscenium_echo_test
+
+inference:
+  generator_model: "together:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+  control_flow_model: "together:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
+
+slack:
+  admin_channel: "deus-ex-machina"

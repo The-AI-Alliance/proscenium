@@ -1,7 +1,7 @@
 from typing import Callable
 from typing import Generator
+from typing import Optional
 
-import time
 import logging
 import os
 from rich.console import Console
@@ -11,7 +11,6 @@ from slack_sdk.web import WebClient
 from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
-from slack_sdk.socket_mode.listeners import SocketModeRequestListener
 
 from proscenium.core import Production
 from proscenium.core import Character
@@ -187,7 +186,7 @@ def channel_table(channels_by_id) -> Table:
     return channel_table
 
 
-def bot_user_id(socket_mode_client: SocketModeClient, console: Console):
+def bot_user_id(socket_mode_client: SocketModeClient, console: Console) -> str:
 
     auth_response = socket_mode_client.web_client.auth_test()
 
@@ -239,113 +238,81 @@ Curtain up.
     )
 
 
-def listen(
-    socket_mode_client: SocketModeClient,
-    slack_listener: SocketModeRequestListener,
-    user_id: str,
-    console: Console,
-):
-    socket_mode_client.socket_mode_request_listeners.append(slack_listener)
+class SlackProductionProcessor:
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        console.print("Exiting...")
+    def __init__(
+        self,
+        production: Production,
+        slack_admin_channel: str,
+        console: Optional[Console] = None,
+        event_log: Optional[list[tuple[str, str]]] = None,
+    ):
+        self.production = production
+        self.console = console
+        self.event_log = event_log
 
+        slack_app_token, slack_bot_token = get_slack_auth()
 
-def send_curtain_down(
-    socket_mode_client: SocketModeClient, slack_admin_channel_id: str
-) -> None:
-    socket_mode_client.web_client.chat_postMessage(
-        channel=slack_admin_channel_id,
-        text="""Curtain down. We hope you enjoyed the show!""",
-    )
+        self.socket_mode_client = connect(slack_app_token, slack_bot_token)
 
+        user_id = bot_user_id(self.socket_mode_client, console)
+        console.print()
 
-def shutdown(
-    socket_mode_client: SocketModeClient,
-    slack_listener: SocketModeRequestListener,
-    user_id: str,
-    production: Production,
-    console: Console,
-):
+        channels_by_id, channel_name_to_id = channel_maps(self.socket_mode_client)
+        console.print(channel_table(channels_by_id))
+        console.print()
 
-    socket_mode_client.socket_mode_request_listeners.remove(slack_listener)
-    socket_mode_client.disconnect()
-    console.print("Disconnected from Slack.")
+        if slack_admin_channel is None:
+            raise ValueError(
+                "slack.admin_channel is not set. "
+                "Please set it to the channel name of the Proscenium admin channel."
+            )
+        slack_admin_channel_id = channel_name_to_id.get(slack_admin_channel, None)
+        if slack_admin_channel_id is None:
+            raise ValueError(
+                f"Admin channel {slack_admin_channel} not found in subscribed channels."
+            )
 
-    production.curtain()
+        self.admin = Admin(slack_admin_channel_id, slack_admin_channel)
 
-    console.print("Handlers stopped.")
+        log.info("Places, please!")
+        channel_id_to_character = production.places(channel_name_to_id)
+        channel_id_to_character[slack_admin_channel_id] = self.admin
 
+        console.print(places_table(channel_id_to_character, channels_by_id))
+        console.print()
 
-def slack_main(
-    production: Production,
-    config: dict,
-    console: Console,
-) -> None:
-
-    slack_app_token, slack_bot_token = get_slack_auth()
-
-    socket_mode_client = connect(slack_app_token, slack_bot_token)
-
-    user_id = bot_user_id(socket_mode_client, console)
-    console.print()
-
-    channels_by_id, channel_name_to_id = channel_maps(socket_mode_client)
-    console.print(channel_table(channels_by_id))
-    console.print()
-
-    slack_admin_channel = config.get("slack", {}).get("admin_channel", None)
-
-    if slack_admin_channel is None:
-        raise ValueError(
-            "slack.admin_channel is not set. "
-            "Please set it to the channel name of the Proscenium admin channel."
-        )
-    slack_admin_channel_id = channel_name_to_id.get(slack_admin_channel, None)
-    if slack_admin_channel_id is None:
-        raise ValueError(
-            f"Admin channel {slack_admin_channel} not found in subscribed channels."
+        self.slack_listener = make_slack_listener(
+            user_id,
+            slack_admin_channel_id,
+            channels_by_id,
+            channel_id_to_character,
+            console,
         )
 
-    admin = Admin(slack_admin_channel_id)
-    log.info(
-        "Admin handler started %s %s.", slack_admin_channel, slack_admin_channel_id
-    )
+        send_curtain_up(self.socket_mode_client, production, slack_admin_channel_id)
 
-    log.info("Places, please!")
-    channel_id_to_character = production.places(channel_name_to_id)
-    channel_id_to_character[slack_admin_channel_id] = admin
+        console.print("Starting the show. Listening for events...")
+        self.socket_mode_client.socket_mode_request_listeners.append(
+            self.slack_listener
+        )
 
-    console.print(places_table(channel_id_to_character, channels_by_id))
-    console.print()
+    def shutdown(
+        self,
+    ):
+        self.socket_mode_client.web_client.chat_postMessage(
+            channel=self.admin.channel_id,
+            text="""Curtain down. We hope you enjoyed the show!""",
+        )
 
-    slack_listener = make_slack_listener(
-        user_id,
-        slack_admin_channel_id,
-        channels_by_id,
-        channel_id_to_character,
-        console,
-    )
+        self.socket_mode_client.socket_mode_request_listeners.remove(
+            self.slack_listener
+        )
+        self.socket_mode_client.disconnect()
+        if self.console is not None:
+            self.console.print("Disconnected from Slack.")
 
-    send_curtain_up(socket_mode_client, production, slack_admin_channel_id)
+        self.production.curtain()
 
-    console.print("Starting the show. Listening for events...")
-    listen(
-        socket_mode_client,
-        slack_listener,
-        user_id,
-        console,
-    )
-
-    send_curtain_down(socket_mode_client, slack_admin_channel_id)
-
-    shutdown(
-        socket_mode_client,
-        slack_listener,
-        user_id,
-        production,
-        console,
-    )
+        if self.console is not None:
+            self.console.print("Handlers stopped.")
