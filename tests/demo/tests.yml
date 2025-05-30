@@ -3,7 +3,7 @@ production:
   class: Tests
   scenes:
     echo_scene:
-      channel: proscenium_echo_test
+      channel: proscenium_tests
 
 inference:
   generator_model: "together:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
