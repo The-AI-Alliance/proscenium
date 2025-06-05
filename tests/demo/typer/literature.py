@@ -7,6 +7,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 from demo.scenes import literature
+from demo.scenes.literature.docs import books
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ default_embedding_model = "all-MiniLM-L6-v2"
 
 
 @app.command(
-    help=f"""Build a vector DB from chunks of {len(literature.books)} books from Project Gutenberg.
+    help=f"""Build a vector DB from chunks of {len(books)} books from Project Gutenberg.
 Uses milvus at MILVUS_URI, with a default of {default_milvus_uri}.
 """
 )
