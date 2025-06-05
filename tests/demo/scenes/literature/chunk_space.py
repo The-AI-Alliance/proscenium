@@ -8,7 +8,7 @@ from lapidarist.vector_database import embedding_function
 from lapidarist.vector_database import vector_db
 from lapidarist.chunk_space import load_chunks_from_files
 
-from proscenium.core import Prop
+from proscenium import Prop
 
 from .docs import books
 

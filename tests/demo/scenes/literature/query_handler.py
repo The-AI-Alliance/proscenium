@@ -6,10 +6,10 @@ import json
 from lapidarist.vector_database import embedding_function
 from lapidarist.vector_database import vector_db
 
-from proscenium.core import Character
-from proscenium.core import WantsToHandleResponse
-from proscenium.core import control_flow_system_prompt
-from proscenium.verbs.complete import complete_simple
+from proscenium import Character
+from proscenium import WantsToHandleResponse
+from proscenium import control_flow_system_prompt
+from proscenium.complete import complete_simple
 from proscenium.patterns.rag import answer_question
 
 from .docs import books
