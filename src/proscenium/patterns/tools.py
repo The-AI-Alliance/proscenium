@@ -7,11 +7,11 @@ from rich.text import Text
 from rich.panel import Panel
 from rich.console import Console
 
-from .chat import messages_table
+from proscenium.history import messages_table
 
 from gofannon.base import BaseTool
 
-from proscenium.verbs.complete import (
+from proscenium.complete import (
     complete_for_tool_applications,
     evaluate_tool_calls,
     complete_with_tool_results,

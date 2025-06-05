@@ -4,8 +4,8 @@ from typing import Optional
 
 import logging
 
-from proscenium.core import Prop
-from proscenium.core import Character
+from proscenium import Prop
+from proscenium import Character
 from rich.console import Console
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
