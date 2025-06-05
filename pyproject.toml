@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "proscenium"
-version = "0.0.13"
+version = "0.0.14"
 description = "Declare Collaborative, Asynchronous Human To Agent Interactions"
 authors = [{ name = "Adam Pingel", email = "oss@pingel.org" }]
 license = "Apache-2.0"
