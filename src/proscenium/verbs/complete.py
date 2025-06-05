@@ -48,23 +48,20 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from aisuite import Client
+from aisuite import Client as AISuiteClient
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
 from proscenium.verbs.display.tools import complete_with_tools_panel
 
 log = logging.getLogger(__name__)
 
-provider_configs = {
-    # TODO expose this
-    "ollama": {"timeout": 180},
-}
-
-client = Client(provider_configs=provider_configs)
-
 
 def complete_simple(
-    model_id: str, system_prompt: str, user_prompt: str, **kwargs
+    chat_completion_client: AISuiteClient,
+    model_id: str,
+    system_prompt: str,
+    user_prompt: str,
+    **kwargs,
 ) -> str:
 
     console = kwargs.pop("console", None)
@@ -96,7 +93,7 @@ model_id: {model_id}
         )
         console.print(call_panel)
 
-    response = client.chat.completions.create(
+    response = chat_completion_client.chat.completions.create(
         model=model_id, messages=messages, **kwargs
     )
     response = response.choices[0].message.content
@@ -152,6 +149,7 @@ def evaluate_tool_calls(tool_call_message, tool_map: dict) -> list[dict]:
 
 
 def complete_for_tool_applications(
+    chat_completion_client: AISuiteClient,
     model_id: str,
     messages: list,
     tool_desc_list: list,
@@ -169,7 +167,7 @@ def complete_for_tool_applications(
         )
         console.print(panel)
 
-    response = client.chat.completions.create(
+    response = chat_completion_client.chat.completions.create(
         model=model_id,
         messages=messages,
         temperature=temperature,
@@ -180,6 +178,7 @@ def complete_for_tool_applications(
 
 
 def complete_with_tool_results(
+    chat_completion_client: AISuiteClient,
     model_id: str,
     messages: list,
     tool_call_message: dict,
@@ -202,7 +201,7 @@ def complete_with_tool_results(
         )
         console.print(panel)
 
-    response = client.chat.completions.create(
+    response = chat_completion_client.chat.completions.create(
         model=model_id,
         messages=messages,
     )
