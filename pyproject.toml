@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "proscenium"
-version = "0.0.12"
-description = "Declare AI Agent Scenes"
+version = "0.0.13"
+description = "Declare Collaborative, Asynchronous Human To Agent Interactions"
 authors = [{ name = "Adam Pingel", email = "oss@pingel.org" }]
 license = "Apache-2.0"
 readme = "README.md"
