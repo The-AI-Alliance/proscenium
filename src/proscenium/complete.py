@@ -37,21 +37,14 @@ Valid model ids:
 - `ollama:granite3.1-dense:2b`
 """
 
-from typing import Optional
-from typing import Any
 import logging
-import json
 
-from rich.console import Console
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
 from aisuite import Client as AISuiteClient
-from aisuite.framework.message import ChatCompletionMessageToolCall
-
-from proscenium.patterns.tools import complete_with_tools_panel
 
 log = logging.getLogger(__name__)
 
@@ -102,108 +95,3 @@ model_id: {model_id}
         console.print(Panel(response, title="Response"))
 
     return response
-
-
-def evaluate_tool_call(tool_map: dict, tool_call: ChatCompletionMessageToolCall) -> Any:
-
-    function_name = tool_call.function.name
-    # TODO validate the arguments?
-    function_args = json.loads(tool_call.function.arguments)
-
-    log.info(f"Evaluating tool call: {function_name} with args {function_args}")
-
-    function_response = tool_map[function_name](**function_args)
-
-    log.info(f"   Response: {function_response}")
-
-    return function_response
-
-
-def tool_response_message(
-    tool_call: ChatCompletionMessageToolCall, tool_result: Any
-) -> dict:
-
-    return {
-        "role": "tool",
-        "tool_call_id": tool_call.id,
-        "name": tool_call.function.name,
-        "content": json.dumps(tool_result),
-    }
-
-
-def evaluate_tool_calls(tool_call_message, tool_map: dict) -> list[dict]:
-
-    tool_call: ChatCompletionMessageToolCall
-
-    log.info("Evaluating tool calls")
-
-    new_messages: list[dict] = []
-
-    for tool_call in tool_call_message.tool_calls:
-        function_response = evaluate_tool_call(tool_map, tool_call)
-        new_messages.append(tool_response_message(tool_call, function_response))
-
-    log.info("Tool calls evaluated")
-
-    return new_messages
-
-
-def complete_for_tool_applications(
-    chat_completion_client: AISuiteClient,
-    model_id: str,
-    messages: list,
-    tool_desc_list: list,
-    temperature: float,
-    console: Optional[Console] = None,
-):
-
-    if console is not None:
-        panel = complete_with_tools_panel(
-            "complete for tool applications",
-            model_id,
-            tool_desc_list,
-            messages,
-            temperature,
-        )
-        console.print(panel)
-
-    response = chat_completion_client.chat.completions.create(
-        model=model_id,
-        messages=messages,
-        temperature=temperature,
-        tools=tool_desc_list,  # tool_choice="auto",
-    )
-
-    return response
-
-
-def complete_with_tool_results(
-    chat_completion_client: AISuiteClient,
-    model_id: str,
-    messages: list,
-    tool_call_message: dict,
-    tool_evaluation_messages: list[dict],
-    tool_desc_list: list,
-    temperature: float,
-    console: Optional[Console] = None,
-):
-
-    messages.append(tool_call_message)
-    messages.extend(tool_evaluation_messages)
-
-    if console is not None:
-        panel = complete_with_tools_panel(
-            "complete call with tool results",
-            model_id,
-            tool_desc_list,
-            messages,
-            temperature,
-        )
-        console.print(panel)
-
-    response = chat_completion_client.chat.completions.create(
-        model=model_id,
-        messages=messages,
-    )
-
-    return response.choices[0].message.content
