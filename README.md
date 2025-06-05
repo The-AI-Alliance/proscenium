@@ -7,7 +7,10 @@
 [![Issues](https://img.shields.io/github/issues/The-AI-Alliance/proscenium)](https://github.com/The-AI-Alliance/proscenium/issues)
 [![GitHub stars](https://img.shields.io/github/stars/The-AI-Alliance/proscenium?style=social)](https://github.com/The-AI-Alliance/proscenium/stargazers)
 
-Proscenium is a small, experimental library of composable glue that allows for succinct construction of enterprise AI applications. It was started in February 2025 and is still in early development.
+Proscenium is a small, experimental library for
+declaring collaborative, asynchronous human to agent interactions
+in enterprise AI applications.
+It was started in February 2025 and is still in early development.
 
 See the [website](https://the-ai-alliance.github.io/proscenium/) for quickstart info, goals, and other links.
 
