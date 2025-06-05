@@ -51,7 +51,7 @@ from rich.text import Text
 from aisuite import Client as AISuiteClient
 from aisuite.framework.message import ChatCompletionMessageToolCall
 
-from proscenium.verbs.display.tools import complete_with_tools_panel
+from proscenium.patterns.tools import complete_with_tools_panel
 
 log = logging.getLogger(__name__)
 
