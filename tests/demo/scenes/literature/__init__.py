@@ -7,7 +7,6 @@ from proscenium import Prop
 from proscenium import Character
 from proscenium import Scene
 
-from .docs import books
 from .chunk_space import ChunkSpace
 from .query_handler import LiteratureExpert
 
