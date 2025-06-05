@@ -1,5 +1,7 @@
 # Proscenium
 
+[![PyPI version](https://img.shields.io/pypi/v/proscenium.svg)](https://pypi.org/project/proscenium/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/proscenium)](https://pypi.org/project/proscenium/)
 [![CI](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml/badge.svg)](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml)
 [![PyPI](https://img.shields.io/pypi/v/proscenium)](https://pypi.org/project/proscenium/)
 [![License](https://img.shields.io/github/license/The-AI-Alliance/proscenium)](https://github.com/The-AI-Alliance/proscenium/tree/main?tab=Apache-2.0-1-ov-file#readme)
