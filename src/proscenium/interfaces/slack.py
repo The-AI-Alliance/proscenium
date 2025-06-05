@@ -12,8 +12,8 @@ from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
 
-from proscenium.core import Production
-from proscenium.core import Character
+from proscenium import Production
+from proscenium import Character
 from proscenium.admin import Admin
 
 log = logging.getLogger(__name__)

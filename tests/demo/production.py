@@ -3,9 +3,9 @@ import logging
 
 from rich.console import Console
 
-from proscenium.core import Production
-from proscenium.core import Character
-from proscenium.core import Scene
+from proscenium import Production
+from proscenium import Character
+from proscenium import Scene
 
 from demo.scenes import abacus, literature
 

@@ -11,12 +11,12 @@ from gofannon.basic_math.subtraction import Subtraction
 from gofannon.basic_math.multiplication import Multiplication
 from gofannon.basic_math.division import Division
 
-from proscenium.core import Character
-from proscenium.core import Scene
-from proscenium.core import control_flow_system_prompt
-from proscenium.core import WantsToHandleResponse
-from proscenium.verbs.complete import complete_simple
-from proscenium.verbs.invoke import process_tools
+from proscenium import Character
+from proscenium import Scene
+from proscenium import control_flow_system_prompt
+from proscenium import WantsToHandleResponse
+from proscenium.complete import complete_simple
+from proscenium.patterns.tools import process_tools
 from proscenium.patterns.tools import apply_tools
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

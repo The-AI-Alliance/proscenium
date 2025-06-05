@@ -1,5 +1,5 @@
 from rich import print
-from proscenium.verbs.display import header
+from proscenium import header
 
 
 def test_header():

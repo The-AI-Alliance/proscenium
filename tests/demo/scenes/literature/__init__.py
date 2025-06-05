@@ -3,11 +3,10 @@ from typing import Optional
 import logging
 from rich.console import Console
 
-from proscenium.core import Prop
-from proscenium.core import Character
-from proscenium.core import Scene
+from proscenium import Prop
+from proscenium import Character
+from proscenium import Scene
 
-from .docs import books
 from .chunk_space import ChunkSpace
 from .query_handler import LiteratureExpert
 

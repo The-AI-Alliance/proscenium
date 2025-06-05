@@ -6,7 +6,7 @@ from rich.table import Table
 from pymilvus import MilvusClient
 from pymilvus import model
 
-from proscenium.verbs.complete import complete_simple
+from proscenium.complete import complete_simple
 
 log = logging.getLogger(__name__)
 

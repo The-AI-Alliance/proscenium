@@ -6,10 +6,10 @@ import logging
 
 from rich.console import Console
 
-from proscenium.core import Production
-from proscenium.core import Character
-from proscenium.core import Scene
-from proscenium.core import Prop
+from proscenium import Production
+from proscenium import Character
+from proscenium import Scene
+from proscenium import Prop
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 

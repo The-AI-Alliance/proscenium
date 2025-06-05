@@ -8,7 +8,7 @@ import logging
 from pathlib import Path
 from rich.console import Console
 
-from proscenium.verbs.display import header
+from proscenium import header
 from proscenium.bin import production_from_config
 from proscenium.interfaces.slack import SlackProductionProcessor
 

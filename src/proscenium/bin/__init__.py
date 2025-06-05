@@ -5,7 +5,7 @@ import importlib
 import yaml
 from pathlib import Path
 from rich.console import Console
-from proscenium.core import Production
+from proscenium import Production
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
