@@ -1,0 +1,47 @@
+name: Unit Tests
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**'
+      - 'tests/unit/**'
+      - 'pyproject.toml'
+      - '.github/workflows/unit-tests.yml' # This workflow
+
+  push:
+    branches: [ "main" ]
+    tags:     [ "v*" ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [ "3.12" ]
+
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install uv
+        uv venv
+        source .venv/bin/activate
+        uv pip install ".[test]"
+        uv pip install pytest
+
+    - name: Run tests
+      run: uv run --group unit pytest -s -v tests/unit/

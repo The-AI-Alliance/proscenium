@@ -1,4 +1,4 @@
-name: Run Python Tests
+name: Integration Tests
 
 on:
   workflow_dispatch:
@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
     types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**'
+      - 'tests/integration/**'
+      - 'pyproject.toml'
+      - '.github/workflows/integration-tests.yml' # This workflow
 
   push:
     branches: [ "main" ]
@@ -42,4 +47,4 @@ jobs:
       env:  
         SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      run: uv run pytest
+      run: uv run --group integration pytest -s -v tests/integration/
