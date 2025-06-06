@@ -24,7 +24,8 @@ Clone locally or start a [new GitHub Codespace](https://github.com/codespaces/ne
 
 [![PyPI version](https://img.shields.io/pypi/v/proscenium)](https://pypi.org/project/proscenium/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/proscenium)](https://pypi.org/project/proscenium/)
-[![CI](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml/badge.svg)](https://github.com/The-AI-Alliance/proscenium/actions/workflows/pytest.yml)
+[![Unit Tests](https://github.com/The-AI-Alliance/proscenium/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/The-AI-Alliance/proscenium/actions/workflows/unit-tests.yml?query=branch%3Amain)
+[![Integration Tests](https://github.com/The-AI-Alliance/proscenium/actions/workflows/integration-tests.yml/badge.svg?branch=main)](https://github.com/The-AI-Alliance/proscenium/actions/workflows/integration-tests.yml?query=branch%3Amain)
 [![License](https://img.shields.io/github/license/The-AI-Alliance/proscenium)](https://github.com/The-AI-Alliance/proscenium/tree/main?tab=Apache-2.0-1-ov-file#readme)
 [![Issues](https://img.shields.io/github/issues/The-AI-Alliance/proscenium)](https://github.com/The-AI-Alliance/proscenium/issues)
 [![GitHub stars](https://img.shields.io/github/stars/The-AI-Alliance/proscenium?style=social)](https://github.com/The-AI-Alliance/proscenium/stargazers)
