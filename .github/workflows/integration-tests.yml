@@ -47,4 +47,4 @@ jobs:
       env:  
         SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      run: uv run --group integration pytest -s -v tests/integration/
+      run: PYTHONPATH=tests:src uv run --group integration pytest -s -v tests/integration/
