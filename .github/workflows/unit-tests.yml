@@ -44,4 +44,4 @@ jobs:
         uv pip install pytest
 
     - name: Run tests
-      run: uv run --group unit pytest -s -v tests/unit/
+      run: PYTHONPATH=tests:src uv run --group unit pytest -s -v tests/unit/
