@@ -1,4 +1,4 @@
-name: Run Python Tests
+name: Unit Tests
 
 on:
   workflow_dispatch:
@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
     types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**'
+      - 'tests/unit/**'
+      - 'pyproject.toml'
+      - '.github/workflows/unit-tests.yml' # This workflow
 
   push:
     branches: [ "main" ]
@@ -39,7 +44,4 @@ jobs:
         uv pip install pytest
 
     - name: Run tests
-      env:  
-        SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      run: uv run pytest
+      run: PYTHONPATH=tests:src uv run --group unit pytest -s -v tests/unit/
