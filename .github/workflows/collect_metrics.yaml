@@ -7,6 +7,9 @@ on:
   
 jobs:  
   collect-and-upload-metrics:  
+    # Disable the workflow, because started failing regularly in early 2026
+    # for reasons we were unable to diagnose!
+    if: false  
     runs-on: ubuntu-latest  
     permissions:  
       contents: read  # Read repo content (needed for repo object)  
@@ -56,7 +59,7 @@ jobs:
           # GITHUB_REPOSITORY format is 'owner/repo'  
           SOURCE_FILE_PATTERN: "github_metrics_*.parquet" # Pattern from the python script  
           S3_DESTINATION_FILENAME: "blob.parquet"  
-        run: |  
+        run: |
           # Check if source file exists  
           if ! ls $SOURCE_FILE_PATTERN 1> /dev/null 2>&1; then  
             echo "Error: No parquet file matching '$SOURCE_FILE_PATTERN' found."  
